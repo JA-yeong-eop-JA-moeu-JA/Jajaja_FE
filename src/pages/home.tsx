@@ -1,5 +1,7 @@
 import { useState } from 'react';
+
 import { Button, PageButton, SelectButton, type TabId } from '@/components/common/button';
+
 import Logo from '@/assets/logo.svg?react';
 
 export default function Home() {
