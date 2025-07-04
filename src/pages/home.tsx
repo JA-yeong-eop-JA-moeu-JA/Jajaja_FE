@@ -1,8 +1,10 @@
 import Logo from '@/assets/logo.svg?react';
+import Header from '@/components/HomeHeader';
 
 export default function Home() {
   return (
     <>
+      <Header />
       <p className="text-title-medium">홈페이지</p>
       <Logo />
       <div className="bg-green text-white">Green</div>

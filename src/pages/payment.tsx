@@ -1,3 +1,9 @@
+import PageHeader from '@/components/PageHeader';
+
 export default function Payment() {
-  return <p className="text-title-medium">결제페이지</p>;
+  return (
+    <>
+      <PageHeader title="주문 상세" />
+    </>
+  );
 }
