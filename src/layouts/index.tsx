@@ -1,9 +1,10 @@
-import { Outlet, useLocation } from 'react-router-dom'
-import BottomBar from '../components/BottomBar'
+import { Outlet, useLocation } from 'react-router-dom';
+
+import BottomBar from '../components/BottomBar';
 
 export default function Layout() {
-  const path = useLocation().pathname
-  const showBottomBar = ['/', '/payment'].includes(path)
+  const path = useLocation().pathname;
+  const showBottomBar = ['/', '/payment'].includes(path);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -12,8 +13,5 @@ export default function Layout() {
       </main>
       {showBottomBar && <BottomBar />}
     </div>
-  )
+  );
 }
-
-
-

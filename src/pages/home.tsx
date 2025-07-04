@@ -1,5 +1,6 @@
-import Logo from '@/assets/logo.svg?react';
 import Header from '@/components/HomeHeader';
+
+import Logo from '@/assets/logo.svg?react';
 
 export default function Home() {
   return (

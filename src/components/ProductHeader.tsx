@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom';
+
 import backIcon from '@/assets/back.svg';
-import searchIcon from '@/assets/search.svg';
 import cartIcon from '@/assets/cart.svg';
+import searchIcon from '@/assets/search.svg';
 
 export default function ProductHeader() {
   const navigate = useNavigate();
