@@ -1,4 +1,5 @@
 import { useModalStore } from '@/stores/modalStore';
+import ExampleCheckbox from '@/components/checkbox/exampleCheckbox';
 
 // import Logo from '@/assets/logo.svg?react';
 
@@ -6,6 +7,8 @@ export default function Home() {
   const { openModal } = useModalStore();
   return (
     <>
+      <ExampleCheckbox />
+
       <p className="text-title-medium" onClick={() => openModal('bottom-drawer')}>
         scroll type
       </p>
