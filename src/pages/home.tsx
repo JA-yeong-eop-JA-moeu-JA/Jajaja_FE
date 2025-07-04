@@ -1,10 +1,21 @@
-import Logo from '@/assets/logo.svg?react';
+import { useModalStore } from '@/stores/modalStore';
+
+// import Logo from '@/assets/logo.svg?react';
 
 export default function Home() {
+  const { openModal } = useModalStore();
   return (
     <>
-      <p className="text-title-medium">홈페이지</p>
-      <Logo />
+      <p className="text-title-medium" onClick={() => openModal('bottom-drawer')}>
+        scroll type
+      </p>
+      <p className="text-title-medium" onClick={() => openModal('bottom-sheet')}>
+        close type
+      </p>
+      <p className="text-title-medium" onClick={() => openModal('alert')}>
+        alert type
+      </p>
+      {/* <Logo /> */}
       <div className="bg-green text-white">Green</div>
       <div className="bg-green-hover">Hover</div>
       <div className="text-error-3">에러 텍스트</div>

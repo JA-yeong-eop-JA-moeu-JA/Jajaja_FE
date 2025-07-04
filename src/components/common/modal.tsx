@@ -1,0 +1,129 @@
+import { createElement, type ReactNode, useEffect, useRef, useState } from 'react';
+
+import { useModalStore } from '@/stores/modalStore';
+
+import Close from '@/assets/icons/close.svg?react';
+import Bar from '@/assets/icons/modalBar.svg?react';
+
+interface IModalProviderProps {
+  children: ReactNode;
+}
+
+export default function ModalProvider({ children }: IModalProviderProps) {
+  const { isModalOpen, modalContent, type, closeModal } = useModalStore();
+  const drawerRef = useRef<HTMLDivElement>(null);
+
+  const baseHeight = 120;
+  const DRAG_THRESHOLD = 10;
+
+  const [currentHeight, setCurrentHeight] = useState(baseHeight);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const startY = useRef<number | null>(null);
+  const startHeight = useRef<number>(baseHeight);
+
+  const onStart = (clientY: number) => {
+    startY.current = clientY;
+    startHeight.current = currentHeight;
+    setIsDragging(true);
+  };
+
+  const onMove = (clientY: number) => {
+    if (!isDragging || startY.current === null) return;
+    const delta = startY.current - clientY;
+    const nextHeight = startHeight.current + delta;
+    const clamped = Math.max(baseHeight, Math.min(nextHeight, window.innerHeight));
+    setCurrentHeight(clamped);
+  };
+
+  const onEnd = () => {
+    if (startY.current === null) return;
+    const movedDistance = Math.abs(currentHeight - startHeight.current);
+
+    if (movedDistance < DRAG_THRESHOLD) {
+      setIsDragging(false);
+      setCurrentHeight(startHeight.current);
+      startY.current = null;
+      return;
+    }
+
+    if (currentHeight > window.innerHeight / 2) {
+      setCurrentHeight(window.innerHeight);
+    } else {
+      setCurrentHeight(baseHeight);
+    }
+
+    setIsDragging(false);
+    startY.current = null;
+  };
+  useEffect(() => {
+    setCurrentHeight(baseHeight);
+    setIsDragging(false);
+    startY.current = null;
+    startHeight.current = baseHeight;
+  }, [isModalOpen]);
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => onMove(e.clientY);
+    const handleTouchMove = (e: TouchEvent) => onMove(e.touches[0].clientY);
+    const handleMouseUp = () => onEnd();
+    const handleTouchEnd = () => onEnd();
+
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('touchmove', handleTouchMove);
+      window.addEventListener('touchend', handleTouchEnd);
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [isDragging, currentHeight]);
+
+  if (!isModalOpen || !modalContent) return <>{children}</>;
+
+  return (
+    <>
+      {children}
+
+      {type === 'bottom-drawer' && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center">
+          <div
+            ref={drawerRef}
+            className="w-full max-w-90 bg-white rounded-t-lg transition-all duration-300 overflow-hidden min-h-20"
+            style={{ height: currentHeight }}
+            onMouseDown={(e) => onStart(e.clientY)}
+            onTouchStart={(e) => onStart(e.touches[0].clientY)}
+          >
+            <div className="flex flex-col justify-center py-3 px-4 gap-5">
+              <div className="w-full flex justify-center cursor-grab active:cursor-grabbing">
+                <Bar />
+              </div>
+              {createElement(modalContent)}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {type === 'bottom-sheet' && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center">
+          <div className="relative h-fit min-h-20 max-w-90 w-full bg-white rounded-t-lg">
+            <div className="absolute top-0 right-0" onClick={closeModal}>
+              <Close />
+            </div>
+            {createElement(modalContent)}
+          </div>
+        </div>
+      )}
+
+      {(type === 'alert' || type === 'confirm') && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
+          <div className="bg-white min-h-10 p-4 rounded-lg shadow-md max-w-76 w-full">{createElement(modalContent)}</div>
+        </div>
+      )}
+    </>
+  );
+}
