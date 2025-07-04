@@ -1,10 +1,11 @@
-import { useCheckboxStore, type TCheckboxType } from '@/stores/checkboxStore';
+import type { TCheckboxType } from '@/stores/checkboxStore';
+import { useCheckboxStore } from '@/stores/checkboxStore';
 
-interface CheckboxProps {
+interface ICheckboxProps {
   type: TCheckboxType;
 }
 
-export default function Checkbox({ type }: CheckboxProps): JSX.Element {
+export default function Checkbox({ type }: ICheckboxProps) {
   const { checkedItems, toggle } = useCheckboxStore();
   const isChecked = checkedItems[type];
 
@@ -12,17 +13,17 @@ export default function Checkbox({ type }: CheckboxProps): JSX.Element {
     <button
       onClick={() => toggle(type)}
       className={`
-    w-12 h-12 p-1
-    border-2
-    flex items-center justify-center
-    transition-colors duration-200
-    ${isChecked ? 'bg-[#96DB00] border-[#96DB00]' : 'bg-white border-[#96DB00]'}
-    rounded-md
-  `}
+        w-12 h-12 p-1
+        border-2
+        flex items-center justify-center
+        transition-colors duration-200
+        ${isChecked ? 'bg-[#96DB00] border-[#96DB00]' : 'bg-white border-[#96DB00]'}
+        rounded
+      `}
       style={{
-        width: '24px',
-        height: '24px',
-        padding: '1px',
+        width: '48px',
+        height: '48px',
+        padding: '4px',
       }}
     >
       {isChecked && (
