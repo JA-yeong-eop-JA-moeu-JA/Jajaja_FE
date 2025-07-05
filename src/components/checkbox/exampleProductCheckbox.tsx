@@ -7,7 +7,6 @@ import BaseCheckbox from '@/components/common/checkbox';
 
 export default function ExampleProductCheckbox() {
   const { initialize, toggleAll, isAllChecked } = useProductCheckboxStore();
-
   const productIds = ['1', '2', '3', '4'];
 
   useEffect(() => {

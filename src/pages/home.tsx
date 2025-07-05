@@ -12,14 +12,21 @@ export default function Home() {
 
   return (
     <>
+      {/* 약관 동의 */}
       <ExampleAgreementCheckbox />
 
+      {/* 상품 선택 */}
       <ExampleProductCheckbox />
 
+      {/* 기본 배송지 설정 */}
       <div className="mt-10">
-        <BaseCheckbox checked={isDefaultAddress} onClick={() => setIsDefaultAddress(!isDefaultAddress)} message="기본 배송지로 설정" />
+        <BaseCheckbox
+          checked={isDefaultAddress}
+          onClick={() => setIsDefaultAddress(!isDefaultAddress)}
+          message="기본 배송지로 설정"
+          textClassName="text-[15px] leading-5 font-normal text-[#1E1E1E]"
+        />
       </div>
-
       <p className="text-title-medium" onClick={() => openModal('bottom-drawer')}>
         scroll type
       </p>
