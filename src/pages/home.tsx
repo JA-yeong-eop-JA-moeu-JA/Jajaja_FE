@@ -1,5 +1,10 @@
 import { useState } from 'react';
 
+import { Button, PageButton, SelectButton, type TabId } from '@/components/common/button';
+
+import Logo from '@/assets/logo.svg?react';
+import { useState } from 'react';
+
 import { useModalStore } from '@/stores/modalStore';
 
 import ExampleAgreementCheckbox from '@/components/checkbox/exampleAgreementCheckbox';
@@ -7,6 +12,8 @@ import ExampleProductCheckbox from '@/components/checkbox/exampleProductCheckbox
 import BaseCheckbox from '@/components/common/checkbox';
 
 export default function Home() {
+  const [selectedTop1, setSelectedTop1] = useState<TabId>('basic');
+  const [selectedTop2, setSelectedTop2] = useState<TabId>('review');
   const { openModal } = useModalStore();
   const [isDefaultAddress, setIsDefaultAddress] = useState(false);
 
@@ -36,6 +43,7 @@ export default function Home() {
       <p className="text-title-medium" onClick={() => openModal('alert')}>
         alert type
       </p>
+      <Logo />
       <div className="bg-green text-white">Green</div>
       <div className="bg-green-hover">Hover</div>
       <div className="text-error-3">에러 텍스트</div>
@@ -51,6 +59,73 @@ export default function Home() {
       <p className="text-small-medium">※ 모든 항목을 정확히 기입해주세요. Please fill out all fields accurately.</p>
       <p className="text-small-regular">※ 모든 항목을 정확히 기입해주세요. Please fill out all fields accurately.</p>
       <p className="text-tiny-medium">ⓘ 저장하지 않으면 변경사항이 사라집니다. Changes will be lost if not saved.</p>
+      <div>
+        <section>
+          <h2 className="text-lg font-semibold">Basic Buttons</h2>
+          <Button kind="basic" variant="solid-orange" onClick={() => {}}>
+            Solid Orange
+          </Button>
+          <Button kind="basic" variant="outline-gray" onClick={() => {}}>
+            Outline Gray
+          </Button>
+          <Button kind="basic" variant="solid-gray" onClick={() => {}}>
+            Solid Gray
+          </Button>
+          <Button kind="basic" variant="outline-orange" onClick={() => {}}>
+            Outline Orange
+          </Button>
+        </section>
+
+        <section>
+          <h2 className="text-lg font-semibold">Select Bottom Buttons</h2>
+          <SelectButton
+            kind="select-bottom"
+            leftText="Left Outline"
+            rightText="Right Orange"
+            leftVariant="left-outline"
+            rightVariant="right-orange"
+            onLeftClick={() => {}}
+            onRightClick={() => {}}
+          />
+          <SelectButton
+            kind="select-bottom"
+            leftText="Left Solid"
+            rightText="Right Orange"
+            leftVariant="left-solid"
+            rightVariant="right-orange"
+            onLeftClick={() => {}}
+            onRightClick={() => {}}
+          />
+        </section>
+
+        <section>
+          <h2 className="text-lg font-semibold">Select Content Buttons</h2>
+          <SelectButton
+            kind="select-content"
+            leftText="Disabled"
+            rightText="Outline Gray"
+            leftVariant="disabled"
+            rightVariant="outline-gray"
+            onLeftClick={() => {}}
+            onRightClick={() => {}}
+          />
+          <SelectButton
+            kind="select-content"
+            leftText="Outline Orange"
+            rightText="Outline Gray"
+            leftVariant="outline-orange"
+            rightVariant="outline-gray"
+            onLeftClick={() => {}}
+            onRightClick={() => {}}
+          />
+        </section>
+
+        <section>
+          <h2 className="text-lg font-semibold">Top Page Buttons</h2>
+          <PageButton items={['basic', 'industry']} selected={selectedTop1} onSelect={setSelectedTop1} />
+          <PageButton items={['review', 'team']} selected={selectedTop2} onSelect={setSelectedTop2} />
+        </section>
+      </div>
     </>
   );
 }
