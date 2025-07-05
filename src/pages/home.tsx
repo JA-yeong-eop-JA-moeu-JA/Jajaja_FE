@@ -1,11 +1,32 @@
+import { useState } from 'react';
+
 import { useModalStore } from '@/stores/modalStore';
 
-// import Logo from '@/assets/logo.svg?react';
+import ExampleAgreementCheckbox from '@/components/checkbox/exampleAgreementCheckbox';
+import ExampleProductCheckbox from '@/components/checkbox/exampleProductCheckbox';
+import BaseCheckbox from '@/components/common/checkbox';
 
 export default function Home() {
   const { openModal } = useModalStore();
+  const [isDefaultAddress, setIsDefaultAddress] = useState(false);
+
   return (
     <>
+      {/* 약관 동의 */}
+      <ExampleAgreementCheckbox />
+
+      {/* 상품 선택 */}
+      <ExampleProductCheckbox />
+
+      {/* 기본 배송지 설정 */}
+      <div className="mt-10">
+        <BaseCheckbox
+          checked={isDefaultAddress}
+          onClick={() => setIsDefaultAddress(!isDefaultAddress)}
+          message="기본 배송지로 설정"
+          textClassName="text-[15px] leading-5 font-normal text-[#1E1E1E]"
+        />
+      </div>
       <p className="text-title-medium" onClick={() => openModal('bottom-drawer')}>
         scroll type
       </p>
@@ -15,7 +36,6 @@ export default function Home() {
       <p className="text-title-medium" onClick={() => openModal('alert')}>
         alert type
       </p>
-      {/* <Logo /> */}
       <div className="bg-green text-white">Green</div>
       <div className="bg-green-hover">Hover</div>
       <div className="text-error-3">에러 텍스트</div>
