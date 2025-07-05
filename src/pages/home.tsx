@@ -1,15 +1,14 @@
 import { useState } from 'react';
 
-import { Button, PageButton, SelectButton, type TabId } from '@/components/common/button';
-
-import Logo from '@/assets/logo.svg?react';
-import { useState } from 'react';
-
 import { useModalStore } from '@/stores/modalStore';
 
 import ExampleAgreementCheckbox from '@/components/checkbox/exampleAgreementCheckbox';
 import ExampleProductCheckbox from '@/components/checkbox/exampleProductCheckbox';
+import { Button, PageButton, SelectButton, type TabId } from '@/components/common/button';
 import BaseCheckbox from '@/components/common/checkbox';
+import Header from '@/components/HomeHeader';
+
+import Logo from '@/assets/logo.svg?react';
 
 export default function Home() {
   const [selectedTop1, setSelectedTop1] = useState<TabId>('basic');
@@ -19,6 +18,7 @@ export default function Home() {
 
   return (
     <>
+      <Header />
       {/* 약관 동의 */}
       <ExampleAgreementCheckbox />
 
