@@ -6,6 +6,7 @@ import ExampleAgreementCheckbox from '@/components/checkbox/exampleAgreementChec
 import ExampleProductCheckbox from '@/components/checkbox/exampleProductCheckbox';
 import { Button, PageButton, SelectButton, type TabId } from '@/components/common/button';
 import BaseCheckbox from '@/components/common/checkbox';
+import SearchInput from '@/components/common/SearchInput';
 import Header from '@/components/HomeHeader';
 
 import Logo from '@/assets/logo.svg?react';
@@ -15,10 +16,14 @@ export default function Home() {
   const [selectedTop2, setSelectedTop2] = useState<TabId>('review');
   const { openModal } = useModalStore();
   const [isDefaultAddress, setIsDefaultAddress] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState('');
 
   return (
     <>
       <Header />
+
+      <SearchInput value={searchKeyword} onChange={(e) => setSearchKeyword(e.target.value)} />
+
       {/* 약관 동의 */}
       <ExampleAgreementCheckbox />
 
