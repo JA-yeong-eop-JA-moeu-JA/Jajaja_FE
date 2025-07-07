@@ -9,7 +9,7 @@ export default function NotFoundPage() {
       {/* 본문 */}
       <div className="flex flex-col flex-1 items-center justify-center text-center px-4">
         <img
-          src="/src/assets/error.svg" // ✅ 네가 직접 준 경로 그대로
+          src="/src/assets/error.svg" 
           alt="에러 아이콘"
           className="w-[150px] h-[150px] mb-6"
         />
