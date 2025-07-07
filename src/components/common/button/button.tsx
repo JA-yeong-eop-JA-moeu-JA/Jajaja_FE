@@ -11,7 +11,7 @@ const sizeMap: Record<IButtonProps['kind'], string> = {
 };
 
 const baseMap: Record<IButtonProps['kind'], string> = {
-  'basic': 'mx-[16px] my-[8px] rounded-[4px] overflow-hidden',
+  'basic': 'mx-[8px] my-[8px] rounded-[4px] overflow-hidden',
   'select-bottom': 'rounded-[4px] flex items-center justify-center overflow-hidden',
   'select-content': 'rounded-[4px] flex items-center justify-center overflow-hidden',
   'top-page': 'flex-1 flex items-center justify-center cursor-pointer',

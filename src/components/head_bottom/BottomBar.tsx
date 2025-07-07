@@ -1,10 +1,10 @@
 import { NavLink } from 'react-router-dom';
 
-import cartIcon from '/src/assets/basket.svg';
-import boardIcon from '/src/assets/board.svg';
-import categoryIcon from '/src/assets/category.svg';
-import homeIcon from '/src/assets/home.svg';
-import myIcon from '/src/assets/my.svg';
+import cartIcon from '@/assets/bar_icons/basket.svg';
+import boardIcon from '@/assets/bar_icons/board.svg';
+import categoryIcon from '@/assets/bar_icons/category.svg';
+import homeIcon from '@/assets/bar_icons/home.svg';
+import myIcon from '@/assets/Bar_icons/my.svg';
 
 const navItems = [
   { to: '/', icon: homeIcon, label: '홈' },
