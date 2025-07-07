@@ -16,7 +16,7 @@ export default function SearchInput({ value, onChange, placeholder = '상품을 
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className="w-full h-full pl-4 pr-10 border border-[#FF7214] rounded-[4px] bg-white text-[15px] leading-[20px] text-[#000000] placeholder-[#999999] focus:outline-none"
+        className="w-full h-full pl-4 pr-10 border border-orange rounded bg-white text-[15px] leading-4 text-black placeholder-black-4 focus:outline-none"
       />
       <img src={InputSearchIcon} alt="검색" className="absolute right-0 top-1/2 w-[48px] h-[48px] p-1 -translate-y-1/2 block" />
     </div>
