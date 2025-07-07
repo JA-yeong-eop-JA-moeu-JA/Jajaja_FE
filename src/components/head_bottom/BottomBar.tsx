@@ -4,7 +4,7 @@ import cartIcon from '@/assets/bar_icons/basket.svg';
 import boardIcon from '@/assets/bar_icons/board.svg';
 import categoryIcon from '@/assets/bar_icons/category.svg';
 import homeIcon from '@/assets/bar_icons/home.svg';
-import myIcon from '@/assets/Bar_icons/my.svg';
+import myIcon from '@/assets/bar_icons/my.svg';
 
 const navItems = [
   { to: '/', icon: homeIcon, label: '홈' },

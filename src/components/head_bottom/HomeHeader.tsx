@@ -1,5 +1,5 @@
 import bellIcon from '@/assets/bar_icons/bell.svg';
-import searchIcon from '@/assets/Bar_icons/search.svg';
+import searchIcon from '@/assets/bar_icons/search.svg';
 import logo from '@/assets/logo.svg';
 
 export default function Header() {
