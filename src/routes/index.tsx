@@ -12,6 +12,7 @@ import MyPage from '@/pages/mypage/myPage';
 import Notice from '@/pages/notice';
 import OnBoarding from '@/pages/onBoarding';
 import Payment from '@/pages/payment';
+import Search from '@/pages/search';
 
 export const router = createBrowserRouter([
   {
@@ -26,6 +27,7 @@ export const router = createBrowserRouter([
       { path: 'payment', element: <Payment /> },
       { path: 'agreement', element: <Agreement /> },
       { path: 'category', element: <CategoryPage /> },
+      { path: 'search', element: <Search /> },
       { path: 'exchange/complete', element: <ExchangeOK /> },
       { path: 'return/complete', element: <ReturnOK /> },
       { path: '*', element: <NotFound /> },
