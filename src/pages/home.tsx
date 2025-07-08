@@ -1,136 +1,56 @@
-import { useState } from 'react';
+import { useLayoutEffect } from 'react';
 
 import { useModalStore } from '@/stores/modalStore';
 
-import ExampleAgreementCheckbox from '@/components/checkbox/exampleAgreementCheckbox';
-import ExampleProductCheckbox from '@/components/checkbox/exampleProductCheckbox';
-import { Button, PageButton, SelectButton, type TabId } from '@/components/common/button';
-import BaseCheckbox from '@/components/common/checkbox';
 import SearchInput from '@/components/common/SearchInput';
 import Header from '@/components/head_bottom/HomeHeader';
-
-import Logo from '@/assets/logo.svg?react';
+import Banner from '@/components/home/banner';
+import New from '@/components/home/new';
+import Popular from '@/components/home/popular';
+import Recommand from '@/components/home/recommand';
 
 export default function Home() {
-  const [selectedTop1, setSelectedTop1] = useState<TabId>('basic');
-  const [selectedTop2, setSelectedTop2] = useState<TabId>('review');
   const { openModal } = useModalStore();
-  const [isDefaultAddress, setIsDefaultAddress] = useState(false);
-  const [searchKeyword, setSearchKeyword] = useState('');
-
+  useLayoutEffect(() => {
+    const shouldShow = !document.cookie.includes('hidePopup=true');
+    if (shouldShow) {
+      openModal('bottom-sheet');
+    }
+  }, [openModal]);
   return (
     <>
-      <Header />
+      <header className="w-full px-4 pb-2.5">
+        <Header />
+        <SearchInput value={''} onChange={() => {}} />
+      </header>
 
-      <SearchInput value={searchKeyword} onChange={(e) => setSearchKeyword(e.target.value)} />
+      <section className="w-full">
+        <Banner />
+      </section>
 
-      {/* 약관 동의 */}
-      <ExampleAgreementCheckbox />
-
-      {/* 상품 선택 */}
-      <ExampleProductCheckbox />
-
-      {/* 기본 배송지 설정 */}
-      <div className="mt-10">
-        <BaseCheckbox
-          checked={isDefaultAddress}
-          onClick={() => setIsDefaultAddress(!isDefaultAddress)}
-          message="기본 배송지로 설정"
-          textClassName="text-[15px] leading-5 font-normal text-[#1E1E1E]"
-        />
-      </div>
-      <p className="text-title-medium" onClick={() => openModal('bottom-drawer')}>
-        scroll type
-      </p>
-      <p className="text-title-medium" onClick={() => openModal('bottom-sheet')}>
-        close type
-      </p>
-      <p className="text-title-medium" onClick={() => openModal('alert')}>
-        alert type
-      </p>
-      <Logo />
-      <div className="bg-green text-white">Green</div>
-      <div className="bg-green-hover">Hover</div>
-      <div className="text-error-3">에러 텍스트</div>
-      <div className="bg-black-0 text-black-5">검정 계열</div>
-      <p className="font-pretendard text-xl">Hello 안녕하세요! Pretendard가 보이시나요?</p>
-      <p className="text-title-semibold">오늘은 정말 완벽한 날씨입니다. Today is a perfectly clear day.</p>
-      <p className="text-title-medium">오늘은 정말 완벽한 날씨입니다. Today is a perfectly clear day.</p>
-      <p className="text-subtitle-semibold">설문조사를 완료하셨나요? Have you completed the survey?</p>
-      <p className="text-subtitle-medium">설문조사를 완료하셨나요? Have you completed the survey?</p>
-      <p className="text-body-semibold">이 문장은 본문 스타일 테스트를 위한 예시입니다. This sentence is a sample for body text styling.</p>
-      <p className="text-body-medium">이 문장은 본문 스타일 테스트를 위한 예시입니다. This sentence is a sample for body text styling.</p>
-      <p className="text-body-regular">이 문장은 본문 스타일 테스트를 위한 예시입니다. This sentence is a sample for body text styling.</p>
-      <p className="text-small-medium">※ 모든 항목을 정확히 기입해주세요. Please fill out all fields accurately.</p>
-      <p className="text-small-regular">※ 모든 항목을 정확히 기입해주세요. Please fill out all fields accurately.</p>
-      <p className="text-tiny-medium">ⓘ 저장하지 않으면 변경사항이 사라집니다. Changes will be lost if not saved.</p>
-      <div>
-        <section>
-          <h2 className="text-lg font-semibold">Basic Buttons</h2>
-          <Button kind="basic" variant="solid-orange" onClick={() => {}}>
-            Solid Orange
-          </Button>
-          <Button kind="basic" variant="outline-gray" onClick={() => {}}>
-            Outline Gray
-          </Button>
-          <Button kind="basic" variant="solid-gray" onClick={() => {}}>
-            Solid Gray
-          </Button>
-          <Button kind="basic" variant="outline-orange" onClick={() => {}}>
-            Outline Orange
-          </Button>
-        </section>
-
-        <section>
-          <h2 className="text-lg font-semibold">Select Bottom Buttons</h2>
-          <SelectButton
-            kind="select-bottom"
-            leftText="Left Outline"
-            rightText="Right Orange"
-            leftVariant="left-outline"
-            rightVariant="right-orange"
-            onLeftClick={() => {}}
-            onRightClick={() => {}}
-          />
-          <SelectButton
-            kind="select-bottom"
-            leftText="Left Solid"
-            rightText="Right Orange"
-            leftVariant="left-solid"
-            rightVariant="right-orange"
-            onLeftClick={() => {}}
-            onRightClick={() => {}}
-          />
-        </section>
-
-        <section>
-          <h2 className="text-lg font-semibold">Select Content Buttons</h2>
-          <SelectButton
-            kind="select-content"
-            leftText="Disabled"
-            rightText="Outline Gray"
-            leftVariant="disabled"
-            rightVariant="outline-gray"
-            onLeftClick={() => {}}
-            onRightClick={() => {}}
-          />
-          <SelectButton
-            kind="select-content"
-            leftText="Outline Orange"
-            rightText="Outline Gray"
-            leftVariant="outline-orange"
-            rightVariant="outline-gray"
-            onLeftClick={() => {}}
-            onRightClick={() => {}}
-          />
-        </section>
-
-        <section>
-          <h2 className="text-lg font-semibold">Top Page Buttons</h2>
-          <PageButton items={['basic', 'industry']} selected={selectedTop1} onSelect={setSelectedTop1} />
-          <PageButton items={['review', 'team']} selected={selectedTop2} onSelect={setSelectedTop2} />
-        </section>
-      </div>
+      <section className="w-full px-4 py-7 flex flex-col items-center gap-8">
+        <Recommand />
+        <Popular />
+        <New />
+      </section>
+      <footer className="px-4 py-5 bg-black-0 flex flex-col gap-4">
+        <div className="flex items-center px-1 gap-2 text-small-regular">
+          <p className="text-black-4">이용약관</p>
+          <p>|</p>
+          <p>개인정보처리방침</p>
+        </div>
+        <div className="flex flex-col gap-3 text-tiny-regular text-black-4">
+          <p>
+            (주) 자자자는 통신판매중개자이며 통신판매의 당사자가 아닙니다. 따라서 (주)자자자는 입점 판매사가 등록한 상품 정보 및 거래에 대해 책임을 지지
+            않습니다.
+          </p>
+          <p>
+            본 사이트의 상품/판매자/쇼핑 정보, 콘텐츠, UI 등에 대한 무단 복제, 전송, 배포, 스크래핑 등의 행위는 저작권법, 콘텐츠사업 진흥법 등에 의하여 엄격히
+            금지됩니다.
+          </p>
+          <p>Copyright ⓒ JAJAJA.COM Corp. All rights reserved.</p>
+        </div>
+      </footer>
     </>
   );
 }

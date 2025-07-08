@@ -3,13 +3,21 @@ import { useNavigate } from 'react-router-dom';
 
 import { CATEGORIES } from '@/constants/onBoarding/categoryList';
 
+import Storage from '@/utils/storage';
+
 import { Button } from '@/components/common/button';
 
 import Logo from '@/assets/sizeLogo.svg?react';
 
 export default function OnBoarding() {
-  const [selected, setSelected] = useState<number>();
   const navigate = useNavigate();
+  const [category, setCategory] = useState(0);
+  const handleSubmit = () => {
+    const categoryName = CATEGORIES.find((cat) => cat.id === Number(category));
+    categoryName?.name === '기타' || !categoryName ? '다른' : categoryName?.name;
+    Storage.setCategory(categoryName!.name);
+    navigate('/home');
+  };
   return (
     <div className="w-full h-screen flex flex-col justify-center items-center relative px-4">
       <button className="text-body-regular text-black-4 absolute top-0 right-4 py-3.5 underline underline-offset-2" onClick={() => navigate('/home')}>
@@ -27,15 +35,15 @@ export default function OnBoarding() {
         <div className="w-full grid grid-cols-2 gap-2">
           {CATEGORIES.map(({ id, name }) => (
             <button
-              onClick={() => setSelected(id)}
+              onClick={() => setCategory(id)}
               key={id}
-              className={`${selected === id ? 'border-orange' : 'border-black-1'} text-body-regular w-full px-4 py-3.5 rounded-sm bg-white border text-black `}
+              className={`${category === id ? 'border-orange' : 'border-black-1'} text-body-regular w-full px-4 py-3.5 rounded-sm bg-white border text-black `}
             >
               {name}
             </button>
           ))}
         </div>
-        <Button kind="basic" variant="solid-orange" className="w-full" onClick={() => navigate('/home')}>
+        <Button kind="basic" variant="solid-orange" className="w-full" onClick={handleSubmit}>
           선택 완료
         </Button>
       </div>
