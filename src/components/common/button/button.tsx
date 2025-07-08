@@ -4,16 +4,16 @@ import classNames from 'classnames';
 import type { IButtonProps } from './index';
 
 const sizeMap: Record<IButtonProps['kind'], string> = {
-  'basic': 'w-[328px] h-[48px]',
-  'select-bottom': 'w-[160px] h-[48px]',
-  'select-content': 'w-[160px] h-[40px]',
-  'top-page': 'w-[180px] h-[48px]',
+  'basic': 'w-full h-12',
+  'select-bottom': 'w-full h-12',
+  'select-content': 'w-full h-10',
+  'top-page': 'w-full h-12',
 };
 
 const baseMap: Record<IButtonProps['kind'], string> = {
-  'basic': 'mx-[16px] my-[8px] rounded-[4px] overflow-hidden',
-  'select-bottom': 'rounded-[4px] flex items-center justify-center overflow-hidden',
-  'select-content': 'rounded-[4px] flex items-center justify-center overflow-hidden',
+  'basic': 'rounded',
+  'select-bottom': 'rounded flex items-center justify-center',
+  'select-content': 'rounded flex items-center justify-center',
   'top-page': 'flex-1 flex items-center justify-center cursor-pointer',
 };
 
@@ -51,6 +51,16 @@ export function Button({ kind, variant = 'default', active = false, className, c
   const key = kind === 'top-page' ? (active ? 'active' : 'default') : variant;
 
   const classes = classNames(sizeMap[kind], baseMap[kind], fontMap[kind], variantMap[kind][key] ?? '', className);
+
+  if (kind === 'basic') {
+    return (
+      <div className="px-4 py-2">
+        <button type="button" className={classes} {...rest}>
+          {children}
+        </button>
+      </div>
+    );
+  }
 
   return (
     <button type="button" className={classes} {...rest}>
