@@ -2,7 +2,6 @@ import { createElement, type ReactNode, useEffect, useRef, useState } from 'reac
 
 import { useModalStore } from '@/stores/modalStore';
 
-import Close from '@/assets/icons/close.svg?react';
 import Bar from '@/assets/icons/modalBar.svg?react';
 
 interface IModalProviderProps {
@@ -10,7 +9,7 @@ interface IModalProviderProps {
 }
 
 export default function ModalProvider({ children }: IModalProviderProps) {
-  const { isModalOpen, modalContent, type, closeModal } = useModalStore();
+  const { isModalOpen, modalContent, type } = useModalStore();
   const drawerRef = useRef<HTMLDivElement>(null);
 
   const baseHeight = 120;
@@ -93,7 +92,7 @@ export default function ModalProvider({ children }: IModalProviderProps) {
         <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center">
           <div
             ref={drawerRef}
-            className="w-full max-w-90 bg-white rounded-t-lg transition-all duration-300 overflow-hidden min-h-20"
+            className="w-full max-w-150 bg-white rounded-t-lg transition-all duration-300 overflow-hidden min-h-20"
             style={{ height: currentHeight }}
             onMouseDown={(e) => onStart(e.clientY)}
             onTouchStart={(e) => onStart(e.touches[0].clientY)}
@@ -110,12 +109,7 @@ export default function ModalProvider({ children }: IModalProviderProps) {
 
       {type === 'bottom-sheet' && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center">
-          <div className="relative h-fit min-h-20 max-w-90 w-full bg-white rounded-t-lg">
-            <div className="absolute top-0 right-0" onClick={closeModal}>
-              <Close />
-            </div>
-            {createElement(modalContent)}
-          </div>
+          <div className="h-fit min-h-20 max-w-150 w-full bg-white rounded-t-lg">{createElement(modalContent)}</div>
         </div>
       )}
 

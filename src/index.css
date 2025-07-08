@@ -1,52 +1,50 @@
 @import 'tailwindcss';
-@tailwind base;
-@tailwind components;
 @tailwind utilities;
 :root {
   width: 100%;
-  max-width: 360px;
+  max-width: 600px;
   margin-left: auto;
   margin-right: auto;
 }
 @theme {
   /* Green */
-  --color-green-light: oklch(0.98 0.01 134);
-  --color-green-light-hover: oklch(0.96 0.02 134);
-  --color-green-light-active: oklch(0.92 0.08 134);
-  --color-green: oklch(0.75 0.21 134);
-  --color-green-hover: oklch(0.69 0.2 134);
-  --color-green-active: oklch(0.62 0.17 134);
-  --color-green-dark: oklch(0.56 0.16 134);
-  --color-green-dark-hover: oklch(0.47 0.15 134);
-  --color-green-dark-active: oklch(0.36 0.12 134);
-  --color-green-darker: oklch(0.28 0.1 134);
+  --color-green-light: oklch(0.978 0.0283 119.91);
+  --color-green-light-hover: oklch(0.9683 0.0447 122.24);
+  --color-green-light-active: oklch(0.9346 0.0911 122.72);
+  --color-green: oklch(0.8142 0.215654 128.9131);
+  --color-green-hover: oklch(0.7523 0.19896 128.8005);
+  --color-green-active: oklch(0.6892 0.1819 128.66);
+  --color-green-dark: oklch(0.6575 0.172971 128.4382);
+  --color-green-dark-hover: oklch(0.5584 0.1465 128.25);
+  --color-green-dark-active: oklch(0.458 0.119475 127.822);
+  --color-green-darker: oklch(0.3859 0.0999 127.27);
 
   /* Orange */
-  --color-orange-light: oklch(0.97 0.01 45);
-  --color-orange-light-hover: oklch(0.95 0.015 45);
-  --color-orange-light-active: oklch(0.91 0.04 45);
-  --color-orange: oklch(0.75 0.27 45);
-  --color-orange-hover: oklch(0.7 0.26 45);
-  --color-orange-active: oklch(0.65 0.24 45);
-  --color-orange-dark: oklch(0.61 0.22 45);
-  --color-orange-dark-hover: oklch(0.52 0.21 45);
-  --color-orange-dark-active: oklch(0.44 0.19 45);
-  --color-orange-darker: oklch(0.38 0.17 45);
+  --color-orange-light: oklch(0.9667 0.0194 55.15);
+  --color-orange-light-hover: oklch(0.9502 0.0296 56);
+  --color-orange-light-active: oklch(0.8973 0.0629 55.14);
+  --color-orange: oklch(0.7121 0.1934 46.37);
+  --color-orange-hover: oklch(0.66 0.178 46.63);
+  --color-orange-active: oklch(0.6038 0.1621 46.69);
+  --color-orange-dark: oklch(0.5767 0.1533 47.22);
+  --color-orange-dark-hover: oklch(0.4904 0.1292 47.17);
+  --color-orange-dark-active: oklch(0.4018 0.1031 47.83);
+  --color-orange-darker: oklch(0.3395 0.0837 49.28);
 
   /* Black scale */
-  --color-black-0: oklch(0.98 0 0);
-  --color-black-1: oklch(0.95 0 0);
-  --color-black-2: oklch(0.87 0 0);
-  --color-black-3: oklch(0.78 0 0);
-  --color-black-4: oklch(0.64 0 0);
-  --color-black-5: oklch(0.52 0 0);
+  --color-black-0: oklch(0.9881 0 0);
+  --color-black-1: oklch(0.9642 0 0);
+  --color-black-2: oklch(0.9006 0 0);
+  --color-black-3: oklch(0.8452 0 0);
+  --color-black-4: oklch(0.683 0 0);
+  --color-black-5: oklch(0.5103 0 0);
   --color-black-transparent-40: oklch(0 0 0 / 0.4);
 
   /* Error */
-  --color-error-1: oklch(0.96 0.03 25);
-  --color-error-2: oklch(0.89 0.09 25);
-  --color-error-3: oklch(0.75 0.21 25);
-  --color-error-4: oklch(0.52 0.17 25);
+  --color-error-1: oklch(0.9574 0.0211 28.33);
+  --color-error-2: oklch(0.8319 0.093353 28.1335);
+  --color-error-3: oklch(0.6718 0.2157 27.48);
+  --color-error-4: oklch(0.5085 0.1824 29.19);
 }
 @layer utilities {
   .font-pretendard {
@@ -122,6 +120,11 @@
   .text-tiny-medium {
     font-size: clamp(0.625rem, 0.3vw + 0.2rem, 0.625rem);
     font-weight: 500;
+    line-height: 0.75rem;
+  }
+  .text-tiny-regular {
+    font-size: clamp(0.625rem, 0.3vw + 0.2rem, 0.625rem);
+    font-weight: 400;
     line-height: 0.75rem;
   }
 }

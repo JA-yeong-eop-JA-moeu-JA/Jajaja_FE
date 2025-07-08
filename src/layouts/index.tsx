@@ -12,7 +12,6 @@ export default function Layout() {
 
   const path = useLocation().pathname;
   const showBottomBar = !isModalOpen && ['/', '/payment'].includes(path);
-
   useEffect(() => {
     if (isModalOpen) {
       document.body.style.overflow = 'hidden';
@@ -23,10 +22,10 @@ export default function Layout() {
   return (
     <ModalProvider>
       <div className="min-h-screen flex flex-col">
-        <main className="flex-1 overflow-y-auto px-1">
+        <main className="flex-1 overflow-y-auto">
           <Outlet />
         </main>
-        {showBottomBar && <BottomBar />}
+        {showBottomBar && path !== '/' && <BottomBar />}
       </div>
     </ModalProvider>
   );
