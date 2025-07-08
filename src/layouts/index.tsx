@@ -5,7 +5,7 @@ import { useModalStore } from '@/stores/modalStore';
 
 import ModalProvider from '@/components/common/modal';
 
-import BottomBar from '../components/BottomBar';
+import BottomBar from '../components/head_bottom/BottomBar';
 
 export default function Layout() {
   const { isModalOpen } = useModalStore();

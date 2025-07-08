@@ -1,4 +1,4 @@
-import ProductHeader from '@/components/ProductHeader';
+import ProductHeader from '@/components/head_bottom/ProductHeader';
 
 export default function Notice() {
   return (

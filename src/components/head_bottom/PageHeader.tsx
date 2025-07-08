@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 
-import backIcon from '@/assets/back.svg';
+import backIcon from '@/assets/bar_icons/back.svg';
 
 // <PageHeader title="주문 상세" /> 이런 식으로 추가하면 됩니다!
 

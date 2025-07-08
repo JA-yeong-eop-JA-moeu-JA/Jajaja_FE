@@ -1,4 +1,4 @@
-import PageHeader from '@/components/PageHeader';
+import PageHeader from '@/components/head_bottom/PageHeader';
 
 export default function Payment() {
   return (

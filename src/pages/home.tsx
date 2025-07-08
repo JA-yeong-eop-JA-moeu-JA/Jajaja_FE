@@ -7,7 +7,7 @@ import ExampleProductCheckbox from '@/components/checkbox/exampleProductCheckbox
 import { Button, PageButton, SelectButton, type TabId } from '@/components/common/button';
 import BaseCheckbox from '@/components/common/checkbox';
 import SearchInput from '@/components/common/SearchInput';
-import Header from '@/components/HomeHeader';
+import Header from '@/components/head_bottom/HomeHeader';
 
 import Logo from '@/assets/logo.svg?react';
 
