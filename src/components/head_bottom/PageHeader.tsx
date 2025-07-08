@@ -13,15 +13,12 @@ export default function PageHeaderBar({ title }: IPageHeaderBarProps) {
 
   return (
     <header className="w-full flex items-center justify-between px-1 py-4 bg-white">
-      {/* 뒤로가기 버튼 */}
-      <button onClick={() => navigate(-1)} className="flex items-center">
+      <button onClick={() => navigate(-1)} className="flex items-center px-3">
         <img src={backIcon} alt="뒤로가기" className="w-5 h-5" />
       </button>
 
-      {/* 타이틀 */}
       <h1 className="text-base font-semibold text-center flex-1">{title}</h1>
 
-      {/* 오른쪽 여백 (아이콘 없으면 비워둠) */}
       <div className="w-5" />
     </header>
   );

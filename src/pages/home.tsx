@@ -20,7 +20,7 @@ export default function Home() {
   return (
     <>
       <header className="w-full px-4 pb-2.5">
-        <Header />
+        <Header showSearch={false} />
         <SearchInput value={''} onChange={() => {}} />
       </header>
 

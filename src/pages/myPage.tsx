@@ -12,7 +12,9 @@ export default function MyPage() {
   const navigate = useNavigate();
   return (
     <>
-      <Header />
+      <header className="px-2">
+        <Header />
+      </header>
       <div className="w-full h-screen bg-white text-black">
         <section className="w-full pt-2 pb-2.5 px-4">
           <button onClick={() => navigate('#')} className="w-full h-23 border border-black-2 rounded flex items-center px-5 py-4 gap-3 mb-5">
