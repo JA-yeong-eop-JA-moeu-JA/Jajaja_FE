@@ -12,7 +12,7 @@ interface IHeaderProps {
 export default function Header({ showSearch = true, showLogo = true }: IHeaderProps) {
   return (
     <header className="sticky top-0 z-50 w-full bg-white">
-      <div className="flex items-center justify-between py-4">
+      <div className="flex items-center justify-between px-2 py-4">
         <img src={logo} alt="자자자 로고" className={`h-6 ${showLogo ? '' : 'invisible'}`} />
 
         <div className="flex items-center gap-6">
