@@ -14,8 +14,8 @@ export default function MyPage() {
     <>
       <Header />
       <div className="w-full h-screen bg-white text-black">
-        <section className="w-full pt-2 pb-2.5 px-3">
-          <button onClick={() => navigate('#')} className="w-full h-23 border border-black-2 rounded flex items-center px-4 py-4 gap-3 mb-5">
+        <section className="w-full pt-2 pb-2.5 px-4">
+          <button onClick={() => navigate('#')} className="w-full h-23 border border-black-2 rounded flex items-center px-5 py-4 gap-3 mb-5">
             {/* 사진과 이름은 추후 수정 */}
             <div>
               <img src="" alt="프로필" className="w-15 h-15 rounded-full object-cover" />
@@ -29,10 +29,15 @@ export default function MyPage() {
             </div>
           </button>
           <div className="w-full grid grid-cols-2">
-            {MAIN_FUNCTIONS.map(({ key, label, icon, path }) => {
+            {MAIN_FUNCTIONS.map(({ key, label, icon, path }, idx) => {
               const Icon = icon;
               return (
-                <button key={key} onClick={() => navigate(path)} className="w-full py-3.5 flex flex-col items-center justify-center text-body-regular gap-2">
+                <button
+                  key={key}
+                  onClick={() => navigate(path)}
+                  className={`w-full py-3.5 flex flex-col items-center justify-center text-body-regular gap-2 ${idx % 2 === 0 ? 'border-r border-black-1' : ''}
+                  ${idx < 2 ? 'border-b border-black-1' : ''}`}
+                >
                   <Icon />
                   {label}
                 </button>
@@ -51,15 +56,16 @@ export default function MyPage() {
           <div>{/* 오늘의 혜택 컴포넌트 추가 예정 */}</div>
         </section>
 
-        <section className="w-full py-6">
+        <section className="w-full pt-6 pb-20">
           <div className="w-full">
-            {SUB_FUNCTIONS.map(({ id, name, path }) => (
+            {SUB_FUNCTIONS.map(({ id, name, path }, idx) => (
               <button
                 onClick={() => {
                   if (path) navigate(path);
                 }}
                 key={id}
                 className={`${name === '로그아웃' ? 'text-error-3' : 'text-black'}
+                  ${idx > 0 ? 'border-t-2 border-black-0' : ''}
                   text-body-regular text-left w-full px-5 py-5 flex items-center justify-between`}
               >
                 <span>{name}</span>
