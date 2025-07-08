@@ -10,9 +10,12 @@ interface IBaseCheckboxProps {
 
 export default function BaseCheckbox({ checked, onClick, message, textClassName }: IBaseCheckboxProps) {
   return (
-    <div className="flex items-center gap-2">
-      <button onClick={onClick}>{checked ? <CheckboxFill /> : <CheckboxBlank />}</button>
+    <label className="flex items-center gap-4 cursor-pointer font-pretendard">
+      <input type="checkbox" checked={checked} onChange={onClick} className="hidden" />
+      <span className="w-5 h-5 flex items-center justify-center shrink-0">
+        {checked ? <CheckboxFill className="block" /> : <CheckboxBlank className="block" />}
+      </span>
       {message && <span className={textClassName ?? 'text-body-medium'}>{message}</span>}
-    </div>
+    </label>
   );
 }
