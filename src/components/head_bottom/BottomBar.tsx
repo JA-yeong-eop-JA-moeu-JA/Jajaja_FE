@@ -21,11 +21,24 @@ export default function BottomBar() {
         <NavLink
           key={to}
           to={to}
-          className={({ isActive }) => `flex flex-col items-center gap-1 transition-colors ${isActive ? 'text-gray-800' : 'text-gray-400'} hover:text-gray-600`}
+          className={({ isActive }) =>
+                        `flex flex-col items-center gap-1 transition-colors 
+                        ${isActive ? 'text-gray-800' : 'text-gray-400'
+                          } hover:text-gray-600`
+                    }
         >
-          <img src={icon} alt={`${label} 아이콘`} className="w-5 h-5" />
-          <span>{label}</span>
+          {({ isActive }) => (
+              <>
+                <img
+                  src={icon}
+                  alt={`${label} 아이콘`}
+                  className={`w-5 h-5 ${isActive ? 'brightness-0' : 'brightness-100'}`}
+                />
+                <span>{label}</span>
+              </>
+          )}
         </NavLink>
+
       ))}
     </nav>
   );

@@ -18,9 +18,9 @@ export default function ProductHeader() {
       <div className="flex-1" />
 
       {/* 오른쪽: 검색 + 장바구니 */}
-      <div className="flex items-center gap-0">
-        <img src={searchIcon} alt="검색" className="w-11" />
-        <img src={cartIcon} alt="장바구니" className="w-11" />
+      <div className="flex items-center gap-6">
+        <img src={searchIcon} alt="검색" className="w-6" />
+        <img src={cartIcon} alt="장바구니" className="w-6" />
       </div>
     </header>
   );
