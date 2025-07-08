@@ -26,6 +26,7 @@ export default function Home() {
         <Header showSearch={false} />
       </header>
       <header className="w-full px-4 pb-2.5">
+        <Header />
         <SearchInput value={''} onFocus={() => navigate('/search')} />
       </header>
 
