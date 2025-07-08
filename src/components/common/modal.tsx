@@ -2,7 +2,6 @@ import { createElement, type ReactNode, useEffect, useRef, useState } from 'reac
 
 import { useModalStore } from '@/stores/modalStore';
 
-import Close from '@/assets/icons/close.svg?react';
 import Bar from '@/assets/icons/modalBar.svg?react';
 
 interface IModalProviderProps {
@@ -10,7 +9,7 @@ interface IModalProviderProps {
 }
 
 export default function ModalProvider({ children }: IModalProviderProps) {
-  const { isModalOpen, modalContent, type, closeModal } = useModalStore();
+  const { isModalOpen, modalContent, type } = useModalStore();
   const drawerRef = useRef<HTMLDivElement>(null);
 
   const baseHeight = 120;
