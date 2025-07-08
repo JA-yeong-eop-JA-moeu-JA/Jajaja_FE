@@ -16,11 +16,10 @@ export default function Header({ showSearch = true, showLogo = true }: IHeaderPr
         <img src={logo} alt="자자자 로고" className={`h-6 ${showLogo ? '' : 'invisible'}`} />
 
         <div className="flex items-center gap-6">
-          {showSearch && (
-            <Link to="/search">
-              <img src={searchIcon} alt="검색" className="w-6" />
-            </Link>
-          )}
+          <Link to="/search">
+            <img src={searchIcon} alt="검색" className={`w-6  ${showSearch ? '' : 'invisible'} `} />
+          </Link>
+
           <Link to="/notifications">
             <img src={bellIcon} alt="알림" className="w-6" />
           </Link>
