@@ -22,7 +22,7 @@ export default function Layout() {
   return (
     <ModalProvider>
       <div className="min-h-screen flex flex-col">
-        <main className="flex-1 overflow-y-auto px-1">
+        <main className="flex-1 overflow-y-auto">
           <Outlet />
         </main>
         {showBottomBar && path !== '/' && <BottomBar />}

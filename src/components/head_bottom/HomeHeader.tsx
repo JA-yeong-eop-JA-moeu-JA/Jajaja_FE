@@ -5,7 +5,7 @@ import logo from '@/assets/logo.svg';
 export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full bg-white">
-      <div className="flex items-center justify-between px-0 py-4">
+      <div className="flex items-center justify-between px-1 py-4">
         <img src={logo} alt="자자자 로고" className="h-7" />
 
         {/* 아이콘 크기 키우고 간격 좁히기 */}

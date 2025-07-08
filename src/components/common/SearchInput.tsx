@@ -10,7 +10,7 @@ interface ISearchInputProps {
 
 export default function SearchInput({ value, onChange, placeholder = '상품을 검색하세요.' }: ISearchInputProps) {
   return (
-    <div className="relative w-[328px] h-[40px]">
+    <div className="relative w-full h-[40px]">
       <input
         type="text"
         value={value}

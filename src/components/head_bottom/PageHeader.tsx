@@ -12,7 +12,7 @@ export default function PageHeaderBar({ title }: IPageHeaderBarProps) {
   const navigate = useNavigate();
 
   return (
-    <header className="w-full flex items-center justify-between px-0 py-4 bg-white">
+    <header className="w-full flex items-center justify-between px-1 py-4 bg-white">
       {/* 뒤로가기 버튼 */}
       <button onClick={() => navigate(-1)} className="flex items-center">
         <img src={backIcon} alt="뒤로가기" className="w-5 h-5" />
