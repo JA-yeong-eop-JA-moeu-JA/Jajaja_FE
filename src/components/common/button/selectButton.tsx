@@ -19,10 +19,10 @@ export interface ISelectButtonProps<K extends TSelectKind> {
 export function SelectButton<K extends TSelectKind>(props: ISelectButtonProps<K>) {
   const { kind, leftText, rightText, leftVariant, rightVariant, onLeftClick, onRightClick } = props;
 
-  const marginY = kind === 'select-content' ? 'my-[4px] py-[4px]' : 'my-[8px]';
+  const marginY = kind === 'select-content' ? 'my-1 py-1' : 'my-2';
 
   return (
-    <div className={`flex justify-center gap-[4px] mx-[16px] ${marginY}`}>
+    <div className={`flex justify-center gap-1 mx-4 ${marginY}`}>
       <Button kind={kind} variant={leftVariant} onClick={onLeftClick}>
         {leftText}
       </Button>
