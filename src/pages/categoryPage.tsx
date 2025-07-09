@@ -43,7 +43,6 @@ export default function CategoryPage() {
   return (
     <div>
       <header className="px-3">
-        {' '}
         {/** 여백이 부족하여 추가했습니다 */}
         <Header />
       </header>
@@ -72,13 +71,13 @@ export default function CategoryPage() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
-                className="absolute inset-0 bg-white p-4 text-sm"
+                className="absolute inset-0 bg-white text-sm"
               >
                 {subCategories.map(({ name }) => (
                   <li
                     key={name}
                     onClick={() => handleSubCategoryClick(name)}
-                    className="flex items-center justify-between py-3 px-2 border-none cursor-pointer"
+                    className="flex items-center justify-between py-3 px-4 border-none cursor-pointer"
                   >
                     <div className="flex items-center gap-2">
                       <span>{name}</span>
