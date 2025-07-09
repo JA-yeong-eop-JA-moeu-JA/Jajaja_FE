@@ -7,7 +7,7 @@ import NotFound from '@/pages/feedback/NotFoundPage';
 import ReturnOK from '@/pages/feedback/returnOk';
 import Home from '@/pages/home';
 import Login from '@/pages/login';
-import MyPage from '@/pages/myPage';
+import MyPage from '@/pages/mypage/myPage';
 import Notice from '@/pages/notice';
 import OnBoarding from '@/pages/onBoarding';
 import Payment from '@/pages/payment';
