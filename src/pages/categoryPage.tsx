@@ -6,7 +6,7 @@ import { PageButton, type TabId } from '@/components/common/button';
 import BottomBar from '@/components/head_bottom/BottomBar';
 
 import Header from '../components/head_bottom/HomeHeader';
-import { CATEGORY_DATA } from '../constants/categoryData';
+import { CATEGORY_DATA } from '../constants/bottomBar/categoryData';
 
 import GoSearch from '@/assets/ChevronRight.svg';
 
