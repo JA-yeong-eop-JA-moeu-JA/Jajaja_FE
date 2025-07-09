@@ -6,7 +6,7 @@ import { PageButton, type TabId } from '@/components/common/button';
 import BottomBar from '@/components/head_bottom/BottomBar';
 
 import Header from '../components/head_bottom/HomeHeader';
-import { CATEGORY_DATA } from '../constants/categoryData';
+import { CATEGORY_DATA, CATEGORY_EMOJIS } from '../constants/categoryData';
 
 import GoSearch from '@/assets/ChevronRight.svg';
 
@@ -35,6 +35,15 @@ export default function CategoryPage() {
   }, [tabKey]);
 
   const subCategories = CATEGORY_DATA[tabKey][selectedMain] ?? [];
+  const parsedSubCategories = subCategories.map(({ name }) => {
+    const parts = name.split(' ');
+    const hasIcon = parts.length > 1 && CATEGORY_EMOJIS.has(parts[0]);
+    const icon = hasIcon ? parts[0] : '';
+    const label = hasIcon ? parts.slice(1).join(' ') : name;
+
+    return { label, icon };
+  });
+
 
   const handleSubCategoryClick = (name: string) => {
     navigate(`/search?keyword=${encodeURIComponent(name)}`);
@@ -73,18 +82,21 @@ export default function CategoryPage() {
                 transition={{ duration: 0.3 }}
                 className="absolute inset-0 bg-white text-sm"
               >
-                {subCategories.map(({ name }) => (
+                {parsedSubCategories.map(({ label, icon }) => (
                   <li
-                    key={name}
-                    onClick={() => handleSubCategoryClick(name)}
+                    key={label}
+                    onClick={() => handleSubCategoryClick(label)}
                     className="flex items-center justify-between py-3 px-4 border-none cursor-pointer"
                   >
                     <div className="flex items-center gap-2">
-                      <span>{name}</span>
+                      {icon && <span>{icon}</span>}
+                      <span>{label}</span>
+
                     </div>
                     <img src={GoSearch} alt=">" className="w-4 h-4 opacity-60" />
                   </li>
                 ))}
+
               </motion.ul>
             </AnimatePresence>
           </div>
