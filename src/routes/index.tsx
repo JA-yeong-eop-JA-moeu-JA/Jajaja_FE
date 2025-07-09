@@ -3,8 +3,7 @@ import { createBrowserRouter } from 'react-router-dom';
 import Layout from '@/layouts';
 import ExchangeOK from '@/pages/feedback/exchangeOk';
 import NotFound from '@/pages/feedback/NotFoundPage';
-import PaymentFailPage from '@/pages/feedback/paymentFail';
-import PaymentCompletePage from '@/pages/feedback/paymentOk';
+import PaymentStatusWrapper from '@/pages/feedback/paymentStatusWrapper';
 import ReturnOK from '@/pages/feedback/returnOk';
 import Home from '@/pages/home';
 import Login from '@/pages/login';
@@ -24,8 +23,7 @@ export const router = createBrowserRouter([
       { path: 'myPage', element: <MyPage /> },
       { path: 'notice', element: <Notice /> },
       { path: 'payment', element: <Payment /> },
-      { path: 'payment/complete', element: <PaymentCompletePage /> },
-      { path: 'payment/fail', element: <PaymentFailPage /> },
+      { path: 'payment/:status', element: <PaymentStatusWrapper /> },
       { path: 'exchange/complete', element: <ExchangeOK /> },
       { path: 'return/complete', element: <ReturnOK /> },
       { path: '*', element: <NotFound /> },
