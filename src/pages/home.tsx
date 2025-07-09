@@ -3,6 +3,7 @@ import { useLayoutEffect } from 'react';
 import { useModalStore } from '@/stores/modalStore';
 
 import SearchInput from '@/components/common/SearchInput';
+import BottomBar from '@/components/head_bottom/BottomBar';
 import Header from '@/components/head_bottom/HomeHeader';
 import Banner from '@/components/home/banner';
 import New from '@/components/home/new';
@@ -51,6 +52,7 @@ export default function Home() {
           <p>Copyright ⓒ JAJAJA.COM Corp. All rights reserved.</p>
         </div>
       </footer>
+      <BottomBar />
     </>
   );
 }
