@@ -8,7 +8,7 @@ export default function ProductHeader() {
   const navigate = useNavigate();
 
   return (
-    <header className="w-full max-w-sm h-[56px] px-0 flex items-center justify-between bg-white">
+    <header className="w-full max-w-sm h-[56px] px-0 flex items-center justify-between bg-white h-14">
       <button onClick={() => navigate(-1)} className="p-1">
         <img src={backIcon} alt="뒤로가기" className="w-5 h-5" />
       </button>
