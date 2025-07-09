@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 
 import Layout from '@/layouts';
+import Agreement from '@/pages/agreement';
 import CategoryPage from '@/pages/categoryPage';
 import ExchangeOK from '@/pages/feedback/exchangeOk';
 import NotFound from '@/pages/feedback/NotFoundPage';
@@ -23,6 +24,7 @@ export const router = createBrowserRouter([
       { path: 'myPage', element: <MyPage /> },
       { path: 'notice', element: <Notice /> },
       { path: 'payment', element: <Payment /> },
+      { path: 'agreement', element: <Agreement /> },
       { path: 'category', element: <CategoryPage /> },
       { path: 'exchange/complete', element: <ExchangeOK /> },
       { path: 'return/complete', element: <ReturnOK /> },
