@@ -44,7 +44,6 @@ export default function CategoryPage() {
     return { label, icon };
   });
 
-
   const handleSubCategoryClick = (name: string) => {
     navigate(`/search?keyword=${encodeURIComponent(name)}`);
   };
@@ -91,12 +90,10 @@ export default function CategoryPage() {
                     <div className="flex items-center gap-2">
                       {icon && <span>{icon}</span>}
                       <span>{label}</span>
-
                     </div>
                     <img src={GoSearch} alt=">" className="w-4 h-4 opacity-60" />
                   </li>
                 ))}
-
               </motion.ul>
             </AnimatePresence>
           </div>
