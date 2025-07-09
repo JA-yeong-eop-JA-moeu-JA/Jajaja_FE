@@ -1,4 +1,3 @@
-import BottomBar from '@/components/head_bottom/BottomBar';
 import Header from '@/components/head_bottom/HomeHeader';
 
 import Google from '@/assets/myPage/google.svg?react';
@@ -8,12 +7,12 @@ import SubLogo from '@/assets/subLogo.svg?react';
 
 export default function Login() {
   return (
-    <>
+    <div className="w-full h-screen flex flex-col justify-between">
       <header className="px-2">
         <Header showLogo={false} />
       </header>
 
-      <div className="w-full bg-white text-black pt-11 pb-17 flex flex-col items-center justify-center gap-17.75">
+      <div className="w-full bg-white text-black pt-15 pb-27 flex flex-col items-center justify-center gap-17.75">
         <div className="flex flex-col items-center justify-center gap-4">
           <div className="w-40 h-9">
             <Logo />
@@ -23,14 +22,14 @@ export default function Login() {
           </div>
         </div>
 
-        <div className="w-full flex flex-col items-center justify-center gap-4 px-4 ">
-          <button className="w-full h-12 rounded bg-[#FDDC3F] px-6 flex items-center justify-center relative">
+        <div className="w-full flex flex-col items-center justify-center gap-4 px-4">
+          <button className="w-full h-12 rounded bg-[#FDDC3F] flex items-center justify-center relative">
             <span className="absolute left-6 flex items-center">
               <Kakao className="w-6.5 h-6" />
             </span>
             <p className="text-black text-body-medium mx-auto">카카오로 시작하기</p>
           </button>
-          <button className="w-full h-12 rounded border border-black-2 px-6 flex items-center justify-center relative">
+          <button className="w-full h-12 rounded border border-black-2 flex items-center justify-center relative">
             <span className="absolute left-6 flex items-center">
               <Google className="w-6.5 h-6.5" />
             </span>
@@ -39,7 +38,7 @@ export default function Login() {
         </div>
       </div>
 
-      <footer className="px-4 pb-21 pt-5 bg-black-0 flex flex-col gap-4">
+      <footer className="px-4 pt-5 pb-6 bg-black-0 flex flex-col gap-4">
         <div className="flex items-center px-1 gap-2 text-small-regular">
           <p className="text-black-4">이용약관</p>
           <p>|</p>
@@ -57,8 +56,6 @@ export default function Login() {
           <p>Copyright ⓒ JAJAJA.COM Corp. All rights reserved.</p>
         </div>
       </footer>
-
-      <BottomBar />
-    </>
+    </div>
   );
 }
