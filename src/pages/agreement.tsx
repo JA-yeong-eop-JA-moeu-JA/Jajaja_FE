@@ -22,8 +22,10 @@ export default function Agreement() {
           </p>
 
           <div className="flex flex-col text-body-regular pl-3.5 pt-10 pb-24.25">
-            <div className="pb-7">
-              <CheckboxAgreement type="agree-all" message="전체 동의" textClassName="text-subtitle-medium py-3" />
+            <div className="pr-4 mb-3">
+              <div className="pb-3 border-b border-black-1">
+                <CheckboxAgreement type="agree-all" message="전체 동의" textClassName="text-subtitle-medium py-3" />
+              </div>
             </div>
 
             {AGREEMENT.map(({ id, type, name, path }) => {
