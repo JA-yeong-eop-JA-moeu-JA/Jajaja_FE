@@ -43,9 +43,11 @@ export default function OnBoarding() {
             </button>
           ))}
         </div>
-        <Button kind="basic" variant="solid-orange" className="w-full" onClick={handleSubmit}>
-          선택 완료
-        </Button>
+        <div className="w-full">
+          <Button kind="basic" variant="solid-orange" onClick={handleSubmit}>
+            선택 완료
+          </Button>
+        </div>
       </div>
     </div>
   );
