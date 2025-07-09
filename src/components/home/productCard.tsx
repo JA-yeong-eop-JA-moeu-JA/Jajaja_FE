@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router-dom';
+
 import Star from '@/assets/icons/star.svg?react';
 
 type TProductCardProps = {
@@ -14,9 +16,10 @@ type TProductCardProps = {
   };
 };
 export default function ProductCard({ data }: TProductCardProps) {
+  const navigate = useNavigate();
   const { id, sale, price, name, company, star, review, imageUrl, tag } = data;
   return (
-    <div key={id} className="w-full flex flex-col gap-3">
+    <div key={id} className="w-full flex flex-col gap-3" onClick={() => navigate(`/product/${id}`)}>
       <div className="relative">
         <img src={imageUrl} className="w-full" />
         {!!tag && (

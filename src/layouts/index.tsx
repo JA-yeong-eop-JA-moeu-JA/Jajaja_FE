@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
+import { Toaster } from 'sonner';
 
 import { useModalStore } from '@/stores/modalStore';
 
@@ -24,6 +25,7 @@ export default function Layout() {
       <div className="min-h-screen flex flex-col">
         <main className="flex-1 overflow-y-auto">
           <Outlet />
+          <Toaster />
         </main>
         {showBottomBar && path !== '/' && <BottomBar />}
       </div>

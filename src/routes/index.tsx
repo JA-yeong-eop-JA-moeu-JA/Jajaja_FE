@@ -15,6 +15,9 @@ import Profile from '@/pages/mypage/profile';
 import Notice from '@/pages/notice';
 import OnBoarding from '@/pages/onBoarding';
 import Payment from '@/pages/payment';
+import PhotoReview from '@/pages/photoReview';
+import Product from '@/pages/product';
+import Review from '@/pages/review';
 import Search from '@/pages/search';
 
 export const router = createBrowserRouter([
@@ -34,6 +37,9 @@ export const router = createBrowserRouter([
       { path: 'agreement', element: <Agreement /> },
       { path: 'category', element: <CategoryPage /> },
       { path: 'search', element: <Search /> },
+      { path: 'product/:id', element: <Product /> },
+      { path: 'product/:id/photoReview', element: <PhotoReview /> },
+      { path: 'product/:id/review', element: <Review /> },
       { path: 'exchange/complete', element: <ExchangeOK /> },
       { path: 'return/complete', element: <ReturnOK /> },
       { path: '*', element: <NotFound /> },
