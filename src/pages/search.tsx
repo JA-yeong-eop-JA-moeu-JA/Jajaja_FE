@@ -36,17 +36,11 @@ export default function Search() {
   const handleValue = (e: ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
   };
-<<<<<<< HEAD
   const handleFilter = (value?: string) => {
     setChange(true);
     const keyword = value ?? inputValue;
 
     if (!keyword.trim()) {
-=======
-  const handleFilter = () => {
-    setChange(true);
-    if (!inputValue.trim()) {
->>>>>>> dd1758b6451098a642b45b9cda1a410892e68a2c
       setFilteredList(TOTALLIST);
       return;
     }
