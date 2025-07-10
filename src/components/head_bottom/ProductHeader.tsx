@@ -8,16 +8,16 @@ export default function ProductHeader() {
   const navigate = useNavigate();
 
   return (
-    <header className="w-full max-w-[600px] h-[56px] px-0 flex items-center justify-between bg-white">
+    <header className="w-full h-[56px] flex items-center justify-between bg-white">
       {/* 왼쪽: 뒤로가기 */}
       <button onClick={() => navigate(-1)} className="p-1">
-        <BackIcon className="w-6 h-6" />
+        <BackIcon className="w-5 h-5" />
       </button>
 
       <div className="flex-1" />
 
-      <div className="flex items-center gap-0">
-        <SearchIcon />
+      <div className="flex items-center gap-4 m-4 p-2">
+        <SearchIcon className="w-5" onClick={() => navigate('/search')} />
         <CartIcon />
       </div>
     </header>
