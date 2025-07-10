@@ -6,6 +6,8 @@ import { REVIEW_LIST } from '@/constants/product/reviews';
 import { TEAMS } from '@/constants/product/team';
 import { TOTALLIST } from '@/constants/search/totalList';
 
+import { useModalStore } from '@/stores/modalStore';
+
 import { Button } from '@/components/common/button';
 import ProductHeader from '@/components/head_bottom/ProductHeader';
 import ReviewCard from '@/components/product/reviewCard';
@@ -17,6 +19,7 @@ import Add from '@/assets/images/product/adv.svg?react';
 
 export default function Product() {
   const navigate = useNavigate();
+  const { openModal } = useModalStore();
   const { id } = useParams<{ id: string }>();
   const product = TOTALLIST.find((item) => item.id === Number(id));
   const [teams, setTeams] = useState(() =>
@@ -181,8 +184,12 @@ export default function Product() {
       )}
 
       <footer className="px-4 py-2 fixed bottom-0 max-w-[600px] bg-white w-full h-16 flex justify-center gap-2 items-center text-body-medium text-white">
-        <button className="rounded-sm bg-black py-2.5 w-full">1인 구매하기</button>
-        <button className="rounded-sm bg-orange py-2.5 w-full">팀 생성하기</button>
+        <button className="rounded-sm bg-black py-2.5 w-full" onClick={() => openModal('bottom-drawer')}>
+          1인 구매하기
+        </button>
+        <button className="rounded-sm bg-orange py-2.5 w-full" onClick={() => openModal('bottom-drawer')}>
+          팀 생성하기
+        </button>
       </footer>
     </div>
   );

@@ -97,8 +97,8 @@ export default function ModalProvider({ children }: IModalProviderProps) {
             onMouseDown={(e) => onStart(e.clientY)}
             onTouchStart={(e) => onStart(e.touches[0].clientY)}
           >
-            <div className="flex flex-col justify-center py-3 px-4 gap-5">
-              <div className="w-full flex justify-center cursor-grab active:cursor-grabbing">
+            <div className="h-full flex flex-col">
+              <div className="w-full flex justify-center cursor-grab active:cursor-grabbing my-5">
                 <Bar />
               </div>
               {createElement(modalContent)}
