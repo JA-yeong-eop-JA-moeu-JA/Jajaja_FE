@@ -12,7 +12,7 @@ export default function ModalProvider({ children }: IModalProviderProps) {
   const { isModalOpen, modalContent, type } = useModalStore();
   const drawerRef = useRef<HTMLDivElement>(null);
 
-  const baseHeight = 120;
+  const baseHeight = 152;
   const DRAG_THRESHOLD = 10;
 
   const [currentHeight, setCurrentHeight] = useState(baseHeight);
@@ -88,16 +88,16 @@ export default function ModalProvider({ children }: IModalProviderProps) {
     <>
       {children}
 
-      {type === 'bottom-drawer' && (
+      {(type === 'bottom-drawer' || type == 'bottom-drawer-team') && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center">
           <div
             ref={drawerRef}
-            className="w-full max-w-150 bg-white rounded-t-lg transition-all duration-300 overflow-hidden min-h-20"
-            style={{ height: currentHeight }}
+            className="w-full max-w-150 bg-white rounded-t-lg transition-all duration-300 overflow-hidden"
+            style={{ minHeight: currentHeight }}
             onMouseDown={(e) => onStart(e.clientY)}
             onTouchStart={(e) => onStart(e.touches[0].clientY)}
           >
-            <div className="h-full flex flex-col">
+            <div className="flex flex-col">
               <div className="w-full flex justify-center cursor-grab active:cursor-grabbing my-5">
                 <Bar />
               </div>
