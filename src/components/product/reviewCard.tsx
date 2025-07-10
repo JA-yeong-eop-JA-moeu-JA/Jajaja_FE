@@ -82,7 +82,7 @@ export default function ReviewCard({ data }: TReviewCardProps) {
       <section className="flex items-center gap-2">
         {images.slice(0, 4).map((img, idx) => (
           <div key={idx} className="relative">
-            <img className="relative" src={img} />
+            <img src={img} />
             {idx === 3 && images.length > 4 && (
               <div
                 className="flex justify-center items-center text-white text-body-regular absolute top-0 left-0 bg-[#00000099] w-full h-full"
