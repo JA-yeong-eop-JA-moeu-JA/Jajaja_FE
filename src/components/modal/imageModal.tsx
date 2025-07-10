@@ -9,11 +9,10 @@ import Next from '@/assets/icons/next.svg?react';
 import Prev from '@/assets/icons/prev.svg?react';
 
 export default function ImageModal(props?: Record<string, string | number>) {
-  const src = props?.src;
   const imageList = REVIEW_LIST.flatMap(({ images }) => images);
   const { closeModal } = useModalStore();
 
-  const startIdx = imageList.findIndex((img) => img === src);
+  const startIdx = imageList.findIndex((img) => img === String(props?.src));
   const [currentIndex, setCurrentIndex] = useState(startIdx);
 
   const handleMove = (offset: number) => {
