@@ -12,6 +12,7 @@ import Login from '@/pages/login';
 import Address from '@/pages/mypage/address';
 import MyDetailPage from '@/pages/mypage/myDetailPage';
 import MyPage from '@/pages/mypage/myPage';
+import Points from '@/pages/mypage/points';
 import Profile from '@/pages/mypage/profile';
 import Notice from '@/pages/notice';
 import OnBoarding from '@/pages/onBoarding';
@@ -30,6 +31,7 @@ export const router = createBrowserRouter([
       { path: 'home', element: <Home /> },
       { path: 'login', element: <Login /> },
       { path: 'myPage', element: <MyPage /> },
+      { path: 'myPage/points', element: <Points /> },
       { path: 'myPage/me', element: <MyDetailPage /> },
       { path: 'myPage/me/profile', element: <Profile /> },
       { path: 'myPage/me/address', element: <Address /> },
