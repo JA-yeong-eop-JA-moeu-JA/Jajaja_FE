@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
 
 import { REVIEW_LIST } from '@/constants/bottomBar/review';
 import { TEAM_RECRUIT_LIST } from '@/constants/bottomBar/teamRecruit';
@@ -26,8 +25,7 @@ export default function Board() {
       </header>
 
       <div className="relative flex-1 overflow-y-auto">
-        <AnimatePresence mode="wait">
-          <motion.ul
+          <ul
             key={selectedTop2 + sortType}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -58,8 +56,7 @@ export default function Board() {
             ) : (
               TEAM_RECRUIT_LIST.map((item) => <HorizontalProductCard key={item.id} data={item} />)
             )}
-          </motion.ul>
-        </AnimatePresence>
+          </ul>
       </div>
 
       <BottomBar />

@@ -5,7 +5,7 @@ export const TEAM_RECRUIT_LIST = [
     price: 23430,
     name: '복음자리 100% 땅콩버터 스무스 280g',
     imageUrl: '/src/assets/images/teamRecruit/1.svg',
-    teamLeaderName: '그라니고릴라',
+    teamLeaderName: '고라니고릴라',
     teamLeaderProfileUrl: '/images/profile1.jpg',
   } /**임시 프로필 사진*/,
   {

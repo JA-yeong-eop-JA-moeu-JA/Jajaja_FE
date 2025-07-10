@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
 
 import HeartFilled from '@/assets/icons/heartFilled.svg';
 import HeartOutline from '@/assets/icons/heartOutline.svg';
@@ -47,21 +46,15 @@ export default function ReviewCard({ data }: TReviewCardProps) {
           </div>
         </div>
 
-        <motion.button onClick={toggleLike} whileTap={{ scale: 0.9 }} className="flex items-center gap-1 text-orange-500 text-sm">
-          <AnimatePresence mode="wait">
-            <motion.img
+        <button onClick={toggleLike} >
+            <img
               key={liked ? 'filled' : 'outline'}
               src={liked ? HeartFilled : HeartOutline}
               alt="like"
               className="w-4 h-4"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ duration: 0.2 }}
             />
-          </AnimatePresence>
           {likes}
-        </motion.button>
+        </button>
       </div>
       {/** 리뷰 제품 및 내용 - 사진은 임의로 해둔거라 안보이는게 정상입니당~ */}
       <p className="mt-2 text-sm font-medium text-black-4">{title}</p>
