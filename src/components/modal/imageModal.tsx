@@ -43,17 +43,17 @@ export default function ImageModal(props?: Record<string, string | number>) {
       </Swiper>
 
       {currentIndex > 0 && (
-        <button onClick={() => handleMove(-1)} className="absolute left-2 top-1/2 -translate-y-1/2 z-10">
+        <button onClick={() => handleMove(-1)} className="absolute left-0 top-1/2 -translate-y-1/2 z-10">
           <Prev />
         </button>
       )}
       {currentIndex < imageList.length - 1 && (
-        <button onClick={() => handleMove(1)} className="absolute right-2 top-1/2 -translate-y-1/2 z-10">
+        <button onClick={() => handleMove(1)} className="absolute right-0 top-1/2 -translate-y-1/2 z-10">
           <Next />
         </button>
       )}
 
-      <Close className="absolute top-2 right-2 cursor-pointer z-10" onClick={closeModal} />
+      <Close className="absolute top-0 right-0 cursor-pointer z-10" onClick={closeModal} />
     </div>
   );
 }
