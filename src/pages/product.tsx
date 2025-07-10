@@ -149,7 +149,7 @@ export default function Product() {
         <p className="text-title-medium mb-3">리뷰</p>
         <div className="flex flex-col gap-3">
           {shortReview.map((item, idx) => (
-            <div key={idx}>
+            <div key={idx} className="flex flex-col gap-3">
               <ReviewCard data={item} />
               {idx !== shortReview.length - 1 && <hr className="border-black-1" />}
             </div>

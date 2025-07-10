@@ -118,6 +118,7 @@ export default function ModalProvider({ children }: IModalProviderProps) {
           <div className="bg-white min-h-10 rounded-lg shadow-md max-w-76 w-full">{createElement(modalContent)}</div>
         </div>
       )}
+      {type === 'image' && <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center">{createElement(modalContent)}</div>}
     </>
   );
 }
