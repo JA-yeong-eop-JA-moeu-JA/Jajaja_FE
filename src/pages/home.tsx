@@ -21,7 +21,7 @@ export default function Home() {
     }
   }, [openModal]);
   return (
-    <>
+    <div className="pb-15">
       <header className="w-full px-4 pb-2.5">
         <Header />
         <SearchInput value={''} onFocus={() => navigate('/search')} />
@@ -55,6 +55,6 @@ export default function Home() {
         </div>
       </footer>
       <BottomBar />
-    </>
+    </div>
   );
 }
