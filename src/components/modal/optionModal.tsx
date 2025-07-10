@@ -38,7 +38,7 @@ export default function OptionModal({ type }: { type?: string }) {
   const totalPrice = selectedItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
   return (
-    <div className="h-full px-4 pb-2 flex flex-col gap-7">
+    <div className="h-full px-4 pb-2 flex flex-col gap-7 select-none">
       <div className="flex flex-col gap-2">
         <DropDown options={OPTIONS} onChange={({ id }) => handleSelect(id)} />
 
@@ -53,12 +53,12 @@ export default function OptionModal({ type }: { type?: string }) {
                     <div className="flex items-center justify-center w-6 h-full cursor-pointer" onClick={() => handleCalculate(id, -1)}>
                       <Minus />
                     </div>
-                    <div className="select-none flex items-center justify-center w-9 h-full border-x border-black-2 text-small-regular">{quantity}</div>
+                    <div className="flex items-center justify-center w-9 h-full border-x border-black-2 text-small-regular">{quantity}</div>
                     <div className="flex items-center justify-center w-6 h-full cursor-pointer" onClick={() => handleCalculate(id, 1)}>
                       <Plus />
                     </div>
                   </div>
-                  <p className="select-none text-body-medium">{(price * quantity).toLocaleString()} 원</p>
+                  <p className="text-body-medium">{(price * quantity).toLocaleString()} 원</p>
                 </div>
               </div>
             ))}
