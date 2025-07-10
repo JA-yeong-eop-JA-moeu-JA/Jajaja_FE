@@ -112,7 +112,7 @@ export default function ShoppingCart() {
             </section>
 
             {cartList.map((product) => (
-              <CartItem key={product.id} product={product} checked={checkedItems[product.id] || false} onToggle={() => toggle(product.id)} />
+              <CartItem key={product.id} product={product} checked={checkedItems[product.id] || false} onToggle={() => toggle(product.id.toString())} />
             ))}
           </>
         )}

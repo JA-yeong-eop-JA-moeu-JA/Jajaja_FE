@@ -7,7 +7,6 @@ import CategoryPage from '@/pages/categoryPage';
 import CouponsPage from '@/pages/coupon';
 import ExchangeOK from '@/pages/feedback/exchangeOk';
 import NotFound from '@/pages/feedback/NotFoundPage';
-import PaymentStatusWrapper from '@/pages/feedback/paymentStatusWrapper';
 import ReturnOK from '@/pages/feedback/returnOk';
 import Home from '@/pages/home';
 import Login from '@/pages/login';
