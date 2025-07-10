@@ -23,7 +23,7 @@ export default function HorizontalProductCard({ data }: THorizontalProductCardPr
           <img src={teamLeaderProfileUrl} alt={teamLeaderName} className="w-5 h-5 rounded-full object-cover" />
           <span>{teamLeaderName}</span>
         </div>
-        <div className="w-[212px] mt-2 text-base "> 
+        <div className="w-[212px] mt-2 text-base ">
           <span className="text-red-500 text-subtitle-medium">{sale}% </span>
           <span className="text-subtitle-medium">{price.toLocaleString()} 원</span>
         </div>
