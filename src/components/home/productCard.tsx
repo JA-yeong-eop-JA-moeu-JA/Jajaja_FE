@@ -38,7 +38,7 @@ export default function ProductCard({ data }: TProductCardProps) {
           <p className="text-small-regular text-black-4">{company}</p>
         </div>
         <div className="flex items-center gap-1 text-tiny-medium">
-          <Star />
+          <Star className="fill-[#FFC800]" />
           <p className="text-[#FFC800]">{star}</p>
           <p className="text-black-4">· 리뷰 {review}</p>
         </div>
