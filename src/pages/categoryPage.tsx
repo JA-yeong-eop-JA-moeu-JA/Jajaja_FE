@@ -6,7 +6,7 @@ import { PageButton, type TabId } from '@/components/common/button';
 import BottomBar from '@/components/head_bottom/BottomBar';
 
 import Header from '../components/head_bottom/HomeHeader';
-import { CATEGORY_DATA, CATEGORY_EMOJIS } from '../constants/categoryData';
+import { CATEGORY_DATA, CATEGORY_EMOJIS } from '../constants/bottomBar/categoryData';
 
 import GoSearch from '@/assets/ChevronRight.svg';
 
@@ -49,7 +49,7 @@ export default function CategoryPage() {
   };
 
   return (
-    <div>
+    <div className="font-body-regular">
       <header className="px-3">
         {/** 여백이 부족하여 추가했습니다 */}
         <Header />

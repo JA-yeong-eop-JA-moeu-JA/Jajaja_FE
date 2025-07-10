@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router-dom';
 
 import Layout from '@/layouts';
 import Agreement from '@/pages/agreement';
+import Board from '@/pages/board';
 import CategoryPage from '@/pages/categoryPage';
 import ExchangeOK from '@/pages/feedback/exchangeOk';
 import NotFound from '@/pages/feedback/NotFoundPage';
@@ -34,6 +35,7 @@ export const router = createBrowserRouter([
       { path: 'myPage/me/address', element: <Address /> },
       { path: 'notice', element: <Notice /> },
       { path: 'payment', element: <Payment /> },
+      { path: 'board', element: <Board /> },
       { path: 'agreement', element: <Agreement /> },
       { path: 'category', element: <CategoryPage /> },
       { path: 'search', element: <Search /> },
