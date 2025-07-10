@@ -1,26 +1,24 @@
 import { useNavigate } from 'react-router-dom';
 
-import backIcon from '@/assets/bar_icons/back.svg';
-import cartIcon from '@/assets/bar_icons/cart.svg';
-import searchIcon from '@/assets/bar_icons/search.svg';
+import BackIcon from '@/assets/bar_icons/back.svg?react';
+import CartIcon from '@/assets/bar_icons/cart.svg?react';
+import SearchIcon from '@/assets/bar_icons/search.svg?react';
 
 export default function ProductHeader() {
   const navigate = useNavigate();
 
   return (
-    <header className="w-full max-w-sm h-[56px] px-0 flex items-center justify-between bg-white">
+    <header className="w-full h-[56px] flex items-center justify-between bg-white">
       {/* 왼쪽: 뒤로가기 */}
       <button onClick={() => navigate(-1)} className="p-1">
-        <img src={backIcon} alt="뒤로가기" className="w-5 h-5" />
+        <BackIcon className="w-5 h-5" />
       </button>
 
-      {/* 가운데: 여백 (자동으로 공간 확보) */}
       <div className="flex-1" />
 
-      {/* 오른쪽: 검색 + 장바구니 */}
-      <div className="flex items-center gap-0">
-        <img src={searchIcon} alt="검색" className="w-11" />
-        <img src={cartIcon} alt="장바구니" className="w-11" />
+      <div className="flex items-center gap-4 m-4 p-2">
+        <SearchIcon className="w-5" onClick={() => navigate('/search')} />
+        <CartIcon />
       </div>
     </header>
   );

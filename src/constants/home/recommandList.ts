@@ -1,6 +1,6 @@
 export const RECOMMANDS = [
   {
-    id: 1,
+    id: 17,
     sale: 15,
     price: 23430,
     name: '복음자리 100% 땅콩버터 스무스 280g',
@@ -11,7 +11,7 @@ export const RECOMMANDS = [
     imageUrl: '/src/assets/images/recommand/1.svg',
   },
   {
-    id: 2,
+    id: 18,
     sale: 20,
     price: 42838,
     name: '미니 다크 아메리카노 120T + 120T',
@@ -22,7 +22,7 @@ export const RECOMMANDS = [
     imageUrl: '/src/assets/images/recommand/2.svg',
   },
   {
-    id: 3,
+    id: 19,
     sale: 0,
     price: 12340,
     name: '멸균우유 흰우유 100ml X 10개',
@@ -33,7 +33,7 @@ export const RECOMMANDS = [
     imageUrl: '/src/assets/images/recommand/3.svg',
   },
   {
-    id: 4,
+    id: 20,
     sale: 12,
     price: 42198,
     name: '클래식 화이트에디션 혼합 8조 세트',
@@ -44,7 +44,7 @@ export const RECOMMANDS = [
     imageUrl: '/src/assets/images/recommand/4.svg',
   },
   {
-    id: 5,
+    id: 21,
     sale: 15,
     price: 21090,
     name: '웨어러블 천연 라텍스 고무장갑 1켤레 대형',
@@ -55,7 +55,7 @@ export const RECOMMANDS = [
     imageUrl: '/src/assets/images/recommand/5.svg',
   },
   {
-    id: 6,
+    id: 22,
     sale: 40,
     price: 2838,
     name: '팔도 비빔장 시그니처 소스 380g 1개',
@@ -66,7 +66,7 @@ export const RECOMMANDS = [
     imageUrl: '/src/assets/images/recommand/6.svg',
   },
   {
-    id: 7,
+    id: 23,
     sale: 0,
     price: 31200,
     name: '유기농 100% 엑스트라버진 올리브오일 1L',
@@ -77,7 +77,7 @@ export const RECOMMANDS = [
     imageUrl: '/src/assets/images/recommand/7.svg',
   },
   {
-    id: 8,
+    id: 24,
     sale: 10,
     price: 12838,
     name: '오뚜기 햇반 270g 24개',

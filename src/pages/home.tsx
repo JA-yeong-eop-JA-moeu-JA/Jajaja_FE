@@ -1,8 +1,10 @@
 import { useLayoutEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { useModalStore } from '@/stores/modalStore';
 
 import SearchInput from '@/components/common/SearchInput';
+import BottomBar from '@/components/head_bottom/BottomBar';
 import Header from '@/components/head_bottom/HomeHeader';
 import Banner from '@/components/home/banner';
 import New from '@/components/home/new';
@@ -11,6 +13,7 @@ import Recommand from '@/components/home/recommand';
 
 export default function Home() {
   const { openModal } = useModalStore();
+  const navigate = useNavigate();
   useLayoutEffect(() => {
     const shouldShow = !document.cookie.includes('hidePopup=true');
     if (shouldShow) {
@@ -18,10 +21,12 @@ export default function Home() {
     }
   }, [openModal]);
   return (
-    <>
+    <div className="pb-15">
+      <header className="px-3">
+        <Header showSearch={false} />
+      </header>
       <header className="w-full px-4 pb-2.5">
-        <Header />
-        <SearchInput value={''} onChange={() => {}} />
+        <SearchInput value={''} onFocus={() => navigate('/search')} />
       </header>
 
       <section className="w-full">
@@ -51,6 +56,7 @@ export default function Home() {
           <p>Copyright ⓒ JAJAJA.COM Corp. All rights reserved.</p>
         </div>
       </footer>
-    </>
+      <BottomBar />
+    </div>
   );
 }

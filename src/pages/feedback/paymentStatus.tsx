@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router-dom';
+
 import { SelectButton } from '@/components/common/button/selectButton';
 import FeedbackPage from '@/components/common/FeedbackPage';
 
@@ -8,6 +10,7 @@ interface IPaymentStatusPageProps {
 }
 
 export default function PaymentStatusPage({ status }: IPaymentStatusPageProps) {
+  const navigate = useNavigate();
   const isSuccess = status === 'success';
 
   return (
@@ -18,20 +21,22 @@ export default function PaymentStatusPage({ status }: IPaymentStatusPageProps) {
         subtitle={isSuccess ? undefined : '잠시 후 다시 시도해주세요.'}
       />
 
-      <div className="w-full fixed bottom-0 left-0 right-0 z-10 pb-2">
-        <SelectButton
-          kind="select-bottom"
-          leftText={isSuccess ? '주문 내역' : '장바구니'}
-          rightText="홈으로"
-          leftVariant="left-outline"
-          rightVariant="right-orange"
-          onLeftClick={() => {
-            window.location.href = isSuccess ? '/주문 내역' : '/장바구니';
-          }}
-          onRightClick={() => {
-            window.location.href = '/home';
-          }}
-        />
+      <div className="fixed bottom-0 left-0 right-0 pb-2 flex justify-center">
+        <div className="w-full max-w-[600px] px-4">
+          <SelectButton
+            kind="select-bottom"
+            leftText={isSuccess ? '주문 내역' : '장바구니'}
+            rightText="홈으로"
+            leftVariant="left-outline"
+            rightVariant="right-orange"
+            onLeftClick={() => {
+              navigate(isSuccess ? '/주문 내역' : '/shoppingcart');
+            }}
+            onRightClick={() => {
+              navigate('/home');
+            }}
+          />
+        </div>
       </div>
     </div>
   );

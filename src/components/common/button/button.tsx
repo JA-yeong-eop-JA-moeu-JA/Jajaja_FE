@@ -54,7 +54,7 @@ export function Button({ kind, variant = 'default', active = false, className, c
 
   if (kind === 'basic') {
     return (
-      <div className="px-4 py-2">
+      <div className="w-full px-4 py-2">
         <button type="button" className={classes} {...rest}>
           {children}
         </button>

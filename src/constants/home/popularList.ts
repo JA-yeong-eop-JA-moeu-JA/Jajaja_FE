@@ -1,6 +1,6 @@
 export const POPULARLIST = [
   {
-    id: 1,
+    id: 9,
     sale: 25,
     price: 23430,
     name: '레오나르디 화이트 발사믹식 콘디멘토 비앙코 250ml X 2개',
@@ -11,7 +11,7 @@ export const POPULARLIST = [
     imageUrl: '/src/assets/images/popular/1.svg',
   },
   {
-    id: 2,
+    id: 10,
     sale: 30,
     price: 42838,
     name: '덴마크 유산균 이야기 170mg X 60캡슐 X 6박스',
@@ -22,7 +22,7 @@ export const POPULARLIST = [
     imageUrl: '/src/assets/images/popular/2.svg',
   },
   {
-    id: 3,
+    id: 11,
     sale: 0,
     price: 23230,
     name: '베네팜 유기농 곱슬케일 4박스 동결건조',
@@ -33,7 +33,7 @@ export const POPULARLIST = [
     imageUrl: '/src/assets/images/popular/3.svg',
   },
   {
-    id: 4,
+    id: 12,
     sale: 20,
     price: 19838,
     name: '코스트코 순수 아보카도 PURE 100% 1L',
@@ -44,7 +44,7 @@ export const POPULARLIST = [
     imageUrl: '/src/assets/images/popular/4.svg',
   },
   {
-    id: 5,
+    id: 13,
     sale: 15,
     price: 23430,
     name: '프렉션드 스탠 냄비 양수 20cm',
@@ -55,7 +55,7 @@ export const POPULARLIST = [
     imageUrl: '/src/assets/images/popular/5.svg',
   },
   {
-    id: 6,
+    id: 14,
     sale: 20,
     price: 42838,
     name: '비욘봉투 세로형 편지봉투 용돈 상품권 선물',
@@ -66,7 +66,7 @@ export const POPULARLIST = [
     imageUrl: '/src/assets/images/popular/6.svg',
   },
   {
-    id: 7,
+    id: 15,
     sale: 0,
     price: 3430,
     name: '서울우유',
@@ -77,7 +77,7 @@ export const POPULARLIST = [
     imageUrl: '/src/assets/images/popular/7.svg',
   },
   {
-    id: 8,
+    id: 16,
     sale: 20,
     price: 32828,
     name: '키스해링 대나무 펄프 뽑아쓰는 키친 타올 휴대용 100매',
