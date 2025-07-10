@@ -27,10 +27,6 @@ export default function Board() {
       <div className="relative flex-1 overflow-y-auto">
           <ul
             key={selectedTop2 + sortType}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
             className="absolute inset-0 bg-white px-4 py-3 flex flex-col gap-3"
           >
             {selectedTop2 === 'review' ? (

@@ -41,7 +41,7 @@ export default function CategoryPage() {
   };
 
   return (
-    <div>
+    <div className='font-body-regular'>
       <header className="px-3">
         {' '}
         {/** 여백이 부족하여 추가했습니다 */}
@@ -52,12 +52,12 @@ export default function CategoryPage() {
         <PageButton items={['basic', 'industry']} selected={selectedTop1} onSelect={setSelectedTop1} />
 
         <div className="flex flex-1 overflow-y-auto relative">
-          <ul className="w-[100px] bg-gray-50 text-sm text-gray-400 flex-shrink-0">
+          <ul className="w-[116px] bg-gray-50 text-sm text-gray-400 flex-shrink-0">
             {mainCategories.map((main) => (
               <li
                 key={main}
                 onClick={() => setSelectedMain(main)}
-                className={`px-3 py-4 border-none cursor-pointer ${selectedMain === main ? 'bg-white text-black font-semibold' : ''}`}
+                className={`px-3 py-4 border-none cursor-pointer flex items-center justify-center ${selectedMain === main ? 'bg-white text-black font-semibold' : ''}`}
               >
                 {main}
               </li>
