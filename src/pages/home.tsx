@@ -1,4 +1,5 @@
 import { useLayoutEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { useModalStore } from '@/stores/modalStore';
 
@@ -12,6 +13,7 @@ import Recommand from '@/components/home/recommand';
 
 export default function Home() {
   const { openModal } = useModalStore();
+  const navigate = useNavigate();
   useLayoutEffect(() => {
     const shouldShow = !document.cookie.includes('hidePopup=true');
     if (shouldShow) {
@@ -21,8 +23,8 @@ export default function Home() {
   return (
     <>
       <header className="w-full px-4 pb-2.5">
-        <Header showSearch={false} />
-        <SearchInput value={''} onChange={() => {}} />
+        <Header />
+        <SearchInput value={''} onFocus={() => navigate('/search')} />
       </header>
 
       <section className="w-full">

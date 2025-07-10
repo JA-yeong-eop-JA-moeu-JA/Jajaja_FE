@@ -6,7 +6,7 @@ import { PageButton, type TabId } from '@/components/common/button';
 import BottomBar from '@/components/head_bottom/BottomBar';
 
 import Header from '../components/head_bottom/HomeHeader';
-import { CATEGORY_DATA } from '../constants/bottomBar/categoryData';
+import { CATEGORY_DATA, CATEGORY_EMOJIS } from '../constants/bottomBar/categoryData';
 
 import GoSearch from '@/assets/ChevronRight.svg';
 
@@ -35,6 +35,14 @@ export default function CategoryPage() {
   }, [tabKey]);
 
   const subCategories = CATEGORY_DATA[tabKey][selectedMain] ?? [];
+  const parsedSubCategories = subCategories.map(({ name }) => {
+    const parts = name.split(' ');
+    const hasIcon = parts.length > 1 && CATEGORY_EMOJIS.has(parts[0]);
+    const icon = hasIcon ? parts[0] : '';
+    const label = hasIcon ? parts.slice(1).join(' ') : name;
+
+    return { label, icon };
+  });
 
   const handleSubCategoryClick = (name: string) => {
     navigate(`/search?keyword=${encodeURIComponent(name)}`);
@@ -43,7 +51,6 @@ export default function CategoryPage() {
   return (
     <div className='font-body-regular'>
       <header className="px-3">
-        {' '}
         {/** 여백이 부족하여 추가했습니다 */}
         <Header />
       </header>
@@ -72,16 +79,17 @@ export default function CategoryPage() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
-                className="absolute inset-0 bg-white p-4 text-sm"
+                className="absolute inset-0 bg-white text-sm"
               >
-                {subCategories.map(({ name }) => (
+                {parsedSubCategories.map(({ label, icon }) => (
                   <li
-                    key={name}
-                    onClick={() => handleSubCategoryClick(name)}
-                    className="flex items-center justify-between py-3 px-2 border-none cursor-pointer"
+                    key={label}
+                    onClick={() => handleSubCategoryClick(label)}
+                    className="flex items-center justify-between py-3 px-4 border-none cursor-pointer"
                   >
                     <div className="flex items-center gap-2">
-                      <span>{name}</span>
+                      {icon && <span>{icon}</span>}
+                      <span>{label}</span>
                     </div>
                     <img src={GoSearch} alt=">" className="w-4 h-4 opacity-60" />
                   </li>
