@@ -17,14 +17,13 @@ export default function HorizontalProductCard({ data }: THorizontalProductCardPr
     <div className="w-[328px] flex w-full p-4 border-b border-b-1" style={{ borderBottomColor: 'var(--color-black-2)' }}>
       <img src={imageUrl} alt={name} className="w-24 h-24 object-cover rounded-md flex-shrink-0" />
 
-      <div className="w-[104px] flex flex-col justify-between ml-4 flex-grow font-body-regular">
+      <div className="w-[104px] flex flex-col ml-2 flex-grow font-body-regular">
         {/* 제품 모집을 시작한 팀장(첫사람) 정보입니당 */}
         <div className="flex items-center gap-2 text-sm text-gray-400">
           <img src={teamLeaderProfileUrl} alt={teamLeaderName} className="w-5 h-5 rounded-full object-cover" />
           <span>{teamLeaderName}</span>
         </div>
-
-        <div className="w-[212px] mt-1 text-base">
+        <div className="w-[212px] mt-2 text-base "> 
           <span className="text-red-500 text-subtitle-medium">{sale}% </span>
           <span className="text-subtitle-medium">{price.toLocaleString()} 원</span>
         </div>
