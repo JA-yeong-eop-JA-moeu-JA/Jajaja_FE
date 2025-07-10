@@ -8,10 +8,12 @@ export default function ProductHeader() {
   const navigate = useNavigate();
 
   return (
+
     <header className="w-full h-[56px] flex items-center justify-between bg-white">
       {/* 왼쪽: 뒤로가기 */}
       <button onClick={() => navigate(-1)} className="p-1">
         <BackIcon className="w-5 h-5" />
+
 
       </button>
 
