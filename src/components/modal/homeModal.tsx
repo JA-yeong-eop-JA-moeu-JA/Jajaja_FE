@@ -11,12 +11,14 @@ import Point from '@/assets/icons/point.svg?react';
 export default function HomeModal() {
   const [checked, setChecked] = useState(false);
   const { closeModal } = useModalStore();
+
   const handleClose = () => {
     if (checked) {
       document.cookie = 'hidePopup=true; max-age=86400; path=/';
     }
     closeModal();
   };
+
   return (
     <>
       <div className="relative w-full pt-7 px-4 flex flex-col items-center gap-4">
