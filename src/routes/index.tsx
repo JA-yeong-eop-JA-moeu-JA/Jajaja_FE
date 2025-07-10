@@ -1,8 +1,8 @@
 import { createBrowserRouter } from 'react-router-dom';
 
 import Layout from '@/layouts';
-import Board from '@/pages/board';
 import Agreement from '@/pages/agreement';
+import Board from '@/pages/board';
 import CategoryPage from '@/pages/categoryPage';
 import ExchangeOK from '@/pages/feedback/exchangeOk';
 import NotFound from '@/pages/feedback/NotFoundPage';

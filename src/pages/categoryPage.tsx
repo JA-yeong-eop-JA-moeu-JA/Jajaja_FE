@@ -49,7 +49,7 @@ export default function CategoryPage() {
   };
 
   return (
-    <div className='font-body-regular'>
+    <div className="font-body-regular">
       <header className="px-3">
         {/** 여백이 부족하여 추가했습니다 */}
         <Header />

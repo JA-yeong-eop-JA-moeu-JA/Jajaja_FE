@@ -25,34 +25,31 @@ export default function Board() {
       </header>
 
       <div className="relative flex-1 overflow-y-auto">
-          <ul
-            key={selectedTop2 + sortType}
-            className="absolute inset-0 bg-white px-4 py-3 flex flex-col gap-3"
-          >
-            {selectedTop2 === 'review' ? (
-              <>
-                <div className="flex justify-end gap-2 text-sm text-gray-400 mb-1">
-                  {[
-                    { label: '최신순', value: 'latest' },
-                    { label: '추천순', value: 'popular' },
-                  ].map(({ label, value }, index, array) => (
-                    <div key={value} className="flex items-center">
-                      <button onClick={() => setSortType(value as 'latest' | 'popular')} className={sortType === value ? 'font-semibold text-black' : ''}>
-                        {label}
-                      </button>
-                      {index < array.length - 1 && <span className="px-1 text-black-2">|</span>}
-                    </div>
-                  ))}
-                </div>
-
-                {sortedReviewList.map((item) => (
-                  <ReviewCard key={item.id} data={item} />
+        <ul key={selectedTop2 + sortType} className="absolute inset-0 bg-white px-4 py-3 flex flex-col gap-3">
+          {selectedTop2 === 'review' ? (
+            <>
+              <div className="flex justify-end gap-2 text-sm text-gray-400 mb-1">
+                {[
+                  { label: '최신순', value: 'latest' },
+                  { label: '추천순', value: 'popular' },
+                ].map(({ label, value }, index, array) => (
+                  <div key={value} className="flex items-center">
+                    <button onClick={() => setSortType(value as 'latest' | 'popular')} className={sortType === value ? 'font-semibold text-black' : ''}>
+                      {label}
+                    </button>
+                    {index < array.length - 1 && <span className="px-1 text-black-2">|</span>}
+                  </div>
                 ))}
-              </>
-            ) : (
-              TEAM_RECRUIT_LIST.map((item) => <HorizontalProductCard key={item.id} data={item} />)
-            )}
-          </ul>
+              </div>
+
+              {sortedReviewList.map((item) => (
+                <ReviewCard key={item.id} data={item} />
+              ))}
+            </>
+          ) : (
+            TEAM_RECRUIT_LIST.map((item) => <HorizontalProductCard key={item.id} data={item} />)
+          )}
+        </ul>
       </div>
 
       <BottomBar />

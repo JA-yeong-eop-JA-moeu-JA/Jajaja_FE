@@ -46,13 +46,8 @@ export default function ReviewCard({ data }: TReviewCardProps) {
           </div>
         </div>
 
-        <button onClick={toggleLike} >
-            <img
-              key={liked ? 'filled' : 'outline'}
-              src={liked ? HeartFilled : HeartOutline}
-              alt="like"
-              className="w-4 h-4"
-            />
+        <button onClick={toggleLike}>
+          <img key={liked ? 'filled' : 'outline'} src={liked ? HeartFilled : HeartOutline} alt="like" className="w-4 h-4" />
           {likes}
         </button>
       </div>
