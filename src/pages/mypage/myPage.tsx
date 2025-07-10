@@ -17,7 +17,7 @@ export default function MyPage() {
       </header>
       <div className="w-full bg-white text-black">
         <section className="w-full pt-2 pb-2.5 px-4">
-          <button onClick={() => navigate('#')} className="w-full h-23 border border-black-2 rounded flex items-center px-5 py-4 gap-3 mb-5">
+          <button onClick={() => navigate('/mypage/me')} className="w-full h-23 border border-black-2 rounded flex items-center px-5 py-4 gap-3 mb-5">
             {/* 사진과 이름은 추후 수정 */}
             <div>
               <img src="" alt="프로필" className="w-15 h-15 rounded-full object-cover" />
