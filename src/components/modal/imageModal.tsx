@@ -28,7 +28,7 @@ export default function ImageModal(props?: Record<string, string | number>) {
   };
 
   return (
-    <div className="w-[600px] h-full relative flex items-center justify-center">
+    <div className="w-[360px] h-full relative flex items-center justify-center">
       <Swiper
         initialSlide={startIdx >= 0 ? startIdx : 0}
         onSlideChange={(swiper) => setCurrentIndex(swiper.activeIndex)}
@@ -52,8 +52,7 @@ export default function ImageModal(props?: Record<string, string | number>) {
           <Next />
         </button>
       )}
-
-      <Close className="absolute top-0 right-0 cursor-pointer z-10" onClick={closeModal} />
+      <Close className="fixed top-0 right-0 cursor-pointer z-10" onClick={closeModal} />
     </div>
   );
 }
