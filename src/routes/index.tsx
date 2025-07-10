@@ -6,6 +6,7 @@ import Board from '@/pages/board';
 import CategoryPage from '@/pages/categoryPage';
 import ExchangeOK from '@/pages/feedback/exchangeOk';
 import NotFound from '@/pages/feedback/NotFoundPage';
+import PaymentStatusWrapper from '@/pages/feedback/paymentStatusWrapper';
 import ReturnOK from '@/pages/feedback/returnOk';
 import Home from '@/pages/home';
 import Login from '@/pages/login';
@@ -42,6 +43,7 @@ export const router = createBrowserRouter([
       { path: 'product/:id', element: <Product /> },
       { path: 'product/:id/photoReview', element: <PhotoReview /> },
       { path: 'product/:id/review', element: <Review /> },
+      { path: 'payment/:status', element: <PaymentStatusWrapper /> },
       { path: 'exchange/complete', element: <ExchangeOK /> },
       { path: 'return/complete', element: <ReturnOK /> },
       { path: '*', element: <NotFound /> },
