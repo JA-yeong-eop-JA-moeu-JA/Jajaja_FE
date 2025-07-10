@@ -1,6 +1,6 @@
 import 'react-indiana-drag-scroll/dist/style.css';
 
-import React, { useEffect, useRef, useState } from 'react';
+import { type ChangeEvent, useEffect, useRef, useState } from 'react';
 import ScrollContainer from 'react-indiana-drag-scroll';
 
 import { SEARCHWORD } from '@/constants/search/searchWord';
@@ -30,12 +30,11 @@ export default function Search() {
   const handleDelete = (id: number) => {
     setFilteredWords((prev) => prev.filter((word) => word.id !== id));
   };
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value) setChange(true);
-    setValue(value);
+  const handleValue = (e: ChangeEvent<HTMLInputElement>) => {
+    setValue(e.target.value);
   };
   const handleFilter = () => {
+    setChange(true);
     if (!inputValue.trim()) {
       setFilteredList(TOTALLIST);
       return;
@@ -67,7 +66,7 @@ export default function Search() {
     <>
       <header className="w-full pr-4 py-1 flex items-center">
         <Back onClick={() => window.history.back()} />
-        <SearchInput value={inputValue} autoFocus onEnter={handleFilter} onChange={handleChange} onClick={handleFilter} />
+        <SearchInput value={inputValue} autoFocus onEnter={handleFilter} onChange={handleValue} onClick={handleFilter} />
       </header>
       {!change && (
         <section className="py-3 px-5 flex flex-col gap-7">
