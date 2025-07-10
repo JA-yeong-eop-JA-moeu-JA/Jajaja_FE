@@ -16,7 +16,7 @@ export default function NotFoundPage() {
       </div>
 
       {/* 버튼 */}
-      <div className="pb-2 justify-center flex">
+      <div className="pb-2 flex w-full px-4">
         <Button kind="basic" variant="solid-orange" className="w-full" onClick={() => (window.location.href = '/')}>
           홈으로
         </Button>
