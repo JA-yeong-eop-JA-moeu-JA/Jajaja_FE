@@ -1,4 +1,8 @@
-import { useState } from 'react';
+import 'swiper/css';
+
+import { useRef, useState } from 'react';
+import type { Swiper as SwiperType } from 'swiper';
+import { Swiper, SwiperSlide } from 'swiper/react';
 
 import { REVIEW_LIST } from '@/constants/product/reviews';
 
@@ -14,32 +18,42 @@ export default function ImageModal(props?: Record<string, string | number>) {
 
   const startIdx = imageList.findIndex((img) => img === String(props?.src));
   const [currentIndex, setCurrentIndex] = useState(startIdx);
+  const swiperRef = useRef<SwiperType | null>(null);
 
   const handleMove = (offset: number) => {
     const newIndex = currentIndex + offset;
     if (newIndex >= 0 && newIndex < imageList.length) {
-      setCurrentIndex(newIndex);
+      swiperRef.current?.slideTo(newIndex);
     }
   };
 
-  const currentImage = imageList[currentIndex];
-
   return (
     <div className="w-[600px] h-full relative flex items-center justify-center">
-      <div className="w-full relative">
-        <img src={currentImage} className="w-full aspect-square object-cover" />
-        {currentIndex > 0 && (
-          <button onClick={() => handleMove(-1)} className="absolute left-2 top-1/2 transform -translate-y-1/2">
-            <Prev />
-          </button>
-        )}
-        {currentIndex < imageList.length - 1 && (
-          <button onClick={() => handleMove(1)} className="absolute right-2 top-1/2 transform -translate-y-1/2">
-            <Next />
-          </button>
-        )}
-      </div>
-      <Close className="absolute top-2 right-2 cursor-pointer" onClick={closeModal} />
+      <Swiper
+        initialSlide={startIdx >= 0 ? startIdx : 0}
+        onSlideChange={(swiper) => setCurrentIndex(swiper.activeIndex)}
+        onSwiper={(swiper) => (swiperRef.current = swiper)}
+        className="w-full relative"
+      >
+        {imageList.map((img, idx) => (
+          <SwiperSlide key={idx} className="pointer-events-none">
+            <img src={img} className="w-full aspect-square object-cover pointer-events-auto" />
+          </SwiperSlide>
+        ))}
+      </Swiper>
+
+      {currentIndex > 0 && (
+        <button onClick={() => handleMove(-1)} className="absolute left-2 top-1/2 -translate-y-1/2 z-10">
+          <Prev />
+        </button>
+      )}
+      {currentIndex < imageList.length - 1 && (
+        <button onClick={() => handleMove(1)} className="absolute right-2 top-1/2 -translate-y-1/2 z-10">
+          <Next />
+        </button>
+      )}
+
+      <Close className="absolute top-2 right-2 cursor-pointer z-10" onClick={closeModal} />
     </div>
   );
 }
