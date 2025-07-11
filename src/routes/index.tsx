@@ -40,7 +40,7 @@ export const router = createBrowserRouter([
       { path: 'myPage/me/profile', element: <Profile /> },
       { path: 'myPage/me/address', element: <Address /> },
       { path: 'myPage/review', element: <MyReview /> },
-      { path: 'myPage/review/write', element: <WriteReview /> },
+      { path: 'myPage/review/:orderId/:productId', element: <WriteReview /> },
       { path: 'coupon', element: <CouponsPage /> },
       { path: 'notice', element: <Notice /> },
       { path: 'payment', element: <Payment /> },
