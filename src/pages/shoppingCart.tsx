@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { CARTLIST as INITIAL_CARTLIST } from '@/constants/shoppingCart/cartList';
 
@@ -8,8 +9,11 @@ import { Button } from '@/components/common/button';
 import BaseCheckbox from '@/components/common/checkbox';
 import BottomBar from '@/components/head_bottom/BottomBar';
 import PageHeaderBar from '@/components/head_bottom/PageHeader';
+import OrderItem from '@/components/shopping_cart/orderItem';
 
 import EmptyCartImage from '@/assets/shoppingCart.svg';
+
+import type { IOrderItem } from '@/mocks/orderData';
 
 interface IProductType {
   id: number;
@@ -22,46 +26,13 @@ interface IProductType {
   price: number;
 }
 
-function CartItem({ product, checked, onToggle }: { product: IProductType; checked: boolean; onToggle: () => void }) {
-  return (
-    <section key={product.id} className="w-full px-4 py-5 border-b-4 border-black-0">
-      <div className="flex items-start gap-3">
-        <BaseCheckbox checked={checked} onClick={onToggle} />
-
-        <img src={product.imageUrl} alt={product.name} className="w-20 h-20 object-cover rounded" />
-
-        <div className="flex flex-col flex-1">
-          <p className="text-small-medium text-black-4 mt-1 mb-1">{product.company}</p>
-          <p className="text-small-medium mb-2">{product.name}</p>
-          <p className="text-small-regular text-black-4">
-            {product.option} / {product.quantity}개
-          </p>
-        </div>
-      </div>
-
-      <div className="flex flex-col w-full mt-4 gap-2">
-        <div className="flex items-center gap-2 w-full">
-          <Button kind="select-content" variant="outline-orange" className="flex-1 py-1">
-            팀 참여
-          </Button>
-          <Button kind="select-content" variant="outline-gray" className="flex-1 py-1">
-            옵션 변경
-          </Button>
-        </div>
-        <div className="flex justify-end items-baseline gap-2 mt-1">
-          <p className="text-black-3 text-small-regular line-through">{product.originalPrice.toLocaleString()} 원</p>
-          <p className="text-body-medium">{product.price.toLocaleString()} 원</p>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 export default function ShoppingCart() {
   const [cartList, setCartList] = useState(INITIAL_CARTLIST);
 
   const productIds = cartList.map((item) => item.id.toString());
   const { checkedItems, initialize, toggle, toggleAll, isAllChecked, reset } = useProductCheckboxStore();
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     initialize(productIds, false);
@@ -82,6 +53,16 @@ export default function ShoppingCart() {
     setCartList(newCartList);
     reset();
   };
+
+  const convertToOrderItem = (product: IProductType): IOrderItem => ({
+    id: product.id,
+    image: product.imageUrl,
+    name: product.name,
+    company: product.company,
+    option: product.option,
+    quantity: product.quantity,
+    price: product.price,
+  });
 
   return (
     <>
@@ -112,7 +93,26 @@ export default function ShoppingCart() {
             </section>
 
             {cartList.map((product) => (
-              <CartItem key={product.id} product={product} checked={checkedItems[product.id] || false} onToggle={() => toggle(product.id.toString())} />
+              <section key={product.id} className="w-full px-4 py-5 border-b-4 border-black-0">
+                <div className="flex items-start gap-3 p-0 m-0">
+                  <BaseCheckbox checked={checkedItems[product.id] || false} onClick={() => toggle(product.id.toString())} />
+                  <div className="flex-1">
+                    <OrderItem item={convertToOrderItem(product)} />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 w-full mt-3 px-4 mx-auto max-w-[600px]">
+                  <Button kind="select-content" variant="outline-orange" className="flex-1 py-1">
+                    팀 참여
+                  </Button>
+                  <Button kind="select-content" variant="outline-gray" className="flex-1 py-1">
+                    옵션 변경
+                  </Button>
+                </div>
+                <div className="flex justify-end items-baseline gap-2 mt-2 px-4 mx-auto max-w-[600px]">
+                  <p className="text-black-3 text-small-regular line-through">{product.originalPrice.toLocaleString()} 원</p>
+                  <p className="text-body-medium">{product.price.toLocaleString()} 원</p>
+                </div>
+              </section>
             ))}
           </>
         )}
