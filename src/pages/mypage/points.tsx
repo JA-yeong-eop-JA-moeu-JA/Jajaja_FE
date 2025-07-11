@@ -14,7 +14,7 @@ export default function Points() {
         </div>
         <div className="w-full px-1">
           {pointData.map((point) => (
-            <PointCard key={point.id} point={point}/>
+            <PointCard key={point.id} point={point} />
           ))}
         </div>
       </div>
