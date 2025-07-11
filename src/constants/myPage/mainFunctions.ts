@@ -14,7 +14,7 @@ export interface IMainFunction {
 
 export const MAIN_FUNCTIONS: IMainFunction[] = [
   { key: 'order', label: '주문/배송', icon: Order, path: '/order' },
-  { key: 'review', label: '리뷰', icon: Review, path: '/review' },
+  { key: 'review', label: '리뷰', icon: Review, path: '/mypage/review' },
   { key: 'coupon', label: '쿠폰', icon: Coupon, path: '/coupon' },
   { key: 'point', label: '포인트', icon: Point, path: '/myPage/points' },
 ];

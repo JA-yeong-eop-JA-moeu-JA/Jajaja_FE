@@ -115,7 +115,7 @@ export default function ModalProvider({ children }: IModalProviderProps) {
 
       {(type === 'alert' || type === 'confirm') && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
-          <div className="bg-white min-h-10 p-4 rounded-lg shadow-md max-w-76 w-full">{createElement(modalContent)}</div>
+          <div className="bg-white min-h-10 rounded-lg shadow-md max-w-76 w-full">{createElement(modalContent)}</div>
         </div>
       )}
     </>

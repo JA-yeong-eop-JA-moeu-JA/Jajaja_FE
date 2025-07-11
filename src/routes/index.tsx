@@ -14,8 +14,10 @@ import Login from '@/pages/login';
 import Address from '@/pages/mypage/address';
 import MyDetailPage from '@/pages/mypage/myDetailPage';
 import MyPage from '@/pages/mypage/myPage';
+import MyReview from '@/pages/mypage/myReview';
 import Points from '@/pages/mypage/points';
 import Profile from '@/pages/mypage/profile';
+import WriteReview from '@/pages/mypage/writeReview';
 import Notice from '@/pages/notice';
 import OnBoarding from '@/pages/onBoarding';
 import Payment from '@/pages/payment';
@@ -37,6 +39,8 @@ export const router = createBrowserRouter([
       { path: 'myPage/me', element: <MyDetailPage /> },
       { path: 'myPage/me/profile', element: <Profile /> },
       { path: 'myPage/me/address', element: <Address /> },
+      { path: 'myPage/review', element: <MyReview /> },
+      { path: 'myPage/review/write', element: <WriteReview /> },
       { path: 'coupon', element: <CouponsPage /> },
       { path: 'notice', element: <Notice /> },
       { path: 'payment', element: <Payment /> },
