@@ -1,6 +1,7 @@
 import PageHeader from '@/components/head_bottom/PageHeader';
+import PointCard from '@/components/pointCard';
 
-import { pointData, PointLabel } from '@/mocks/pointData';
+import { pointData } from '@/mocks/pointData';
 
 export default function Points() {
   return (
@@ -11,17 +12,9 @@ export default function Points() {
           <p className="text-subtitle-medium text-black">현재 보유 포인트</p>
           <p className="text-green-hover text-title-medium">12,094 원</p>
         </div>
-        <div className="w-full">
+        <div className="w-full px-1">
           {pointData.map((point) => (
-            <div key={point.id} className={`flex items-start justify-between py-5 ${point.id > 1 ? 'border-t border-black-1' : ''}`}>
-              <p className="text-black-4 text-body-regular">{point.createdAt}</p>
-              <div className="flex flex-col items-start justify-center gap-1">
-                <p className="text-black text-body-medium">{PointLabel[point.type]}</p>
-                <p className="text-black text-body-regular">{point.content}</p>
-                <p className="text-black-4 text-small-medium mt-1">{point.expiredAt} 소멸 예정</p>
-              </div>
-              <p className="text-orange text-title-medium">+{point.amount}</p>
-            </div>
+            <PointCard key={point.id} point={point}/>
           ))}
         </div>
       </div>
