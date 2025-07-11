@@ -1,18 +1,17 @@
 import { useEffect, useState } from 'react';
 
-import { CARTLIST as INITIAL_CARTLIST } from '@/constants/shoppingCart/cartList';
-
 import { useProductCheckboxStore } from '@/stores/productCheckboxStore';
 
 import { Button } from '@/components/common/button';
 import BaseCheckbox from '@/components/common/checkbox';
 import BottomBar from '@/components/head_bottom/BottomBar';
 import PageHeaderBar from '@/components/head_bottom/PageHeader';
-import OrderItem from '@/components/shopping_cart/orderItem';
+import OrderItem from '@/components/review/orderItem';
 
 import EmptyCartImage from '@/assets/shoppingCart.svg';
 
 import type { IOrderItem } from '@/mocks/orderData';
+import { orderData } from '@/mocks/orderData';
 
 interface IProductType {
   id: number;
@@ -25,16 +24,28 @@ interface IProductType {
   price: number;
 }
 
-export default function ShoppingCart() {
-  const [cartList, setCartList] = useState(INITIAL_CARTLIST);
+const initialCartList: IProductType[] = orderData[0].items.map((item) => ({
+  id: item.productId,
+  imageUrl: item.image,
+  name: item.name,
+  company: item.company,
+  option: item.option,
+  quantity: item.quantity,
+  originalPrice: item.price,
+  price: item.price,
+}));
 
-  const productIds = cartList.map((item) => item.id.toString());
+export default function ShoppingCart() {
+  const [cartList, setCartList] = useState<IProductType[]>(initialCartList);
+
+  const productIds = cartList.map((item: IProductType) => item.id.toString());
   const { checkedItems, initialize, toggle, toggleAll, isAllChecked, reset } = useProductCheckboxStore();
+
   useEffect(() => {
     initialize(productIds, false);
   }, [cartList, initialize]);
 
-  const totalPrice = cartList.reduce((acc, product) => {
+  const totalPrice = cartList.reduce((acc: number, product: IProductType) => {
     if (checkedItems[product.id]) {
       return acc + product.price;
     }
@@ -45,7 +56,7 @@ export default function ShoppingCart() {
   const isCartEmpty = cartList.length === 0;
 
   const handleDeleteSelected = () => {
-    const newCartList = cartList.filter((product) => !checkedItems[product.id]);
+    const newCartList = cartList.filter((product: IProductType) => !checkedItems[product.id]);
     setCartList(newCartList);
     reset();
   };
@@ -57,7 +68,7 @@ export default function ShoppingCart() {
     option: product.option,
     quantity: product.quantity,
     price: product.price,
-    productId: 0,
+    productId: product.id,
     reviewed: false,
   });
 
@@ -84,20 +95,21 @@ export default function ShoppingCart() {
                 textClassName="text-small-medium"
                 disabled={isCartEmpty}
               />
-              <button className="ml-auto text-body-regular text-black-5 disabled:text-black-3" disabled={!isAnyChecked} onClick={handleDeleteSelected}>
+              <button className="ml-auto text-body-regular text-black disabled:text-black-3" disabled={!isAnyChecked} onClick={handleDeleteSelected}>
                 선택 삭제
               </button>
             </section>
 
             {cartList.map((product) => (
               <section key={product.id} className="w-full px-4 py-5 border-b-4 border-black-0">
-                <div className="flex items-start gap-3 p-0 m-0">
+                <div className="flex items-start gap-3">
                   <BaseCheckbox checked={checkedItems[product.id] || false} onClick={() => toggle(product.id.toString())} />
                   <div className="flex-1">
-                    <OrderItem item={convertToOrderItem(product)} />
+                    <OrderItem item={convertToOrderItem(product)} showReviewButton={false} layout="horizontal" showPrice={false} />
                   </div>
                 </div>
-                <div className="flex items-center gap-2 w-full mt-3 px-4 mx-auto max-w-[600px]">
+
+                <div className="flex w-full gap-2 mt-3">
                   <Button kind="select-content" variant="outline-orange" className="flex-1 py-1">
                     팀 참여
                   </Button>
@@ -105,23 +117,25 @@ export default function ShoppingCart() {
                     옵션 변경
                   </Button>
                 </div>
-                <div className="flex justify-end items-baseline gap-2 mt-2 px-4 mx-auto max-w-[600px]">
+
+                <div className="flex justify-end items-baseline gap-2 mt-3 w-full">
                   <p className="text-black-3 text-small-regular line-through">{product.originalPrice.toLocaleString()} 원</p>
                   <p className="text-body-medium">{product.price.toLocaleString()} 원</p>
                 </div>
               </section>
             ))}
+
+            {!isCartEmpty && (
+              <div className="fixed bottom-16 left-0 right-0 w-full">
+                <Button kind="basic" variant="solid-orange" className="w-full" disabled={totalPrice === 0} onClick={() => {}}>
+                  {totalPrice.toLocaleString()} 원 1인 구매하기
+                </Button>
+              </div>
+            )}
           </>
         )}
       </div>
 
-      {!isCartEmpty && (
-        <div className="fixed bottom-16 left-0 right-0 px-4 mx-auto max-w-[600px] w-full">
-          <Button kind="basic" variant="solid-orange" className="w-full" onClick={() => {}}>
-            {totalPrice.toLocaleString()} 원 1인 구매하기
-          </Button>
-        </div>
-      )}
       <BottomBar />
     </>
   );
