@@ -57,7 +57,7 @@ export default function WriteReview() {
           </div>
         </div>
       </div>
-      <Button kind="basic" variant="solid-orange" onClick={() => {}} disabled={comment.length == 0 || star === false}>
+      <Button kind="basic" variant="solid-orange" onClick={() => {}} disabled={comment.trim().length == 0 || star === false}>
         리뷰 등록
       </Button>
     </div>
