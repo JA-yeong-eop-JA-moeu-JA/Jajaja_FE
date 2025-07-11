@@ -13,14 +13,14 @@ export default function OrderItem({ item, show }: IOrderDataProps) {
     <div className="w-full flex flex-col items-center justify-center">
       <div className="w-full flex items-center justify-center">
         <img src={item.image} alt={item.name} className="w-21 h-21" />
-        <div className="ml-3 w-full">
+        <div className={`${layout === 'horizontal' ? 'ml-3 flex-1' : 'ml-3 w-full'}`}>
           <p className="text-black-4 text-small-medium pb-2">{item.company}</p>
           <p className="text-black text-small-medium pb-1">{item.name}</p>
           <p className="text-black-4 text-small-regular pb-2">
             {item.option}
             <span> / {item.quantity}개</span>
           </p>
-          <p className="text-black text-small-medium">{item.price.toLocaleString('ko-KR')} 원</p>
+          {showPrice && <p className="text-black text-small-medium">{item.price.toLocaleString('ko-KR')} 원</p>}
         </div>
       </div>
       {show === true ? (
