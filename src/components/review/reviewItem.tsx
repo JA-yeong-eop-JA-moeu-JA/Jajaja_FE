@@ -44,15 +44,26 @@ export default function ReviewItem({ item }: IReviewDataProps) {
             {item.comment}
           </p>
           {!expanded && isOverflow && (
-            <button className="text-black-3 text-body-regular py-1 underline" onClick={() => setExpanded(true)}>
+            <button
+              className="text-black-3 text-body-regular py-1 underline"
+              onClick={() => setExpanded(true)}
+            >
               더보기
+            </button>
+          )}
+          {expanded && (
+            <button
+              className="text-black-3 text-body-regular py-1 underline"
+              onClick={() => setExpanded(false)}
+            >
+              접기
             </button>
           )}
         </div>
       </div>
       <div className="w-full flex items-center justify-start gap-2 py-3">
-        {/* 4장 이상 처리 구현 예정 */}
-        {item.images?.map((url: string, index: number) => (
+        {/* 4장 이상 처리 상세보기 구현 예정 */}
+        {item.images?.slice(0, 4).map((url: string, index: number) => (
           <img key={index} src={url} alt={`Review image ${index + 1}`} className="w-19 h-19 object-cover" />
         ))}
       </div>

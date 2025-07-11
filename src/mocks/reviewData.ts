@@ -21,7 +21,7 @@ export const myReviewData: IMyReview[] = [
     likeCount: 12,
     rewardPoints: 100,
     createdAt: '25.12.02.',
-    images: ['/src/assets/myPage/review/my/1.svg', '/src/assets/myPage/review/my/2.svg', '/src/assets/myPage/review/my/3.svg'],
+    images: ['/src/assets/myPage/review/my/1.svg', '/src/assets/myPage/review/my/2.svg', '/src/assets/myPage/review/my/3.svg', '/src/assets/myPage/review/my/4.svg', '/src/assets/myPage/review/my/5.svg'],
   },
   {
     reviewId: 2,
