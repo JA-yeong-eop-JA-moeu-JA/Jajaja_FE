@@ -44,18 +44,12 @@ export default function ReviewItem({ item }: IReviewDataProps) {
             {item.comment}
           </p>
           {!expanded && isOverflow && (
-            <button
-              className="text-black-3 text-body-regular py-1 underline"
-              onClick={() => setExpanded(true)}
-            >
+            <button className="text-black-3 text-body-regular py-1 underline" onClick={() => setExpanded(true)}>
               더보기
             </button>
           )}
           {expanded && (
-            <button
-              className="text-black-3 text-body-regular py-1 underline"
-              onClick={() => setExpanded(false)}
-            >
+            <button className="text-black-3 text-body-regular py-1 underline" onClick={() => setExpanded(false)}>
               접기
             </button>
           )}
