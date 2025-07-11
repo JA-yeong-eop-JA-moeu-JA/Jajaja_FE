@@ -41,6 +41,7 @@ export const router = createBrowserRouter([
       { path: 'home', element: <Home /> },
       { path: 'login', element: <Login /> },
       { path: 'myPage', element: <MyPage /> },
+      { path: 'myPage/points', element: <Points /> },
       { path: 'myPage/me', element: <MyDetailPage /> },
       { path: 'myPage/me/profile', element: <Profile /> },
       { path: 'myPage/me/address', element: <Address /> },
