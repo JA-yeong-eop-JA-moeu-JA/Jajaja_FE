@@ -5,9 +5,13 @@ import AddAddress from '@/pages/addAddress';
 import Agreement from '@/pages/agreement';
 import Board from '@/pages/board';
 import CategoryPage from '@/pages/categoryPage';
+<<<<<<< HEAD
 import CouponsPage from '@/pages/coupon';
+=======
+>>>>>>> 3e03a1d (fix: 라우팅 수정)
 import ExchangeOK from '@/pages/feedback/exchangeOk';
 import NotFound from '@/pages/feedback/NotFoundPage';
+import PaymentStatusWrapper from '@/pages/feedback/paymentStatusWrapper';
 import ReturnOK from '@/pages/feedback/returnOk';
 import Home from '@/pages/home';
 import Login from '@/pages/login';
@@ -54,6 +58,16 @@ export const router = createBrowserRouter([
       { path: 'return/complete', element: <ReturnOK /> },
       { path: 'addaddress', element: <AddAddress /> },
       { path: '*', element: <NotFound /> },
+      { path: 'board', element: <Board /> },
+      { path: 'agreement', element: <Agreement /> },
+      { path: 'category', element: <CategoryPage /> },
+      { path: 'search', element: <Search /> },
+      { path: 'product/:id', element: <Product /> },
+      { path: 'product/:id/photoReview', element: <PhotoReview /> },
+      { path: 'product/:id/review', element: <Review /> },
+      { path: 'payment/:status', element: <PaymentStatusWrapper /> },
+      { path: 'shoppingcart', element: <ShoppingCart /> },
+
     ],
   },
 ]);
