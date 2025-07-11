@@ -1,4 +1,4 @@
-import { type ChangeEvent, useRef, useState } from 'react';
+import { type ChangeEvent, useEffect, useRef, useState } from 'react';
 
 import Close from '@/assets/myPage/review/close.svg?react';
 import Plus from '@/assets/myPage/review/plus.svg?react';
@@ -41,10 +41,20 @@ export default function ReviewImageUploader({ maxCount = 5, onChange }: IReviewI
   };
 
   const handleDelete = (index: number) => {
+    URL.revokeObjectURL(images[index].url);
+
     const removed = images.filter((_, i) => i !== index);
     setImages(removed);
     onChange?.(removed.map((p) => p.file));
   };
+
+  useEffect(() => {
+    return () => {
+      images.forEach((img) => {
+        URL.revokeObjectURL(img.url);
+      });
+    };
+  }, []);
 
   return (
     <div className="flex flex-col w-full items-start">
