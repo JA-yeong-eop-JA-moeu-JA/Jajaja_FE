@@ -40,16 +40,16 @@ export default function WriteReview() {
           <div className="w-full">
             <ReviewStarRating initialRating={0} onChange={handleRatingChange} />
           </div>
-          <div className="relative w-full">
+          <div className="w-full border border-black-1 rounded-lg mt-4 mb-6 px-4 pt-3">
             <textarea
-              className="w-full border border-black-1 rounded-lg text-black text-body-regular px-4 py-3 resize-none mt-3 mb-6"
+              className="w-full text-black text-body-regular resize-none"
               placeholder="내용을 입력해주세요."
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               maxLength={500}
               rows={7}
             />
-            <p className="absolute right-4 bottom-2 text-black-4 text-small-medium">{comment.length}/500</p>
+            <p className="text-end text-black-4 text-small-medium pb-2">{comment.length}/500</p>
           </div>
 
           <div>
