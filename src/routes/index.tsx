@@ -65,7 +65,6 @@ export const router = createBrowserRouter([
       { path: 'product/:id/review', element: <Review /> },
       { path: 'payment/:status', element: <PaymentStatusWrapper /> },
       { path: 'shoppingcart', element: <ShoppingCart /> },
-
     ],
   },
 ]);
