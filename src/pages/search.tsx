@@ -1,7 +1,8 @@
 import 'react-indiana-drag-scroll/dist/style.css';
 
-import React, { useEffect, useRef, useState } from 'react';
+import { type ChangeEvent, useEffect, useRef, useState } from 'react';
 import ScrollContainer from 'react-indiana-drag-scroll';
+import { useSearchParams } from 'react-router-dom';
 
 import { SEARCHWORD } from '@/constants/search/searchWord';
 import { TOTALLIST } from '@/constants/search/totalList';
@@ -17,6 +18,7 @@ import NoResult from '@/assets/icons/noResult.svg?react';
 import Up from '@/assets/icons/up.svg?react';
 
 export default function Search() {
+  const [searchParams] = useSearchParams();
   const menuRef = useRef<HTMLDivElement>(null);
   const [filteredWords, setFilteredWords] = useState(SEARCHWORD);
   const [sortOption, setSortOption] = useState('인기순');
@@ -24,23 +26,25 @@ export default function Search() {
   const [inputValue, setValue] = useState('');
   const [isAsc, setIsAsc] = useState(true);
   const [filteredList, setFilteredList] = useState(TOTALLIST);
+  const keywordParam = searchParams.get('keyword');
   const COLUMN_COUNT = 2;
   const rowsPerColumn = Math.ceil(SEARCHWORD.length / COLUMN_COUNT);
   const columns = Array.from({ length: COLUMN_COUNT }, (_, i) => SEARCHWORD.slice(i * rowsPerColumn, (i + 1) * rowsPerColumn));
   const handleDelete = (id: number) => {
     setFilteredWords((prev) => prev.filter((word) => word.id !== id));
   };
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value) setChange(true);
-    setValue(value);
+  const handleValue = (e: ChangeEvent<HTMLInputElement>) => {
+    setValue(e.target.value);
   };
-  const handleFilter = () => {
-    if (!inputValue.trim()) {
+  const handleFilter = (value?: string) => {
+    setChange(true);
+    const keyword = value ?? inputValue;
+
+    if (!keyword.trim()) {
       setFilteredList(TOTALLIST);
       return;
     }
-    const matchIndex = TOTALLIST.findIndex((item) => item.name.includes(inputValue));
+    const matchIndex = TOTALLIST.findIndex((item) => item.name.includes(keyword));
     if (matchIndex !== -1) {
       const matched = TOTALLIST[matchIndex];
       const rest = [...TOTALLIST.slice(0, matchIndex), ...TOTALLIST.slice(matchIndex + 1)];
@@ -63,11 +67,18 @@ export default function Search() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+  useEffect(() => {
+    if (keywordParam) {
+      setValue(keywordParam);
+      setChange(true);
+      handleFilter(keywordParam);
+    }
+  }, [keywordParam]);
   return (
     <>
       <header className="w-full pr-4 py-1 flex items-center">
         <Back onClick={() => window.history.back()} />
-        <SearchInput value={inputValue} autoFocus onEnter={handleFilter} onChange={handleChange} onClick={handleFilter} />
+        <SearchInput value={inputValue} autoFocus onEnter={handleFilter} onChange={handleValue} onClick={handleFilter} />
       </header>
       {!change && (
         <section className="py-3 px-5 flex flex-col gap-7">
