@@ -1,25 +1,22 @@
-import { useNavigate } from 'react-router-dom';
-
 import type { IOrderItem } from '@/mocks/orderData';
 
-interface IOrderDataProps {
+interface IOrderItemProps {
   item: IOrderItem;
 }
 
-export default function OrderItem({ item }: IOrderDataProps) {
-  const navigate = useNavigate();
+export default function OrderItem({ item }: IOrderItemProps) {
   return (
-    <div className="w-full flex flex-col items-center justify-center">
-      <div className="w-full flex items-center justify-center pt-5 pb-3">
-        <img src={item.image} alt={item.name} className="w-21 h-21" />
-        <div className="ml-3 w-full">
-          <p className="text-black-4 text-small-medium pb-2">{item.company}</p>
-          <p className="text-black text-small-medium pb-1">{item.name}</p>
-          <p className="text-black-4 text-small-regular pb-2">
-            {item.option}
-            <span> / {item.quantity}개</span>
-          </p>
-          <p className="text-black text-small-medium">{item.price.toLocaleString('ko-KR')} 원</p>
+    <div className="flex gap-3">
+      <img src={item.image} alt={item.name} className="w-24 h-24 object-cover rounded-md border border-black-3" />
+      <div className="flex flex-col justify-between flex-1">
+        <div>
+          <p className="text-body-medium mb-1">{item.name}</p>
+          <p className="text-small-regular text-black-4">{item.company}</p>
+          <p className="text-small-regular text-black-4">{item.option}</p>
+        </div>
+        <div className="flex justify-between items-end">
+          <p className="text-small-regular text-black-4">수량: {item.quantity}</p>
+          <p className="text-body-medium">{item.price.toLocaleString()} 원</p>
         </div>
       </div>
     </div>

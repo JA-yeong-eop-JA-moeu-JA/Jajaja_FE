@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import { CARTLIST as INITIAL_CARTLIST } from '@/constants/shoppingCart/cartList';
 
@@ -31,9 +30,6 @@ export default function ShoppingCart() {
 
   const productIds = cartList.map((item) => item.id.toString());
   const { checkedItems, initialize, toggle, toggleAll, isAllChecked, reset } = useProductCheckboxStore();
-
-  const navigate = useNavigate();
-
   useEffect(() => {
     initialize(productIds, false);
   }, [cartList, initialize]);
@@ -55,13 +51,14 @@ export default function ShoppingCart() {
   };
 
   const convertToOrderItem = (product: IProductType): IOrderItem => ({
-    id: product.id,
     image: product.imageUrl,
     name: product.name,
     company: product.company,
     option: product.option,
     quantity: product.quantity,
     price: product.price,
+    productId: 0,
+    reviewed: false,
   });
 
   return (
