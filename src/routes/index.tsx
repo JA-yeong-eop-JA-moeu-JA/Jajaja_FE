@@ -4,6 +4,7 @@ import Layout from '@/layouts';
 import Agreement from '@/pages/agreement';
 import Board from '@/pages/board';
 import CategoryPage from '@/pages/categoryPage';
+import CouponsPage from '@/pages/coupon';
 import ExchangeOK from '@/pages/feedback/exchangeOk';
 import NotFound from '@/pages/feedback/NotFoundPage';
 import PaymentStatusWrapper from '@/pages/feedback/paymentStatusWrapper';
@@ -34,6 +35,7 @@ export const router = createBrowserRouter([
       { path: 'myPage/me', element: <MyDetailPage /> },
       { path: 'myPage/me/profile', element: <Profile /> },
       { path: 'myPage/me/address', element: <Address /> },
+      { path: 'coupon', element: <CouponsPage /> },
       { path: 'notice', element: <Notice /> },
       { path: 'payment', element: <Payment /> },
       { path: 'board', element: <Board /> },
