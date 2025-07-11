@@ -34,12 +34,11 @@ export default function HomeModal() {
           </div>
           <Point />
         </div>
-        <Button kind="basic" variant="solid-orange" className="w-full" onClick={() => closeModal()}>
-          기간 한정 포인트 확인하기
-        </Button>
       </div>
-
-      <div className="flex items-center">
+      <Button kind="basic" variant="solid-orange" className="w-full" onClick={() => closeModal()}>
+        기간 한정 포인트 확인하기
+      </Button>
+      <div className="flex items-center px-4 py-3">
         <BaseCheckbox message="오늘 하루 보지 않기" checked={checked} onClick={() => setChecked(!checked)} />
       </div>
     </>
