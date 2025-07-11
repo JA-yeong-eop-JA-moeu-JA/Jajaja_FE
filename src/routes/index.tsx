@@ -6,10 +6,12 @@ import Agreement from '@/pages/agreement';
 import ApplyReturnOrExchange from '@/pages/ApplyReturnOrExchange';
 import Board from '@/pages/board';
 import CategoryPage from '@/pages/categoryPage';
+<<<<<<< HEAD
 import CouponsPage from '@/pages/coupon';
 import DeliveryInfo from '@/pages/deliveryInfo';
 import ExchangeOK from '@/pages/feedback/exchangeOk';
 import NotFound from '@/pages/feedback/NotFoundPage';
+import PaymentStatusWrapper from '@/pages/feedback/paymentStatusWrapper';
 import PaymentStatusWrapper from '@/pages/feedback/paymentStatusWrapper';
 import ReturnOK from '@/pages/feedback/returnOk';
 import Home from '@/pages/home';
@@ -75,6 +77,16 @@ export const router = createBrowserRouter([
       { path: 'myPage/apply', element: <ApplyReturnOrExchange /> },
 
       { path: '*', element: <NotFound /> },
+      { path: 'board', element: <Board /> },
+      { path: 'agreement', element: <Agreement /> },
+      { path: 'category', element: <CategoryPage /> },
+      { path: 'search', element: <Search /> },
+      { path: 'product/:id', element: <Product /> },
+      { path: 'product/:id/photoReview', element: <PhotoReview /> },
+      { path: 'product/:id/review', element: <Review /> },
+      { path: 'payment/:status', element: <PaymentStatusWrapper /> },
+      { path: 'shoppingcart', element: <ShoppingCart /> },
+
     ],
   },
 ]);
