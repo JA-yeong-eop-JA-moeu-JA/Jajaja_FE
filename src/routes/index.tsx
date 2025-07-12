@@ -42,7 +42,7 @@ export const router = createBrowserRouter([
       { path: 'myPage/point', element: <Points /> },
       { path: 'myPage/coupon', element: <Coupons /> },
       { path: 'myPage/review', element: <MyReview /> },
-      { path: 'myPage/review/write', element: <WriteReview /> },
+      { path: 'myPage/review/:orderId/:productId', element: <WriteReview /> },
       { path: 'coupon', element: <CouponsPage /> },
       { path: 'notice', element: <Notice /> },
       { path: 'payment', element: <Payment /> },

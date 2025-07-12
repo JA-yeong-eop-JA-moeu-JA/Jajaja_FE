@@ -1,4 +1,5 @@
 export interface IOrderItem {
+  orderId: number;
   productId: number;
   name: string;
   company: string;
@@ -20,6 +21,7 @@ export const orderData: IOrder[] = [
     id: 1,
     items: [
       {
+        orderId: 1,
         productId: 1,
         name: '카누 미니 마일드 로스트 커피 0.9g x 150스틱',
         company: '카누',
@@ -30,6 +32,7 @@ export const orderData: IOrder[] = [
         reviewed: false,
       },
       {
+        orderId: 1,
         productId: 2,
         name: '복음자리 100% 땅콩버터 스무스 280g',
         company: '복음자리',
@@ -46,7 +49,8 @@ export const orderData: IOrder[] = [
     id: 2,
     items: [
       {
-        productId: 3,
+        orderId: 2,
+        productId: 1,
         name: '카누 미니 마일드 로스트 커피 0.9g x 150스틱',
         company: '카누',
         price: 23920,
