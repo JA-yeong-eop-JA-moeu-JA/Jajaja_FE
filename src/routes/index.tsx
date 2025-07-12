@@ -22,6 +22,8 @@ import Profile from '@/pages/mypage/profile';
 import WriteReview from '@/pages/mypage/writeReview';
 import Notice from '@/pages/notice';
 import OnBoarding from '@/pages/onBoarding';
+import OrderDetailPersonal from '@/pages/orderDetailPersonal';
+import OrderDetailTeam from '@/pages/orderDetailTeam';
 import OrderList from '@/pages/orderListPage';
 import Payment from '@/pages/payment';
 import PhotoReview from '@/pages/photoReview';
@@ -58,8 +60,11 @@ export const router = createBrowserRouter([
       { path: 'payment/:status', element: <PaymentStatusWrapper /> },
       { path: 'exchange/complete', element: <ExchangeOK /> },
       { path: 'return/complete', element: <ReturnOK /> },
-      { path: 'deliveryInfo', element: <DeliveryInfo /> },
-      { path: 'orderList', element: <OrderList /> },
+      { path: 'myPage/deliveryInfo', element: <DeliveryInfo /> },
+      { path: 'myPage/orderList', element: <OrderList /> },
+      { path: 'myPage/orderDetailPersonal', element: <OrderDetailPersonal /> },
+      { path: 'myPage/orderDetailTeam', element: <OrderDetailTeam /> },
+
       { path: '*', element: <NotFound /> },
     ],
   },
