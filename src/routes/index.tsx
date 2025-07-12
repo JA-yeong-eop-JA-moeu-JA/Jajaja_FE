@@ -4,6 +4,7 @@ import Layout from '@/layouts';
 import Agreement from '@/pages/agreement';
 import Board from '@/pages/board';
 import CategoryPage from '@/pages/categoryPage';
+import DeliveryInfo from '@/pages/deliveryInfo';
 import ExchangeOK from '@/pages/feedback/exchangeOk';
 import NotFound from '@/pages/feedback/NotFoundPage';
 import ReturnOK from '@/pages/feedback/returnOk';
@@ -15,6 +16,7 @@ import MyPage from '@/pages/mypage/myPage';
 import Profile from '@/pages/mypage/profile';
 import Notice from '@/pages/notice';
 import OnBoarding from '@/pages/onBoarding';
+import OrderList from '@/pages/orderList';
 import Payment from '@/pages/payment';
 import PhotoReview from '@/pages/photoReview';
 import Product from '@/pages/product';
@@ -44,6 +46,8 @@ export const router = createBrowserRouter([
       { path: 'product/:id/review', element: <Review /> },
       { path: 'exchange/complete', element: <ExchangeOK /> },
       { path: 'return/complete', element: <ReturnOK /> },
+      { path: 'deliveryInfo', element: <DeliveryInfo /> },
+      { path: 'orderList', element: <OrderList /> },
       { path: '*', element: <NotFound /> },
     ],
   },
