@@ -17,7 +17,7 @@ export default function PageHeaderBar({ title }: IPageHeaderBarProps) {
         <img src={backIcon} alt="뒤로가기" className="w-5 h-5" />
       </button>
 
-      <h1 className="text-base font-semibold text-center pr-4 flex-1">{title}</h1>
+      <h1 className="text-body-medium text-center pr-4 flex-1">{title}</h1>
 
       <div className="w-5" />
     </header>

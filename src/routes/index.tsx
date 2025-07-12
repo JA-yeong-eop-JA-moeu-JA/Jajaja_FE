@@ -22,7 +22,7 @@ import Profile from '@/pages/mypage/profile';
 import WriteReview from '@/pages/mypage/writeReview';
 import Notice from '@/pages/notice';
 import OnBoarding from '@/pages/onBoarding';
-import OrderList from '@/pages/orderList';
+import OrderList from '@/pages/orderListPage';
 import Payment from '@/pages/payment';
 import PhotoReview from '@/pages/photoReview';
 import Product from '@/pages/product';
