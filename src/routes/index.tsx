@@ -12,6 +12,7 @@ import ReturnOK from '@/pages/feedback/returnOk';
 import Home from '@/pages/home';
 import Login from '@/pages/login';
 import Address from '@/pages/mypage/address';
+import Coupons from '@/pages/mypage/coupons';
 import MyDetailPage from '@/pages/mypage/myDetailPage';
 import MyPage from '@/pages/mypage/myPage';
 import MyReview from '@/pages/mypage/myReview';
@@ -35,10 +36,11 @@ export const router = createBrowserRouter([
       { path: 'home', element: <Home /> },
       { path: 'login', element: <Login /> },
       { path: 'myPage', element: <MyPage /> },
-      { path: 'myPage/points', element: <Points /> },
       { path: 'myPage/me', element: <MyDetailPage /> },
       { path: 'myPage/me/profile', element: <Profile /> },
       { path: 'myPage/me/address', element: <Address /> },
+      { path: 'myPage/point', element: <Points /> },
+      { path: 'myPage/coupon', element: <Coupons /> },
       { path: 'myPage/review', element: <MyReview /> },
       { path: 'myPage/review/write', element: <WriteReview /> },
       { path: 'coupon', element: <CouponsPage /> },
