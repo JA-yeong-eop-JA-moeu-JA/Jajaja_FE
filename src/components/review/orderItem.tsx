@@ -5,9 +5,11 @@ import type { IOrderItem } from '@/mocks/orderData';
 export interface IOrderDataProps {
   item: IOrderItem;
   show: boolean;
+  layout?: 'horizontal' | 'vertical';
+  showPrice?: boolean;
 }
 
-export default function OrderItem({ item, show }: IOrderDataProps) {
+export default function OrderItem({ item, show, layout = 'vertical', showPrice = true }: IOrderDataProps) {
   const navigate = useNavigate();
   return (
     <div className="w-full flex flex-col items-center justify-center">
