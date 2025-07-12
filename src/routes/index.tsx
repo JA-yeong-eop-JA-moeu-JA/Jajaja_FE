@@ -4,19 +4,25 @@ import Layout from '@/layouts';
 import Agreement from '@/pages/agreement';
 import Board from '@/pages/board';
 import CategoryPage from '@/pages/categoryPage';
+import CouponsPage from '@/pages/coupon';
 import DeliveryInfo from '@/pages/deliveryInfo';
 import ExchangeOK from '@/pages/feedback/exchangeOk';
 import NotFound from '@/pages/feedback/NotFoundPage';
+import PaymentStatusWrapper from '@/pages/feedback/paymentStatusWrapper';
 import ReturnOK from '@/pages/feedback/returnOk';
 import Home from '@/pages/home';
 import Login from '@/pages/login';
 import Address from '@/pages/mypage/address';
+import Coupons from '@/pages/mypage/coupons';
 import MyDetailPage from '@/pages/mypage/myDetailPage';
 import MyPage from '@/pages/mypage/myPage';
+import MyReview from '@/pages/mypage/myReview';
+import Points from '@/pages/mypage/points';
 import Profile from '@/pages/mypage/profile';
+import WriteReview from '@/pages/mypage/writeReview';
 import Notice from '@/pages/notice';
 import OnBoarding from '@/pages/onBoarding';
-import OrderList from '@/pages/orderList';
+import OrderList from '@/pages/orderListPage';
 import Payment from '@/pages/payment';
 import PhotoReview from '@/pages/photoReview';
 import Product from '@/pages/product';
@@ -35,6 +41,11 @@ export const router = createBrowserRouter([
       { path: 'myPage/me', element: <MyDetailPage /> },
       { path: 'myPage/me/profile', element: <Profile /> },
       { path: 'myPage/me/address', element: <Address /> },
+      { path: 'myPage/point', element: <Points /> },
+      { path: 'myPage/coupon', element: <Coupons /> },
+      { path: 'myPage/review', element: <MyReview /> },
+      { path: 'myPage/review/:orderId/:productId', element: <WriteReview /> },
+      { path: 'coupon', element: <CouponsPage /> },
       { path: 'notice', element: <Notice /> },
       { path: 'payment', element: <Payment /> },
       { path: 'board', element: <Board /> },
@@ -44,6 +55,7 @@ export const router = createBrowserRouter([
       { path: 'product/:id', element: <Product /> },
       { path: 'product/:id/photoReview', element: <PhotoReview /> },
       { path: 'product/:id/review', element: <Review /> },
+      { path: 'payment/:status', element: <PaymentStatusWrapper /> },
       { path: 'exchange/complete', element: <ExchangeOK /> },
       { path: 'return/complete', element: <ReturnOK /> },
       { path: 'deliveryInfo', element: <DeliveryInfo /> },

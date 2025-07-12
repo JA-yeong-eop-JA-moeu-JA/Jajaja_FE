@@ -3,12 +3,13 @@ import { create } from 'zustand';
 
 import ExampleModal from '@/components/modal/exampleModal';
 import HomeModal from '@/components/modal/homeModal';
+import ReviewModal from '@/components/modal/reviewModal';
 
 export type TModalType = 'alert' | 'confirm' | 'bottom-sheet' | 'bottom-drawer';
 type TComponentType = () => JSX.Element;
 const MODAL_COMPONENTS: Record<TModalType, TComponentType> = {
   'confirm': ExampleModal,
-  'alert': ExampleModal,
+  'alert': ReviewModal,
   'bottom-sheet': HomeModal,
   'bottom-drawer': ExampleModal,
 };
