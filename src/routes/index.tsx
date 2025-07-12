@@ -4,10 +4,7 @@ import Layout from '@/layouts';
 import Agreement from '@/pages/agreement';
 import Board from '@/pages/board';
 import CategoryPage from '@/pages/categoryPage';
-<<<<<<< HEAD
 import CouponsPage from '@/pages/coupon';
-=======
->>>>>>> 3e03a1d (fix: 라우팅 수정)
 import ExchangeOK from '@/pages/feedback/exchangeOk';
 import NotFound from '@/pages/feedback/NotFoundPage';
 import PaymentStatusWrapper from '@/pages/feedback/paymentStatusWrapper';
