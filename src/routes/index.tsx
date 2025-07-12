@@ -42,7 +42,6 @@ export const router = createBrowserRouter([
       { path: 'myPage/me', element: <MyDetailPage /> },
       { path: 'myPage/me/profile', element: <Profile /> },
       { path: 'myPage/me/address', element: <Address /> },
-      { path: 'myPage/point', element: <Points /> },
       { path: 'myPage/coupon', element: <Coupons /> },
       { path: 'myPage/review', element: <MyReview /> },
       { path: 'myPage/review/:orderId/:productId', element: <WriteReview /> },
@@ -51,7 +50,6 @@ export const router = createBrowserRouter([
       { path: 'payment', element: <Payment /> },
       { path: 'shoppingcart', element: <ShoppingCart /> },
 
-      { path: 'search', element: <Search /> },
       { path: 'exchange/complete', element: <ExchangeOK /> },
       { path: 'return/complete', element: <ReturnOK /> },
       { path: 'addaddress', element: <AddAddress /> },
@@ -64,7 +62,6 @@ export const router = createBrowserRouter([
       { path: 'product/:id/photoReview', element: <PhotoReview /> },
       { path: 'product/:id/review', element: <Review /> },
       { path: 'payment/:status', element: <PaymentStatusWrapper /> },
-      { path: 'shoppingcart', element: <ShoppingCart /> },
     ],
   },
 ]);
