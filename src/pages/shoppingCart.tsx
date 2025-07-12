@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import { useModalStore } from '@/stores/modalStore';
 import { useProductCheckboxStore } from '@/stores/productCheckboxStore';
 
 import { Button } from '@/components/common/button';
@@ -40,6 +41,7 @@ export default function ShoppingCart() {
 
   const productIds = cartList.map((item: IProductType) => item.id.toString());
   const { checkedItems, initialize, toggle, toggleAll, isAllChecked, reset } = useProductCheckboxStore();
+  const { openModal } = useModalStore();
 
   useEffect(() => {
     initialize(productIds, false);
@@ -95,7 +97,11 @@ export default function ShoppingCart() {
                 textClassName="text-small-medium"
                 disabled={isCartEmpty}
               />
-              <button className="ml-auto text-body-regular text-black disabled:text-black-3" disabled={!isAnyChecked} onClick={handleDeleteSelected}>
+              <button
+                className="ml-auto text-body-regular text-black disabled:text-black-3"
+                disabled={!isAnyChecked}
+                onClick={() => openModal('alert', { onDelete: handleDeleteSelected, message: '장바구니에서 상품을 삭제할까요?' })}
+              >
                 선택 삭제
               </button>
             </section>
