@@ -31,7 +31,6 @@ import Search from '@/pages/search';
 
 export const router = createBrowserRouter([
   {
-    
     path: '/',
     element: <Layout />,
     children: [

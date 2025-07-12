@@ -10,7 +10,6 @@ export interface IOrderItem {
   reviewed: boolean;
   orderStatus?: '배송 중' | '결제 완료' | '결제 취소' | '반품 접수' | '교환 접수';
   matchStatus?: '매칭 중' | '매칭 완료' | '매칭 실패' | '';
-
 }
 
 export interface IOrder {
@@ -85,7 +84,6 @@ export const orderData: IOrder[] = [
         quantity: 2,
         reviewed: false,
         orderStatus: '반품 접수',
-
       },
     ],
     createdAt: '25.05.12.',
