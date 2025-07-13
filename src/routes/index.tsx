@@ -5,6 +5,7 @@ import Agreement from '@/pages/agreement';
 import Board from '@/pages/board';
 import CategoryPage from '@/pages/categoryPage';
 import CouponsPage from '@/pages/coupon';
+import DeliveryInfo from '@/pages/deliveryInfo';
 import ExchangeOK from '@/pages/feedback/exchangeOk';
 import NotFound from '@/pages/feedback/NotFoundPage';
 import PaymentStatusWrapper from '@/pages/feedback/paymentStatusWrapper';
@@ -21,6 +22,7 @@ import Profile from '@/pages/mypage/profile';
 import WriteReview from '@/pages/mypage/writeReview';
 import Notice from '@/pages/notice';
 import OnBoarding from '@/pages/onBoarding';
+import OrderList from '@/pages/orderList';
 import Payment from '@/pages/payment';
 import PhotoReview from '@/pages/photoReview';
 import Product from '@/pages/product';
@@ -56,6 +58,8 @@ export const router = createBrowserRouter([
       { path: 'payment/:status', element: <PaymentStatusWrapper /> },
       { path: 'exchange/complete', element: <ExchangeOK /> },
       { path: 'return/complete', element: <ReturnOK /> },
+      { path: 'deliveryInfo', element: <DeliveryInfo /> },
+      { path: 'orderList', element: <OrderList /> },
       { path: '*', element: <NotFound /> },
     ],
   },
