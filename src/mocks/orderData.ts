@@ -8,8 +8,8 @@ export interface IOrderItem {
   option: string;
   quantity: number;
   reviewed: boolean;
-  orderStatus?: '배송 중' | '결제 완료' | '결제 취소' | '반품 접수' | '교환 접수';
-  matchStatus?: '매칭 중' | '매칭 완료' | '매칭 실패' | '';
+  orderStatus: '배송 중' | '결제 완료' | '결제 취소' | '반품 접수' | '교환 접수';
+  matchStatus?: '매칭 중' | '매칭 완료' | '매칭 실패' | undefined;
 }
 
 export interface IOrder {

@@ -11,7 +11,7 @@ type TPaymentInfoProps = {
 
 export default function PaymentInfo({ paymentInfo }: TPaymentInfoProps) {
   return (
-    <section className="px-4 bg-white pt-2 border-t border-black-1 flex flex-col gap-2">
+    <section className="px-4 bg-white pt-2 flex flex-col gap-2">
       <h2 className="text-subtitle-medium">결제 정보</h2>
       <div className="flex flex-col gap-1 text-body-regular">
         <div className="flex justify-between">
@@ -34,10 +34,9 @@ export default function PaymentInfo({ paymentInfo }: TPaymentInfoProps) {
           <span className="text-black-4">배송비</span>
           <span>{paymentInfo.deliveryFee === 0 ? '무료' : `${paymentInfo.deliveryFee.toLocaleString()} 원`}</span>
         </div>
-
-        <div className="flex justify-between py-4 text-subtitle-medium font-semibold border-t border-t-black-1 border-t-1">
+        <div className="flex justify-between py-4 text-subtitle-medium border-t border-t-black-1 border-t-1">
           <span>총 결제 금액</span>
-          <span style={{ color: 'var(--color-green)' }}>{paymentInfo.total.toLocaleString()} 원</span>
+          <span className="text-green">{paymentInfo.total.toLocaleString()} 원</span>
         </div>
       </div>
     </section>

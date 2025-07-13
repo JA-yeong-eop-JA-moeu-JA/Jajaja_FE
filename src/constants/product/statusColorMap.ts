@@ -9,8 +9,7 @@ export const ORDER_STATUS_COLOR_MAP: Record<NonNullable<IOrderItem['orderStatus'
 };
 
 export const MATCH_STATUS_COLOR_MAP: Record<NonNullable<IOrderItem['matchStatus']>, string> = {
-  '매칭 중': 'text-[color:var(--color-green)]',
-  '매칭 완료': 'text-[color:var(--color-green)]',
+  '매칭 중': 'text-green',
+  '매칭 완료': 'text-green',
   '매칭 실패': 'text-[color:var(--color-error-3)]',
-  '': '',
 };

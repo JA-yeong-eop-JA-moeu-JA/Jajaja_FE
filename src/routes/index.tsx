@@ -62,7 +62,7 @@ export const router = createBrowserRouter([
       { path: 'exchange/complete', element: <ExchangeOK /> },
       { path: 'return/complete', element: <ReturnOK /> },
       { path: 'myPage/deliveryInfo', element: <DeliveryInfo /> },
-      { path: 'myPage/orderList', element: <OrderList /> },
+      { path: 'myPage/order', element: <OrderList /> },
       { path: 'myPage/orderDetailPersonal', element: <OrderDetailPersonal /> },
       { path: 'myPage/orderDetailTeam', element: <OrderDetailTeam /> },
       { path: 'myPage/apply', element: <ApplyReturnOrExchange /> },

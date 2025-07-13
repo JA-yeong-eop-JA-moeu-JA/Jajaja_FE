@@ -1,4 +1,4 @@
-import { MATCH_STATUS_COLOR_MAP } from '@/constants/product/statusColorMap'; // 경로는 네가 저장한 위치에 따라 조정
+import { MATCH_STATUS_COLOR_MAP } from '@/constants/product/statusColorMap';
 
 import { SelectButton } from '@/components/common/button';
 import PageHeader from '@/components/head_bottom/PageHeader';
@@ -47,7 +47,7 @@ export default function OrderDetailTeam() {
         <section className="px-4 pb-4 border-b border-b-4 border-b-black-1 flex flex-col gap-4">
           <div className="flex justify-between items-center">
             <h2 className="text-subtitle-medium">주문 상품</h2>
-            <span className={`text-small font-medium ${MATCH_STATUS_COLOR_MAP[matchStatus]}`}>{matchStatus}</span>
+            <span className={`text-small text-body-medium ${MATCH_STATUS_COLOR_MAP[matchStatus]}`}>{matchStatus}</span>
           </div>
 
           {order.items.map((item) => (
@@ -70,7 +70,7 @@ export default function OrderDetailTeam() {
         <section className="px-4 bg-white p-4 pt-0 pb-8 border-b border-b-4 border-b-black-1">
           <h2 className="text-subtitle-medium mb-3">배송지 정보</h2>
           <div className="flex gap-0">
-            <div className="flex flex-col gap-2 text-black-4 text-body-regular w-18 h-[20px]">
+            <div className="flex flex-col gap-2 text-black-4 text-body-regular w-">
               <span>받는 분</span>
               <span>주소</span>
               <span>연락처</span>

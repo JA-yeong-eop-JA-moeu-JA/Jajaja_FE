@@ -11,22 +11,20 @@ export default function ApplyReturnOrExchange() {
   const order = orderData[0];
   const item = order.items[0];
 
-  // ✅ 하드코딩된 배송지 정보
   const dummyDeliveryData = {
     recipient: '이한비',
     phone: '010-2812-1241',
     address: '서울특별시 강서구 낙성서로12번길 3-12',
   };
 
-  // ✅ 하드코딩된 결제 정보
   const dummyRefundInfo = {
-    amount: 12090,
+    amount: 23920,
     discount: 1239,
     pointsUsed: 324,
     deliveryFee: 0,
-    returnDeliveryFee: 6000,
-    total: 82233,
     method: '카카오페이',
+    reason: '고객 단순 변심',
+    address: '서울특별시 강서구 낙성서로12번길 3-12',
   };
 
   const [selectedType, setSelectedType] = useState<'교환' | '반품' | null>(null);
@@ -45,7 +43,7 @@ export default function ApplyReturnOrExchange() {
 
       <main className="flex flex-col gap-6 pb-24">
         {/* 상품 정보 */}
-        <section className="flex flex-col gap-2 py-6 border-b border-b-black-1 border-b-4">
+        <section className="flex flex-col gap-2 py-6 border-b-black-1 border-b-4">
           <div className="px-4">
             <h2 className="text-subtitle-medium pb-4">상품 정보</h2>
             <OrderItem item={item} show={false} />
@@ -99,11 +97,10 @@ export default function ApplyReturnOrExchange() {
         <section className="flex flex-col gap-2 px-4">
           <div className="flex justify-between items-center">
             <h2 className="text-subtitle-medium">회수지 정보</h2>
-            <button className="text-small-medium h-[16px]" style={{ color: 'var(--color-orange)' }}>
-              변경하기
-            </button>
+
+            <button className="text-small-medium h-[16px] text-orange">변경하기</button>
           </div>
-          <div className="flex flex-col gap-[2px] text-sm text-black">
+          <div className="flex flex-col gap-[2px] text-body-regular text-black">
             <p>{dummyDeliveryData.recipient}</p>
             <p>{dummyDeliveryData.phone}</p>
             <p>{dummyDeliveryData.address}</p>
