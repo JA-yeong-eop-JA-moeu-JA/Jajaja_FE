@@ -5,7 +5,7 @@ import type { IOrderItem } from '@/mocks/orderData';
 export interface IOrderDataProps {
   item: IOrderItem;
   show: boolean;
-  layout?: 'horizontal' | 'vertical';
+  layout: 'horizontal' | 'vertical';
   showPrice?: boolean;
 }
 
