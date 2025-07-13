@@ -65,7 +65,7 @@ export default function AddAddress() {
         </div>
       </div>
 
-      <div className="w-full px-4 pb-2">
+      <div className="fixed bottom-14 left-0 right-0 w-full max-w-[600px] mx-auto px-4">
         <Button kind="basic" variant="solid-orange" disabled={!isFormValid} onClick={() => navigate(-1)} className="w-full">
           저장하기
         </Button>
