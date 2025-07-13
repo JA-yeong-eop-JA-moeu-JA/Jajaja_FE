@@ -35,7 +35,7 @@ export default function WriteReview() {
         <PageHeader title="리뷰 작성" />
         <div className="w-full px-4">
           <div className="py-2">
-            <OrderItem item={product} show={false} />
+            <OrderItem item={product} show={false} layout={'horizontal'} />
           </div>
           <div className="w-full">
             <ReviewStarRating initialRating={0} onChange={handleRatingChange} />
