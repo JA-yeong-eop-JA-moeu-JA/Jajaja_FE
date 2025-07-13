@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 
 import Layout from '@/layouts';
+import AddAddress from '@/pages/addAddress';
 import Agreement from '@/pages/agreement';
 import ApplyReturnOrExchange from '@/pages/ApplyReturnOrExchange';
 import Board from '@/pages/board';
@@ -66,6 +67,7 @@ export const router = createBrowserRouter([
       { path: 'payment/:status', element: <PaymentStatusWrapper /> },
       { path: 'exchange/complete', element: <ExchangeOK /> },
       { path: 'return/complete', element: <ReturnOK /> },
+      { path: 'addaddress', element: <AddAddress /> },
       { path: 'myPage/deliveryInfo', element: <DeliveryInfo /> },
       { path: 'myPage/order', element: <OrderList /> },
       { path: 'myPage/order/orderDetailPersonal', element: <OrderDetailPersonal /> },
