@@ -57,7 +57,7 @@ export default function AddAddress() {
           label="공동 현관 비밀번호 (선택)"
           placeholder="비밀번호를 입력해주세요."
           value={gateCode}
-          onChange={(e) => setGateCode(e.target.value.replace(/[^0-9]/g, ''))}
+          onChange={(e) => setGateCode(e.target.value)}
           type="number"
         />
         <div className="flex items-center px-4 py-4.5">
