@@ -62,6 +62,10 @@ export const router = createBrowserRouter([
       { path: 'product/:id/photoReview', element: <PhotoReview /> },
       { path: 'product/:id/review', element: <Review /> },
       { path: 'payment/:status', element: <PaymentStatusWrapper /> },
+      { path: 'exchange/complete', element: <ExchangeOK /> },
+      { path: 'return/complete', element: <ReturnOK /> },
+      { path: 'addaddress', element: <AddAddress /> },
+      { path: '*', element: <NotFound /> },
     ],
   },
 ]);
