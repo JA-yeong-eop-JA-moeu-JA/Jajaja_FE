@@ -13,7 +13,7 @@ export default function OrderReviewList({ orders }: IOrderProps) {
         <section key={order.id} className="w-full">
           <p className="pt-6 pb-5">{order.createdAt}</p>
           {order.items.map((item) => (
-            <OrderItem key={order.id} item={item} show={true} />
+            <OrderItem key={order.id} item={item} show={true} layout={'horizontal'} />
           ))}
         </section>
       ))}
