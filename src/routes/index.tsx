@@ -28,7 +28,6 @@ import Product from '@/pages/product';
 import Review from '@/pages/review';
 import Search from '@/pages/search';
 
-
 export const router = createBrowserRouter([
   {
     path: '/',
