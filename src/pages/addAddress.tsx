@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { Button } from '@/components/common/button';
 import BaseCheckbox from '@/components/common/checkbox';
@@ -12,7 +12,6 @@ export default function AddAddress() {
   const [address, setAddress] = useState('');
   const [addressDetail, setAddressDetail] = useState('');
   const [gateCode, setGateCode] = useState('');
-  const [isDefault, setIsDefault] = useState(false);
   const [checked, setChecked] = useState(false);
   const isFormValid = name !== '' && phone !== '' && /* address !== '' && */ addressDetail !== '';
   const navigate = useNavigate();
