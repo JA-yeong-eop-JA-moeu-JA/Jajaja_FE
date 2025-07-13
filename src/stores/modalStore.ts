@@ -14,11 +14,18 @@ const MODAL_COMPONENTS: Record<TModalType, TComponentType> = {
   'bottom-drawer': ExampleModal,
 };
 
+interface IModalOptions {
+  onDelete?: () => void;
+  message?: string;
+  [key: string]: any;
+}
+
 interface IModalStore {
   isModalOpen: boolean;
   modalContent: TComponentType | null;
   type: TModalType | null;
-  openModal: (type: TModalType) => void;
+  options?: IModalOptions;
+  openModal: (type: TModalType, options?: IModalOptions) => void;
   closeModal: () => void;
 }
 
@@ -26,12 +33,14 @@ export const useModalStore = create<IModalStore>((set) => ({
   isModalOpen: false,
   modalContent: null,
   type: null,
-  openModal: (type) => {
+  options: {},
+  openModal: (type, options = {}) => {
     const ModalComponent = MODAL_COMPONENTS[type];
     set({
       isModalOpen: true,
       type,
       modalContent: ModalComponent,
+      options,
     });
   },
   closeModal: () =>
@@ -39,5 +48,6 @@ export const useModalStore = create<IModalStore>((set) => ({
       isModalOpen: false,
       type: null,
       modalContent: null,
+      options: {},
     }),
 }));
