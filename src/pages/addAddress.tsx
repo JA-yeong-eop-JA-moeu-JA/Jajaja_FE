@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { Navigate, useNavigate } from 'react-router-dom';
 
+import { Button } from '@/components/common/button';
 import BaseCheckbox from '@/components/common/checkbox';
 import InputField from '@/components/common/InputField';
 import PageHeader from '@/components/head_bottom/PageHeader';
-import { Button } from '@/components/common/button';
-import { Navigate } from 'react-router-dom';
 
 export default function AddAddress() {
   const [name, setName] = useState('');
@@ -14,6 +14,8 @@ export default function AddAddress() {
   const [gateCode, setGateCode] = useState('');
   const [isDefault, setIsDefault] = useState(false);
   const [checked, setChecked] = useState(false);
+  const isFormValid = name !== '' && phone !== '' && /* address !== '' && */ addressDetail !== '';
+  const navigate = useNavigate();
 
   return (
     <div className="w-full mx-auto py-4.5">
@@ -21,7 +23,7 @@ export default function AddAddress() {
       <InputField label="성함" placeholder="최대 10글자로 작성해주세요." value={name} onChange={(e) => setName(e.target.value)} />
       <InputField label="휴대폰 번호" placeholder="010-0000-0000" value={phone} onChange={(e) => setPhone(e.target.value)} />
       <div className="px-4">
-        <p className="text-text-body-medium py-3">주소</p>
+        <p className="text-body-medium py-3">주소</p>
         <div className="flex mb-3 text-black-4">
           <input
             type="text"
@@ -40,7 +42,7 @@ export default function AddAddress() {
             onChange={(e) => setAddressDetail(e.target.value)}
             className="flex-1 border border-black-1 rounded px-3 py-2.5 text-body-regular"
           />
-          <button className="px-4 border border-orange text-orange rounded text-body-regular">주소 찾기</button>
+          <button className="px-4 border border-black-3 text-orange rounded text-body-regular">주소 찾기</button>
         </div>
       </div>
       <InputField label="공동 현관 비밀번호 (선택)" placeholder="비밀번호를 입력해주세요." value={gateCode} onChange={(e) => setGateCode(e.target.value)} />
@@ -48,7 +50,7 @@ export default function AddAddress() {
         <BaseCheckbox message="기본 배송지로 설정" checked={checked} onClick={() => setChecked(!checked)} />{' '}
       </div>
       <div className="w-full fixed bottom-2">
-        <Button kind="basic" variant="solid-orange" onClick={Navigate('/')}>
+        <Button kind="basic" variant="solid-orange" disabled={!isFormValid} onClick={() => navigate(-1)}>
           저장하기
         </Button>
       </div>
