@@ -27,7 +27,7 @@ export default function ReviewItem({ item }: IReviewDataProps) {
       <div className="flex flex-col items-start justify-center gap-2 w-full">
         <div className="flex items-center justify-between w-full">
           <p className="text-black text-body-medium">{item.createdAt}</p>
-          <button className="text-error-3 text-small-medium" onClick={() => openModal('alert')}>
+          <button className="text-error-3 text-small-medium" onClick={() => openModal('alert', { message: '등록한 리뷰를 삭제할까요?' })}>
             삭제
           </button>
         </div>
