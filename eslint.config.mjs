@@ -33,7 +33,12 @@ export default [
   },
   {
     rules: {
-      'prettier/prettier': 'warn',
+      'prettier/prettier': [
+        'warn',
+        {
+          endOfLine: 'auto',
+        },
+      ],
     },
   },
   tsConfig,

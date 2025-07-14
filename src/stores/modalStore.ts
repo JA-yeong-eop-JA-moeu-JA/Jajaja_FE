@@ -3,15 +3,17 @@ import { create } from 'zustand';
 
 import ExampleModal from '@/components/modal/exampleModal';
 import HomeModal from '@/components/modal/homeModal';
+import OptionModal from '@/components/modal/optionModal';
 import ReviewModal from '@/components/modal/reviewModal';
 
-export type TModalType = 'alert' | 'confirm' | 'bottom-sheet' | 'bottom-drawer';
-type TComponentType = () => JSX.Element;
+export type TModalType = 'alert' | 'confirm' | 'bottom-sheet' | 'bottom-drawer' | 'bottom-drawer-team';
+type TComponentType = (props?: Record<string, string>) => JSX.Element;
 const MODAL_COMPONENTS: Record<TModalType, TComponentType> = {
   'confirm': ExampleModal,
   'alert': ReviewModal,
   'bottom-sheet': HomeModal,
-  'bottom-drawer': ExampleModal,
+  'bottom-drawer': () => OptionModal({ type: 'personal' }),
+  'bottom-drawer-team': () => OptionModal({ type: 'team' }),
 };
 
 interface IModalOptions {
