@@ -9,7 +9,7 @@ interface IModalProviderProps {
 }
 
 export default function ModalProvider({ children }: IModalProviderProps) {
-  const { isModalOpen, modalContent, type } = useModalStore();
+  const { isModalOpen, modalContent, type, options } = useModalStore();
   const drawerRef = useRef<HTMLDivElement>(null);
 
   const baseHeight = 152;
@@ -118,7 +118,7 @@ export default function ModalProvider({ children }: IModalProviderProps) {
           <div className="bg-white min-h-10 rounded-lg shadow-md max-w-76 w-full">{createElement(modalContent)}</div>
         </div>
       )}
-      {type === 'image' && <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center">{createElement(modalContent)}</div>}
+      {type === 'image' && <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center">{createElement(modalContent, options)}</div>}
     </>
   );
 }

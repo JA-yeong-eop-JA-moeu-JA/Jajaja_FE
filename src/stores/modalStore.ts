@@ -1,4 +1,4 @@
-import type { JSX } from 'react';
+import type { ComponentType } from 'react';
 import { create } from 'zustand';
 
 import ExampleModal from '@/components/modal/exampleModal';
@@ -8,7 +8,7 @@ import OptionModal from '@/components/modal/optionModal';
 import ReviewModal from '@/components/modal/reviewModal';
 
 export type TModalType = 'alert' | 'confirm' | 'bottom-sheet' | 'bottom-drawer' | 'bottom-drawer-team' | 'image';
-type TComponentType = (props?: Record<string, string | number>) => JSX.Element;
+type TComponentType = ComponentType<any>;
 const MODAL_COMPONENTS: Record<TModalType, TComponentType> = {
   'confirm': ExampleModal,
   'alert': ReviewModal,
