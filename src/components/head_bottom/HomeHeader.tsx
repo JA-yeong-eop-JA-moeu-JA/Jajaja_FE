@@ -13,7 +13,9 @@ export default function Header({ showSearch = true, showLogo = true }: IHeaderPr
   return (
     <header className="sticky top-0 z-50 w-full bg-white">
       <div className="flex items-center justify-between px-2 h-14">
-        <img src={logo} alt="자자자 로고" className={`h-6 ${showLogo ? '' : 'invisible'}`} />
+        <Link to="/home">
+          <img src={logo} alt="자자자 로고" className={`h-6 ${showLogo ? '' : 'invisible'}`} />
+        </Link>
 
         <div className="flex items-center gap-6">
           <Link to="/search">
