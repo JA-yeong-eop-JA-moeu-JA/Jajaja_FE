@@ -30,7 +30,7 @@ export default function Profile() {
               <input
                 type="text"
                 defaultValue={nickname}
-                className="w-full border border-black-1 px-3 py-2.5 rounded-sm text-body-regular text-black"
+                className="w-full border border-black-1 px-3 py-2.5 rounded text-body-regular text-black"
                 placeholder="성함"
               />
             </div>
@@ -39,13 +39,13 @@ export default function Profile() {
               <input
                 type="text"
                 defaultValue={phoneNumber}
-                className="w-full border border-black-1 px-3 py-2.5 rounded-sm text-body-regular text-black"
+                className="w-full border border-black-1 px-3 py-2.5 rounded text-body-regular text-black"
                 placeholder="휴대폰 번호"
               />
             </div>
             <div className="w-full flex flex-col items-start justify-center gap-3">
               <p className="text-body-medium">이메일</p>
-              <div className="w-full border border-black-1 px-3 py-2.5 rounded-sm bg-black-1 text-body-regular text-black-4">
+              <div className="w-full border border-black-1 px-3 py-2.5 rounded bg-black-1 text-body-regular text-black-4">
                 <p>{email}</p>
               </div>
             </div>
