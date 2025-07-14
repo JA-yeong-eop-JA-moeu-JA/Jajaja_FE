@@ -10,7 +10,7 @@ const navItems = [
   { to: '/', icon: homeIcon, label: '홈' },
   { to: '/board', icon: boardIcon, label: '게시판' },
   { to: '/category', icon: categoryIcon, label: '카테고리' },
-  { to: '/cart', icon: cartIcon, label: '장바구니' },
+  { to: '/shoppingcart', icon: cartIcon, label: '장바구니' },
   { to: '/mypage', icon: myIcon, label: '마이페이지' },
 ];
 

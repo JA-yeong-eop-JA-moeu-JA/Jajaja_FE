@@ -26,6 +26,7 @@ import PhotoReview from '@/pages/photoReview';
 import Product from '@/pages/product';
 import Review from '@/pages/review';
 import Search from '@/pages/search';
+import ShoppingCart from '@/pages/shoppingCart';
 
 export const router = createBrowserRouter([
   {
@@ -46,6 +47,10 @@ export const router = createBrowserRouter([
       { path: 'coupon', element: <CouponsPage /> },
       { path: 'notice', element: <Notice /> },
       { path: 'payment', element: <Payment /> },
+      { path: 'shoppingcart', element: <ShoppingCart /> },
+      { path: 'exchange/complete', element: <ExchangeOK /> },
+      { path: 'return/complete', element: <ReturnOK /> },
+      { path: '*', element: <NotFound /> },
       { path: 'board', element: <Board /> },
       { path: 'agreement', element: <Agreement /> },
       { path: 'category', element: <CategoryPage /> },
@@ -54,9 +59,6 @@ export const router = createBrowserRouter([
       { path: 'product/:id/photoReview', element: <PhotoReview /> },
       { path: 'product/:id/review', element: <Review /> },
       { path: 'payment/:status', element: <PaymentStatusWrapper /> },
-      { path: 'exchange/complete', element: <ExchangeOK /> },
-      { path: 'return/complete', element: <ReturnOK /> },
-      { path: '*', element: <NotFound /> },
     ],
   },
 ]);
