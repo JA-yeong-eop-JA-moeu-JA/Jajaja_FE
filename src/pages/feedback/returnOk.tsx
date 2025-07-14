@@ -17,7 +17,7 @@ export default function ReturnCompletePage() {
             window.location.href = '/return/history';
           }}
           onRightClick={() => {
-            window.location.href = '/';
+            window.location.href = '/home';
           }}
         />
       </div>

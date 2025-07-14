@@ -17,7 +17,7 @@ export default function ExchangeCompletePage() {
             window.location.href = '/exchange/history';
           }}
           onRightClick={() => {
-            window.location.href = '/';
+            window.location.href = '/home';
           }}
         />
       </div>
