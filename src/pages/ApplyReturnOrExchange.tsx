@@ -123,7 +123,7 @@ export default function ApplyReturnOrExchange() {
       </main>
 
       {/* 하단 고정 접수 버튼 */}
-      <div className="fixed bottom-0 left-0 right-0 z-10 bg-white border-t border-black-1">
+      <div className="px-4 fixed bottom-0 left-0 right-0 z-10 bg-white">
         <Button kind="basic" variant="solid-orange" disabled={!isFormValid} onClick={handleSubmit}>
           접수
         </Button>

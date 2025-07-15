@@ -2,24 +2,20 @@ import { useNavigate } from 'react-router-dom';
 
 import backIcon from '@/assets/bar_icons/back.svg';
 
-// <PageHeader title="주문 상세" /> 이런 식으로 추가하면 됩니다!
-
 interface IPageHeaderBarProps {
-  title?: string; //props가 없는 경우도 있으니 선택적으로 설정
+  title?: string;
 }
 
 export default function PageHeaderBar({ title }: IPageHeaderBarProps) {
   const navigate = useNavigate();
 
   return (
-    <header className="w-full flex items-center justify-between px-1 h-14 bg-white">
-      <button onClick={() => navigate(-1)} className="flex items-center px-3">
+    <header className="w-full relative h-14 bg-white flex items-center">
+      <button onClick={() => navigate(-1)} className="absolute left-3 top-1/2 -translate-y-1/2">
         <img src={backIcon} alt="뒤로가기" className="w-5 h-5" />
       </button>
 
-      <h1 className="text-body-medium text-center pr-4 flex-1">{title}</h1>
-
-      <div className="w-5" />
+      <h1 className="w-full text-center text-body-medium">{title}</h1>
     </header>
   );
 }

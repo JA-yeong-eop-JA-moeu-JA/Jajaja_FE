@@ -36,7 +36,7 @@ export default function DeliveryInfo() {
                 <span>{dummyDeliveryData.invoiceNumber}</span>
                 <button
                   onClick={() => navigator.clipboard.writeText(dummyDeliveryData.invoiceNumber)}
-                  className="text-body-regular leading-5 underline underline-offset-0 text-green hover:text-green-hover "
+                  className="text-body-regular leading-5 underline underline-offset-2 text-green hover:text-green-hover "
                 >
                   복사하기
                 </button>

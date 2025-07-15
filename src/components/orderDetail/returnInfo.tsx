@@ -67,7 +67,7 @@ export default function RefundInfo({ refundInfo }: TRefundInfoProps) {
           </span>
         </div>
 
-        <div className="flex justify-between text-body-regular">
+        <div className="flex justify-between text-body-regular border-t border-t-black-1 pt-2">
           <span>환불 예상 금액</span>
           <span className="text-green">{total.toLocaleString()} 원</span>
         </div>

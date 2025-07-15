@@ -16,14 +16,14 @@ const navItems = [
 
 export default function BottomBar() {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white grid grid-cols-5 pr-2 pl-2 py-2 text-tiny-medium h-14">
+    <nav className="fixed bottom-0 left-0 right-0 w-full max-w-screen-sm mx-auto bg-white grid grid-cols-5 px-2 py-2 text-tiny-medium h-14">
       {navItems.map(({ to, icon, label }) => (
         <NavLink
           key={to}
           to={to}
           className={({ isActive }) =>
             `flex flex-col items-center gap-1 transition-colors 
-                        ${isActive ? 'text-gray-800' : 'text-black-4'} hover:text-gray-600`
+            ${isActive ? 'text-gray-800' : 'text-black-4'} hover:text-gray-600`
           }
         >
           {({ isActive }) => (
