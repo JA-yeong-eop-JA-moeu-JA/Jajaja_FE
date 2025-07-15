@@ -7,6 +7,7 @@ import StarRating from '@/components/product/starRating';
 
 import Heart from '@/assets/icons/heart.svg?react';
 import HeartFill from '@/assets/icons/heartFill.svg?react';
+import { REVIEW_LIST } from '@/constants/product/reviews';
 
 type TReviewCardProps = {
   data: {
@@ -85,7 +86,7 @@ export default function ReviewCard({ data }: TReviewCardProps) {
       <section className="flex items-center gap-2">
         {images.slice(0, 4).map((img, idx) => (
           <div key={idx} className="relative">
-            <img src={img} onClick={() => openModal('image', { src: img })} />
+            <img src={img} onClick={() => openModal('image', { src: img, imageList: REVIEW_LIST.flatMap(({ images }) => images)})} />
             {idx === 3 && images.length > 4 && (
               <div
                 className="flex justify-center items-center text-white text-body-regular absolute top-0 left-0 bg-[#00000099] w-full h-full"

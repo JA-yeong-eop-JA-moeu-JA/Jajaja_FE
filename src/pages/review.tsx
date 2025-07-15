@@ -31,7 +31,7 @@ export default function PhotoReview() {
       <section className="w-full grid grid-cols-3 gap-1">
         {imageList.slice(0, 6).map((img, idx) => (
           <div key={idx} className="relative">
-            <img src={img} className="w-full aspect-square object-cover" onClick={() => openModal('image', { src: img })} />
+            <img src={img} className="w-full aspect-square object-cover" onClick={() => openModal('image', { src: img, imageList: imageList })} />
             {idx === 5 && (
               <div
                 className="flex justify-center items-center text-white text-subtitle-semibold absolute top-0 left-0 bg-[#00000099] w-full h-full"

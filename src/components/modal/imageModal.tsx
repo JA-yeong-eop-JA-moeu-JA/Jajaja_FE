@@ -4,20 +4,18 @@ import { useRef, useState } from 'react';
 import type { Swiper as SwiperType } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
-import { REVIEW_LIST } from '@/constants/product/reviews';
-
 import { useModalStore } from '@/stores/modalStore';
 
 import Close from '@/assets/icons/modalClose.svg?react';
 import Next from '@/assets/icons/next.svg?react';
 import Prev from '@/assets/icons/prev.svg?react';
 
-export default function ImageModal(props?: Record<string, string | number>) {
-  const imageList = REVIEW_LIST.flatMap(({ images }) => images);
+export default function ImageModal(props: Record<string | number, string[]>) {
+  const imageList = props.imageList;
   const { closeModal } = useModalStore();
 
-  const startIdx = imageList.findIndex((img) => img === String(props?.src));
-  const [currentIndex, setCurrentIndex] = useState(startIdx);
+  const startIdx = imageList.findIndex((img) => img === String(props.src));
+  const [currentIndex, setCurrentIndex] = useState(startIdx >= 0 ? startIdx : 0);
   const swiperRef = useRef<SwiperType | null>(null);
 
   const handleMove = (offset: number) => {
