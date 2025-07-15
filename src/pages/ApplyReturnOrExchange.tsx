@@ -53,7 +53,7 @@ export default function ApplyReturnOrExchange() {
         {/* 해결 방법 */}
         <section className="flex flex-col text-body-regular gap-2">
           <h2 className="text-subtitle-medium px-4">해결 방법</h2>
-          <div className="mx-0 px-0 h-[56px]">
+          <div className="h-14">
             <SelectButton
               kind="select-content"
               leftText="교환"
@@ -108,7 +108,7 @@ export default function ApplyReturnOrExchange() {
           <select
             value={deliveryRequest}
             onChange={(e) => setDeliveryRequest(e.target.value)}
-            className="border border-black-3 rounded-md p-2 text-black-4 text-small-medium"
+            className="border border-black-3 rounded p-2 text-black-4 text-small-medium"
           >
             <option value="">배송 요청사항을 선택해주세요</option>
             <option value="문 앞에 놔주세요">문 앞에 놔주세요</option>
