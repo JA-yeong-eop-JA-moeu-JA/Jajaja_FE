@@ -2,10 +2,12 @@ import { useLayoutEffect, useRef, useState } from 'react';
 
 import { useModalStore } from '@/stores/modalStore';
 
-import type { IMyReview } from '@/mocks/reviewData';
+import StarRating from '../product/starRating';
+
 import Heart from '@/assets/icons/heart.svg?react';
 import HeartFill from '@/assets/icons/heartFill.svg?react';
-import StarRating from '../product/starRating';
+import type { IMyReview } from '@/mocks/reviewData';
+
 interface IReviewDataProps {
   item: IMyReview;
 }
@@ -79,10 +81,10 @@ export default function ReviewItem({ item }: IReviewDataProps) {
         ))}
       </div>
       <div className="w-full flex items-center justify-start gap-2">
-          <div className="flex items-center gap-1" onClick={() => setLiked((prev) => !prev)}>
-            {liked ? <HeartFill className="w-4 h-3.5"/> : <Heart className="w-4 h-3.5"/>}
-            <p className="text-body-medium text-orange">{liked ? item.likeCount + 1 : item.likeCount}</p>
-          </div>
+        <div className="flex items-center gap-1" onClick={() => setLiked((prev) => !prev)}>
+          {liked ? <HeartFill className="w-4 h-3.5" /> : <Heart className="w-4 h-3.5" />}
+          <p className="text-body-medium text-orange">{liked ? item.likeCount + 1 : item.likeCount}</p>
+        </div>
         <div className="text-center text-black border border-black-1 px-2 py-1 text-small-regular">{item.rewardPoints} P 지급 완료</div>
       </div>
     </div>

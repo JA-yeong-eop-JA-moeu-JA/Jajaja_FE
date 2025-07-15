@@ -10,11 +10,11 @@ import Close from '@/assets/icons/modalClose.svg?react';
 import Next from '@/assets/icons/next.svg?react';
 import Prev from '@/assets/icons/prev.svg?react';
 
-export default function ImageModal(props: Record<string | number, string[]>) {
-  const imageList = props.imageList;
+export default function ImageModal({ src, images }: Record<string | number, string[]>) {
+  const imageList = images;
   const { closeModal } = useModalStore();
 
-  const startIdx = imageList.findIndex((img) => img === String(props.src));
+  const startIdx = imageList.findIndex((img) => img === String(src));
   const [currentIndex, setCurrentIndex] = useState(startIdx >= 0 ? startIdx : 0);
   const swiperRef = useRef<SwiperType | null>(null);
 
