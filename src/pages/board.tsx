@@ -34,7 +34,10 @@ export default function Board() {
                   { label: '추천순', value: 'popular' },
                 ].map(({ label, value }, index, array) => (
                   <div key={value} className="flex items-center">
-                    <button onClick={() => setSortType(value as 'latest' | 'popular')} className={sortType === value ? 'font-semibold text-black' : ''}>
+                    <button
+                      onClick={() => setSortType(value as 'latest' | 'popular')}
+                      className={sortType === value ? 'font-IOrderProductListSectionProps text-black' : ''}
+                    >
                       {label}
                     </button>
                     {index < array.length - 1 && <span className="px-1 text-black-2">|</span>}

@@ -64,7 +64,7 @@ export default function CategoryPage() {
               <li
                 key={main}
                 onClick={() => setSelectedMain(main)}
-                className={`px-3 py-4 border-none cursor-pointer flex items-center justify-center ${selectedMain === main ? 'bg-white text-black font-semibold' : ''}`}
+                className={`px-3 py-4 border-none cursor-pointer flex items-center justify-center ${selectedMain === main ? 'bg-white text-black font-IOrderProductListSectionProps' : ''}`}
               >
                 {main}
               </li>
