@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 
 import { Button, SelectButton } from '@/components/common/button';
 import PageHeader from '@/components/head_bottom/PageHeader';
+import ConfirmModal from '@/components/modal/confirmModal';
 import RefundInfo from '@/components/orderDetail/returnInfo';
 import OrderItem from '@/components/review/orderItem';
 
 import { orderData } from '@/mocks/orderData';
-import ConfirmModal from '@/components/modal/ConfirmModal';
 
 export default function ApplyReturnOrExchange() {
   const order = orderData[0];
@@ -28,7 +28,7 @@ export default function ApplyReturnOrExchange() {
     reason: '고객 단순 변심',
     address: '서울특별시 강서구 낙성서로12번길 3-12',
   };
-  
+
   const navigate = useNavigate();
   const [selectedType, setSelectedType] = useState<'교환' | '반품' | null>(null);
   const [selectedReason, setSelectedReason] = useState('');
@@ -42,7 +42,6 @@ export default function ApplyReturnOrExchange() {
     console.log(`${selectedType} 신청 완료`);
     // TODO: API 요청 등 필요한 작업 추가
   };
-
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -150,10 +149,9 @@ export default function ApplyReturnOrExchange() {
         onConfirm={() => {
           handleSubmit();
           setIsModalOpen(false);
-          navigate('/home');           
+          navigate('/home');
         }}
       />
-
     </div>
   );
 }
