@@ -31,6 +31,7 @@ import PhotoReview from '@/pages/photoReview';
 import Product from '@/pages/product';
 import Review from '@/pages/review';
 import Search from '@/pages/search';
+import ShoppingCart from '@/pages/shoppingCart';
 
 export const router = createBrowserRouter([
   {
@@ -40,17 +41,21 @@ export const router = createBrowserRouter([
       { index: true, element: <OnBoarding /> },
       { path: 'home', element: <Home /> },
       { path: 'login', element: <Login /> },
-      { path: 'myPage', element: <MyPage /> },
-      { path: 'myPage/me', element: <MyDetailPage /> },
-      { path: 'myPage/me/profile', element: <Profile /> },
-      { path: 'myPage/me/address', element: <Address /> },
-      { path: 'myPage/point', element: <Points /> },
-      { path: 'myPage/coupon', element: <Coupons /> },
-      { path: 'myPage/review', element: <MyReview /> },
-      { path: 'myPage/review/:orderId/:productId', element: <WriteReview /> },
+      { path: 'mypage', element: <MyPage /> },
+      { path: 'mypage/me', element: <MyDetailPage /> },
+      { path: 'mypage/me/profile', element: <Profile /> },
+      { path: 'mypage/me/address', element: <Address /> },
+      { path: 'mypage/point', element: <Points /> },
+      { path: 'mypage/coupon', element: <Coupons /> },
+      { path: 'mypage/review', element: <MyReview /> },
+      { path: 'mypage/review/:orderId/:productId', element: <WriteReview /> },
       { path: 'coupon', element: <CouponsPage /> },
       { path: 'notice', element: <Notice /> },
       { path: 'payment', element: <Payment /> },
+      { path: 'shoppingcart', element: <ShoppingCart /> },
+      { path: 'exchange/complete', element: <ExchangeOK /> },
+      { path: 'return/complete', element: <ReturnOK /> },
+      { path: '*', element: <NotFound /> },
       { path: 'board', element: <Board /> },
       { path: 'agreement', element: <Agreement /> },
       { path: 'category', element: <CategoryPage /> },

@@ -6,9 +6,12 @@ import { SUB_FUNCTIONS } from '@/constants/myPage/subFunctions';
 import BottomBar from '@/components/head_bottom/BottomBar';
 import Header from '@/components/head_bottom/HomeHeader';
 
+import DefaultProfile from '@/assets/myPage/defaultProfile.svg?react';
 import Right from '@/assets/right.svg?react';
+import { profileData } from '@/mocks/profileData';
 
 export default function MyPage() {
+  const { nickname, profileImage } = profileData;
   const navigate = useNavigate();
   return (
     <div className="w-full h-screen">
@@ -18,12 +21,15 @@ export default function MyPage() {
       <div className="w-full bg-white text-black">
         <section className="w-full pt-2 pb-2.5 px-4">
           <button onClick={() => navigate('/mypage/me')} className="w-full h-23 border border-black-2 rounded flex items-center px-5 py-4 gap-3 mb-5">
-            {/* 사진과 이름은 추후 수정 */}
             <div>
-              <img src="" alt="프로필" className="w-15 h-15 rounded-full object-cover" />
+              {profileImage ? (
+                <img src={profileImage} alt="프로필" className="w-15 h-15 rounded-full object-cover" />
+              ) : (
+                <DefaultProfile className="w-15 h-15 rounded-full object-cover" />
+              )}
             </div>
             <div className="w-full flex flex-col items-start justify-center gap-1 py-2">
-              <p className="text-body-medium">이한비</p>
+              <p className="text-body-medium">{nickname}</p>
               <p className="text-body-regular text-black-4">내 정보 관리</p>
             </div>
             <div>
