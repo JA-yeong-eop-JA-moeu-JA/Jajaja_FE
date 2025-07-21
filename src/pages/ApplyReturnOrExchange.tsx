@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { Button, SelectButton } from '@/components/common/button';
 import PageHeader from '@/components/head_bottom/PageHeader';
@@ -6,6 +7,7 @@ import RefundInfo from '@/components/orderDetail/returnInfo';
 import OrderItem from '@/components/review/orderItem';
 
 import { orderData } from '@/mocks/orderData';
+import ConfirmModal from '@/components/modal/ConfirmModal';
 
 export default function ApplyReturnOrExchange() {
   const order = orderData[0];
@@ -26,16 +28,21 @@ export default function ApplyReturnOrExchange() {
     reason: '고객 단순 변심',
     address: '서울특별시 강서구 낙성서로12번길 3-12',
   };
-
+  
+  const navigate = useNavigate();
   const [selectedType, setSelectedType] = useState<'교환' | '반품' | null>(null);
   const [selectedReason, setSelectedReason] = useState('');
   const [deliveryRequest, setDeliveryRequest] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const isFormValid = selectedType !== null && selectedReason !== '';
 
   const handleSubmit = () => {
-    alert(`${selectedType} 신청 완료`);
+    // 실제 접수 처리 로직
+    console.log(`${selectedType} 신청 완료`);
+    // TODO: API 요청 등 필요한 작업 추가
   };
+
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -123,11 +130,30 @@ export default function ApplyReturnOrExchange() {
       </main>
 
       {/* 하단 고정 접수 버튼 */}
-      <div className="px-4 fixed bottom-0 left-0 right-0 z-10 bg-white">
-        <Button kind="basic" variant="solid-orange" disabled={!isFormValid} onClick={handleSubmit}>
+      <div className="px-4 fixed bottom-0 left-0 right-0 z-10 bg-white max-w-screen-sm mx-auto w-full">
+        <Button
+          kind="basic"
+          variant="solid-orange"
+          disabled={!isFormValid}
+          onClick={() => {
+            setIsModalOpen(true);
+          }}
+        >
           접수
         </Button>
       </div>
+
+      <ConfirmModal
+        open={isModalOpen}
+        message={`${selectedType} 신청하시겠어요?`}
+        onCancel={() => setIsModalOpen(false)}
+        onConfirm={() => {
+          handleSubmit();
+          setIsModalOpen(false);
+          navigate('/home');           
+        }}
+      />
+
     </div>
   );
 }

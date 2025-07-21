@@ -19,7 +19,8 @@ export default function OrderList({ orders }: IOrderProps) {
     <div className="w-full flex flex-col ">
       {orders.map((order, index) => (
         <section key={order.id} className={`w-full pb-4 mb-4 ${index !== orders.length - 1 ? 'border-b-black-1 border-b-4' : ''}`}>
-          <button className="w-full flex items-center justify-between pt-0 pb-2 px-4" onClick={() => navigate(`/mypage/order/${order.id}`)}>
+          <button className="w-full flex items-center justify-between pt-0 pb-2 px-4" onClick={() => navigate(`/mypage/order/orderDetailPersonal`)}> 
+            {/** 나중에 `/mypage/order/${order.id}`로 바꿔야함!! */}
             <p className="text-subtitle-medium text-left">{order.createdAt}</p>
             <img src={ChevronRight} alt=">" className="w-2 h-4" />
           </button>
