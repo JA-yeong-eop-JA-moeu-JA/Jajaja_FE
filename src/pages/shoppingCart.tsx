@@ -82,7 +82,9 @@ export default function ShoppingCart() {
       </header>
 
       <div className="w-full bg-white text-black pb-32">
+      <div className="w-full bg-white text-black pb-32">
         {isCartEmpty ? (
+          <section className="flex flex-col items-center justify-center h-[calc(100vh-56px-56px)] pt-20 pb-10 px-4">
           <section className="flex flex-col items-center justify-center h-[calc(100vh-56px-56px)] pt-20 pb-10 px-4">
             <img src={EmptyCartImage} alt="장바구니 비어 있음" className="w-40 h-40 mb-6" />
             <p className="text-subtitle-medium mb-2">장바구니에 담긴 상품이 없습니다.</p>
