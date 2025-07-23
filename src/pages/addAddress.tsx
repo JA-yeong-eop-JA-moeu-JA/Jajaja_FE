@@ -14,8 +14,8 @@ export default function AddAddress() {
   const [addressDetail, setAddressDetail] = useState('');
   const [gateCode, setGateCode] = useState('');
   const [checked, setChecked] = useState(false);
-
-  const isFormValid = name !== '' && phone !== '' && /* address !== '' && */ addressDetail !== '';
+  const isValidPhone = /^\d{3}-\d{3,4}-\d{4}$/.test(phone);
+  const isFormValid = name !== '' && isValidPhone && /* address !== '' && */ addressDetail !== '';
   const navigate = useNavigate();
 
   return (
@@ -27,8 +27,21 @@ export default function AddAddress() {
           label="휴대폰 번호"
           placeholder="010-0000-0000"
           value={phone}
-          onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))}
-          type="number"
+          onChange={(e) => {
+            const raw = e.target.value.replace(/\D/g, ''); // 숫자만 허용
+            let formatted = raw;
+
+            if (raw.length < 4) {
+              formatted = raw;
+            } else if (raw.length < 8) {
+              formatted = `${raw.slice(0, 3)}-${raw.slice(3)}`;
+            } else {
+              formatted = `${raw.slice(0, 3)}-${raw.slice(3, 7)}-${raw.slice(7, 11)}`;
+            }
+
+            setPhone(formatted);
+          }}
+          type="text"
         />
         <div className="px-4">
           <p className="text-body-medium py-3">주소</p>
@@ -57,10 +70,16 @@ export default function AddAddress() {
           label="공동 현관 비밀번호 (선택)"
           placeholder="비밀번호를 입력해주세요."
           value={gateCode}
-          onChange={(e) => setGateCode(e.target.value)}
-          type="number"
+          type="text"
+          onChange={(e) => {
+            const value = e.target.value;
+            const allowed = /^[0-9#*]*$/;
+            if (value === '' || allowed.test(value)) {
+              setGateCode(value);
+            }
+          }}
         />
-        <div className="flex items-center px-4 py-4.5">
+        <div className="flex items-center px-4 py-4.5 mb-30">
           <BaseCheckbox message="기본 배송지로 설정" checked={checked} onClick={() => setChecked(!checked)} />
         </div>
       </div>
