@@ -1,8 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 
+import { BENEFIT_LIST } from '@/constants/myPage/benefitList';
 import { MAIN_FUNCTIONS } from '@/constants/myPage/mainFunctions';
 import { SUB_FUNCTIONS } from '@/constants/myPage/subFunctions';
 
+import BenefitCard from '@/components/benefitCard';
 import BottomBar from '@/components/head_bottom/BottomBar';
 import Header from '@/components/head_bottom/HomeHeader';
 
@@ -55,13 +57,12 @@ export default function MyPage() {
         </section>
 
         <section className="w-full pt-2.5 pb-6">
-          <div className="w-full flex items-center justify-center mb-1">
-            <p className="flex-1 text-subtitle-medium px-5 py-3">오늘의 혜택</p>
-            <button className="w-12 h-12 flex items-center justify-center">
-              <Right />
-            </button>
+          <p className="flex-1 text-subtitle-medium px-5 pt-3 pb-4">오늘의 혜택</p>
+          <div className="w-full flex overflow-x-auto gap-x-2 px-4 scrollbar-hide">
+            {BENEFIT_LIST.map(({ id, content }) => (
+              <BenefitCard key={id} content={content} />
+            ))}
           </div>
-          <div>{/* 오늘의 혜택 컴포넌트 추가 예정 */}</div>
         </section>
 
         <section className="w-full pt-6 pb-20">
