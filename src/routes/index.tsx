@@ -21,7 +21,7 @@ import MyReview from '@/pages/mypage/myReview';
 import Points from '@/pages/mypage/points';
 import Profile from '@/pages/mypage/profile';
 import WriteReview from '@/pages/mypage/writeReview';
-import Notice from '@/pages/notice';
+import Notifications from '@/pages/notifications';
 import OnBoarding from '@/pages/onBoarding';
 import OrderDetailPersonal from '@/pages/orderDetailPersonal';
 import OrderDetailTeam from '@/pages/orderDetailTeam';
@@ -50,7 +50,7 @@ export const router = createBrowserRouter([
       { path: 'mypage/review', element: <MyReview /> },
       { path: 'mypage/review/:orderId/:productId', element: <WriteReview /> },
       { path: 'coupon', element: <CouponsPage /> },
-      { path: 'notice', element: <Notice /> },
+      { path: 'notifications', element: <Notifications /> },
       { path: 'payment', element: <Payment /> },
       { path: 'shoppingcart', element: <ShoppingCart /> },
       { path: 'exchange/complete', element: <ExchangeOK /> },
