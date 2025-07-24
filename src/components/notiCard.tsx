@@ -41,7 +41,7 @@ export default function NotiCard({ id, type, content, createdAt, isRead, url, on
           ${isRead ? 'bg-white' : 'bg-[#FFF9F9]'}`}
       onClick={handleClick}
     >
-      <div className="w-10 h-10">{Icon && <Icon />}</div>
+      <div className="w-10 h-10">{<Icon />}</div>
       <div className="flex flex-col items-start justify-center gap-2">
         <p className="text-black text-body-regular text-start">{content}</p>
         <p className="text-black-4 text-small-medium">{time}</p>
