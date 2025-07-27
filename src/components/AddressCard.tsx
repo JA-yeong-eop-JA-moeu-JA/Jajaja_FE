@@ -15,7 +15,7 @@ function AddressCard({ address, onDelete }: IAddressCardProps) {
 
   return (
     <div className="px-4 mb-2">
-      <div className={`relative border-1 border-black-2 rounded-md p-4 mb-3`}>
+      <div className={`relative border-1 border-black-1 rounded-md p-4 mb-3`}>
         <button onClick={handleDelete} className="absolute top-2 right-2">
           <DeleteIcon />
         </button>

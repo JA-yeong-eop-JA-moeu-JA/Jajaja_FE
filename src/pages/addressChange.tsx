@@ -35,7 +35,7 @@ export default function AddressChange() {
 
   return (
     <div className="">
-      <PageHeaderBar title="배송지 관리" />
+      <PageHeaderBar title="배송지 변경" />
 
       {addresses.map((addr) => (
         <AddressCard key={addr.id} address={addr} onDelete={handleDelete} />
