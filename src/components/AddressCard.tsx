@@ -27,7 +27,9 @@ function AddressCard({ address, onDelete }: IAddressCardProps) {
 
         <p className="text-body-regular text-black">{address.phone}</p>
 
-        <p className="text-body-regular text-black">{address.address}</p>
+        <p className="text-body-regular text-black">
+          {address.address} {address.detailAddress}
+        </p>
 
         {address.gateCode && <p className="text-body-regular text-black-4">공동 현관 비밀번호: {address.gateCode}</p>}
       </div>

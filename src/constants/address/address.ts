@@ -6,7 +6,6 @@ export interface IAddress {
   detailAddress?: string;
   gateCode?: string;
   isDefault: boolean;
-  tag?: string;
 }
 
 export const ADDRESSES: IAddress[] = [
@@ -15,14 +14,14 @@ export const ADDRESSES: IAddress[] = [
     name: '이한비',
     phone: '010-2812-1241',
     address: '서울특별시 강서구 낙섬서로12번길 3-12',
-    gateCode: '1231',
+    gateCode: '1231*',
     isDefault: true,
   },
   {
     id: 2,
     name: '김승연',
     phone: '010-2812-1241',
-    address: '서울특별시 강남구 봉천2로 12 109동 121호',
+    address: '서울특별시 강남구 봉천2로 12',
     isDefault: false,
   },
 ];
