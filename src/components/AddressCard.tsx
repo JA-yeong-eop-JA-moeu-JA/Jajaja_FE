@@ -1,6 +1,8 @@
 import type { IAddress } from '@/constants/address/address';
 import { DEFAULT_ADDRESS_TAG } from '@/constants/address/address';
 
+import { useModalStore } from '@/stores/modalStore';
+
 import DeleteIcon from '../assets/icons/delete.svg?react';
 
 interface IAddressCardProps {
@@ -9,6 +11,8 @@ interface IAddressCardProps {
 }
 
 function AddressCard({ address, onDelete }: IAddressCardProps) {
+  const { openModal } = useModalStore();
+
   const handleDelete = () => {
     onDelete(address.id);
   };
@@ -16,18 +20,28 @@ function AddressCard({ address, onDelete }: IAddressCardProps) {
   return (
     <div className="px-4 mb-2">
       <div className={`relative border-1 border-black-1 rounded-md p-4 mb-3`}>
-        <button onClick={handleDelete} className="absolute top-2 right-2">
-          <DeleteIcon />
-        </button>
+        {!address.isDefault && (
+          <button
+            onClick={() =>
+              openModal('alert', {
+                onDelete: handleDelete,
+                message: '배송지 정보를 삭제할까요?',
+              })
+            }
+            className="absolute top-2 right-2"
+          >
+            <DeleteIcon />
+          </button>
+        )}
 
         <div className="flex items-center gap-2 mb-2">
           <p className="text-body-medium">{address.name}</p>
           {address.isDefault && <span className="text-orange text-small-medium">{DEFAULT_ADDRESS_TAG}</span>}
         </div>
 
-        <p className="text-body-regular text-black">{address.phone}</p>
+        <p className="text-body-regular">{address.phone}</p>
 
-        <p className="text-body-regular text-black">
+        <p className="text-body-regular">
           {address.address} {address.detailAddress}
         </p>
 
