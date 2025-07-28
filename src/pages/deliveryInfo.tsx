@@ -78,7 +78,8 @@ export default function DeliveryInfo() {
 
       {/* 하단 버튼 - 고정 */}
       <div className="px-2 pb-0 pt-2 bg-white">
-        <Button kind="basic" variant="outline-orange" className="w-full" onClick={() => navigate('/')}>
+        <Button kind="basic" variant="outline-orange" className="w-full" onClick={() => navigate('/home')}>
+          {/** 배송 현황 확인은 나중에 구현 */}
           배송 현황 확인
         </Button>
       </div>

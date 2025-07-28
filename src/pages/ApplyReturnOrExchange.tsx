@@ -37,11 +37,36 @@ export default function ApplyReturnOrExchange() {
 
   const isFormValid = selectedType !== null && selectedReason !== '';
 
-  const handleSubmit = () => {
-    // 실제 접수 처리 로직
-    console.log(`${selectedType} 신청 완료`);
-    // TODO: API 요청 등 필요한 작업 추가
+  const handleSubmit = async (): Promise<boolean> => {
+    try {
+      console.log(`${selectedType} 신청 완료`);
+      // TODO: 실제 API 요청이 들어간다면 이곳에 작성
+      return true;
+    } catch (err) {
+      console.error('신청 실패', err);
+      return false;
+    }
   };
+  {
+    /** Api 연동 시
+      import axios from 'axios';
+
+  const handleSubmit = async (): Promise<boolean> => {
+    try {
+      const response = await axios.post('/api/exchange-or-return', {
+        type: selectedType,
+        // 다른 필요한 데이터들 함께 전송
+      });
+
+      return response.status === 200;
+    } catch (err) {
+      console.error('신청 실패', err);
+      return false;
+    }
+  };
+
+    */
+  }
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -146,10 +171,20 @@ export default function ApplyReturnOrExchange() {
         open={isModalOpen}
         message={`${selectedType} 신청하시겠어요?`}
         onCancel={() => setIsModalOpen(false)}
-        onConfirm={() => {
-          handleSubmit();
+        onConfirm={async () => {
+          const isSuccess = await handleSubmit();
           setIsModalOpen(false);
-          navigate('/home');
+
+          if (!isSuccess) {
+            navigate('/not-found');
+            return;
+          }
+
+          if (selectedType === '교환') {
+            navigate('/exchange/complete');
+          } else if (selectedType === '반품') {
+            navigate('/return/complete');
+          }
         }}
       />
     </div>
