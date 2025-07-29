@@ -72,6 +72,7 @@ export default function ShoppingCart() {
     price: product.price,
     productId: product.id,
     reviewed: false,
+    orderId: 0,
   });
 
   return (
@@ -111,7 +112,7 @@ export default function ShoppingCart() {
                 <div className="flex items-start gap-3">
                   <BaseCheckbox checked={checkedItems[product.id] || false} onClick={() => toggle(product.id.toString())} />
                   <div className="flex-1">
-                    <OrderItem item={convertToOrderItem(product)} showReviewButton={false} layout="horizontal" showPrice={false} />
+                    <OrderItem item={convertToOrderItem(product)} layout="horizontal" showPrice={false} show={false} />
                   </div>
                 </div>
 
