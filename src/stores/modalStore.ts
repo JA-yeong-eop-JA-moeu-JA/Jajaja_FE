@@ -1,13 +1,14 @@
 import type { ComponentType } from 'react';
 import { create } from 'zustand';
 
+import DeliveryRequestModal from '@/components/modal/deliveryModal';
 import ExampleModal from '@/components/modal/exampleModal';
 import HomeModal from '@/components/modal/homeModal';
 import ImageModal from '@/components/modal/imageModal';
 import OptionModal from '@/components/modal/optionModal';
 import ReviewModal from '@/components/modal/reviewModal';
 
-export type TModalType = 'alert' | 'confirm' | 'bottom-sheet' | 'bottom-drawer' | 'bottom-drawer-team' | 'image';
+export type TModalType = 'alert' | 'confirm' | 'bottom-sheet' | 'bottom-drawer' | 'bottom-drawer-team' | 'image' | 'delivery';
 type TComponentType = ComponentType<any>;
 const MODAL_COMPONENTS: Record<TModalType, TComponentType> = {
   'confirm': ExampleModal,
@@ -16,11 +17,13 @@ const MODAL_COMPONENTS: Record<TModalType, TComponentType> = {
   'bottom-drawer': () => OptionModal({ type: 'personal' }),
   'bottom-drawer-team': () => OptionModal({ type: 'team' }),
   'image': ImageModal,
+  'delivery': DeliveryRequestModal,
 };
 
 interface IModalOptions {
   onDelete?: () => void;
   message?: string;
+  onSelect?: (text: string) => void;
   [key: string]: any;
 }
 

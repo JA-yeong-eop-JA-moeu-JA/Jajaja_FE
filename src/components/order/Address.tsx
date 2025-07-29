@@ -1,3 +1,8 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import { useModalStore } from '@/stores/modalStore';
+
 import Down from '@/assets/icons/down.svg?react';
 
 interface IAddressBlockProps {
@@ -7,17 +12,32 @@ interface IAddressBlockProps {
 }
 
 export default function AddressBlock({ name, phone, address }: IAddressBlockProps) {
+  const { openModal } = useModalStore();
+  const [selectedDeliveryRequest, setSelectedDeliveryRequest] = useState<string>('');
+  const navigate = useNavigate();
+
+  const handleDeliveryRequestClick = () => {
+    openModal('delivery', {
+      onSelect: (text: string) => setSelectedDeliveryRequest(text),
+    });
+  };
+
   return (
     <section className="p-4">
       <div className="flex justify-between items-center mb-2">
         <p className="text-subtitle-medium">배송지</p>
-        <button className="text-orange text-small-medium">변경하기</button>
+        <button className="text-orange text-small-medium" onClick={() => navigate('/addresschange')}>
+          변경하기
+        </button>
       </div>
       <p className="text-body-regular mb-1">{name}</p>
       <p className="text-body-regular">{phone}</p>
       <p className="text-body-regular">{address}</p>
-      <button className="w-full flex items-center justify-between border border-black-3 text-small-medium text-black-4 rounded mt-3 mb-4 px-4 py-3">
-        <span>배송 요청 사항을 선택해주세요.</span>
+      <button
+        className="w-full flex items-center justify-between border border-black-3 text-small-medium rounded mt-3 mb-4 px-4 py-3"
+        onClick={handleDeliveryRequestClick}
+      >
+        <span className={selectedDeliveryRequest ? 'text-black' : 'text-black-4'}>{selectedDeliveryRequest || '배송 요청 사항을 선택해주세요.'}</span>{' '}
         <Down className="w-4 h-2" />
       </button>
     </section>
