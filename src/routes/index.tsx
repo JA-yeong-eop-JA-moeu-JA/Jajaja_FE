@@ -2,12 +2,14 @@ import { createBrowserRouter } from 'react-router-dom';
 
 import Layout from '@/layouts';
 import AddAddress from '@/pages/addAddress';
+import AddressChange from '@/pages/addressChange';
 import Agreement from '@/pages/agreement';
 import ApplyReturnOrExchange from '@/pages/ApplyReturnOrExchange';
 import Board from '@/pages/board';
 import CategoryPage from '@/pages/categoryPage';
 import CouponsPage from '@/pages/coupon';
 import DeliveryInfo from '@/pages/deliveryInfo';
+import EditAddress from '@/pages/editAddress';
 import ExchangeOK from '@/pages/feedback/exchangeOk';
 import NotFound from '@/pages/feedback/NotFoundPage';
 import PaymentStatusWrapper from '@/pages/feedback/paymentStatusWrapper';
@@ -54,9 +56,19 @@ export const router = createBrowserRouter([
       { path: 'notifications', element: <Notifications /> },
       { path: 'payment', element: <Payment /> },
       { path: 'shoppingcart', element: <ShoppingCart /> },
-      { path: 'addaddress', element: <AddAddress /> },
+      { path: 'addresschange', element: <AddressChange /> },
+      { path: 'editaddress', element: <EditAddress /> },
+
+      { path: 'search', element: <Search /> },
       { path: 'exchange/complete', element: <ExchangeOK /> },
       { path: 'return/complete', element: <ReturnOK /> },
+      { path: 'addaddress', element: <AddAddress /> },
+      { path: 'myPage/deliveryInfo', element: <DeliveryInfo /> },
+      { path: 'myPage/order', element: <OrderList /> },
+      { path: 'myPage/order/orderDetailPersonal', element: <OrderDetailPersonal /> },
+      { path: 'myPage/order/orderDetailTeam', element: <OrderDetailTeam /> },
+      { path: 'myPage/apply', element: <ApplyReturnOrExchange /> },
+
       { path: '*', element: <NotFound /> },
       { path: 'board', element: <Board /> },
       { path: 'agreement', element: <Agreement /> },
@@ -66,14 +78,7 @@ export const router = createBrowserRouter([
       { path: 'product/:id/photoReview', element: <PhotoReview /> },
       { path: 'product/:id/review', element: <Review /> },
       { path: 'payment/:status', element: <PaymentStatusWrapper /> },
-      { path: 'exchange/complete', element: <ExchangeOK /> },
-      { path: 'return/complete', element: <ReturnOK /> },
-      { path: 'myPage/deliveryInfo', element: <DeliveryInfo /> },
-      { path: 'myPage/order', element: <OrderList /> },
-      { path: 'myPage/order/orderDetailPersonal', element: <OrderDetailPersonal /> },
-      { path: 'myPage/order/orderDetailTeam', element: <OrderDetailTeam /> },
-      { path: 'myPage/apply', element: <ApplyReturnOrExchange /> },
-
+      { path: 'addaddress', element: <AddAddress /> },
       { path: '*', element: <NotFound /> },
     ],
   },

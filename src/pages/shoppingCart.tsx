@@ -77,7 +77,7 @@ export default function ShoppingCart() {
 
   return (
     <>
-      <header className="px-2">
+      <header className="">
         <PageHeaderBar title="장바구니" />
       </header>
 
