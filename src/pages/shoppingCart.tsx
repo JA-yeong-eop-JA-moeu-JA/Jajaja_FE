@@ -77,13 +77,13 @@ export default function ShoppingCart() {
 
   return (
     <>
-      <header className="px-2">
+      <header className="">
         <PageHeaderBar title="장바구니" />
       </header>
 
-      <div className="w-full bg-white text-black pb-40">
+      <div className="w-full bg-white text-black pb-32">
         {isCartEmpty ? (
-          <section className="flex flex-col items-center justify-center pt-20 pb-10 px-4">
+          <section className="flex flex-col items-center justify-center h-[calc(100vh-56px-56px)] pt-20 pb-10 px-4">
             <img src={EmptyCartImage} alt="장바구니 비어 있음" className="w-40 h-40 mb-6" />
             <p className="text-subtitle-medium mb-2">장바구니에 담긴 상품이 없습니다.</p>
             <p className="text-body-regular text-black-4">원하는 상품을 찾아 장바구니를 채워보세요.</p>
@@ -131,17 +131,17 @@ export default function ShoppingCart() {
                 </div>
               </section>
             ))}
-
-            {!isCartEmpty && (
-              <div className="fixed bottom-16 left-0 right-0 w-full">
-                <Button kind="basic" variant="solid-orange" className="w-full" disabled={totalPrice === 0} onClick={() => {}}>
-                  {totalPrice.toLocaleString()} 원 1인 구매하기
-                </Button>
-              </div>
-            )}
           </>
         )}
       </div>
+
+      {!isCartEmpty && (
+        <div className="fixed bottom-14 left-0 right-0 w-full max-w-[600px] mx-auto px-4">
+          <Button kind="basic" variant="solid-orange" className="w-full" disabled={totalPrice === 0} onClick={() => {}}>
+            {totalPrice.toLocaleString()} 원 1인 구매하기
+          </Button>
+        </div>
+      )}
 
       <BottomBar />
     </>
