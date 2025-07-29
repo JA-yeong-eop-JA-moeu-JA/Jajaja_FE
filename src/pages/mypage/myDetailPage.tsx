@@ -11,11 +11,11 @@ export default function MyDetailPage() {
     <div className="w-full h-screen bg-black-0">
       <PageHeader title="내 정보 관리" />
       <div className="flex flex-col items-center justify-center px-4 text-subtitle-medium bg-white">
-        <button className="w-full flex flex-col items-center justify-center gap-1 pb-6 border-b border-black-1" onClick={() => navigate('/myPage/me/profile')}>
+        <button className="w-full flex flex-col items-center justify-center gap-1 pb-6 border-b border-black-1" onClick={() => navigate('/mypage/me/profile')}>
           <Profile className="w-30 h-30" />
           <p>프로필 수정</p>
         </button>
-        <button className="w-full flex flex-col items-center justify-center gap-2 pb-6 pt-7" onClick={() => navigate('/myPage/me/address')}>
+        <button className="w-full flex flex-col items-center justify-center gap-2 pb-6 pt-7" onClick={() => navigate('/mypage/me/address')}>
           <Address className="w-30 h-30" />
           <p>배송지 관리</p>
         </button>

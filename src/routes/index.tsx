@@ -1,11 +1,14 @@
 import { createBrowserRouter } from 'react-router-dom';
 
 import Layout from '@/layouts';
+import AddAddress from '@/pages/addAddress';
 import AddressChange from '@/pages/addressChange';
 import Agreement from '@/pages/agreement';
+import ApplyReturnOrExchange from '@/pages/ApplyReturnOrExchange';
 import Board from '@/pages/board';
 import CategoryPage from '@/pages/categoryPage';
 import CouponsPage from '@/pages/coupon';
+import DeliveryInfo from '@/pages/deliveryInfo';
 import ExchangeOK from '@/pages/feedback/exchangeOk';
 import NotFound from '@/pages/feedback/NotFoundPage';
 import PaymentStatusWrapper from '@/pages/feedback/paymentStatusWrapper';
@@ -20,8 +23,11 @@ import MyReview from '@/pages/mypage/myReview';
 import Points from '@/pages/mypage/points';
 import Profile from '@/pages/mypage/profile';
 import WriteReview from '@/pages/mypage/writeReview';
-import Notice from '@/pages/notice';
+import Notifications from '@/pages/notifications';
 import OnBoarding from '@/pages/onBoarding';
+import OrderDetailPersonal from '@/pages/orderDetailPersonal';
+import OrderDetailTeam from '@/pages/orderDetailTeam';
+import OrderList from '@/pages/orderListPage';
 import Payment from '@/pages/payment';
 import PhotoReview from '@/pages/photoReview';
 import Product from '@/pages/product';
@@ -37,21 +43,30 @@ export const router = createBrowserRouter([
       { index: true, element: <OnBoarding /> },
       { path: 'home', element: <Home /> },
       { path: 'login', element: <Login /> },
-      { path: 'myPage', element: <MyPage /> },
-      { path: 'myPage/points', element: <Points /> },
-      { path: 'myPage/me', element: <MyDetailPage /> },
-      { path: 'myPage/me/profile', element: <Profile /> },
-      { path: 'myPage/me/address', element: <Address /> },
-      { path: 'myPage/coupon', element: <Coupons /> },
-      { path: 'myPage/review', element: <MyReview /> },
-      { path: 'myPage/review/:orderId/:productId', element: <WriteReview /> },
+      { path: 'mypage', element: <MyPage /> },
+      { path: 'mypage/me', element: <MyDetailPage /> },
+      { path: 'mypage/me/profile', element: <Profile /> },
+      { path: 'mypage/me/address', element: <Address /> },
+      { path: 'mypage/point', element: <Points /> },
+      { path: 'mypage/coupon', element: <Coupons /> },
+      { path: 'mypage/review', element: <MyReview /> },
+      { path: 'mypage/review/:orderId/:productId', element: <WriteReview /> },
       { path: 'coupon', element: <CouponsPage /> },
-      { path: 'notice', element: <Notice /> },
+      { path: 'notifications', element: <Notifications /> },
       { path: 'payment', element: <Payment /> },
       { path: 'shoppingcart', element: <ShoppingCart /> },
       { path: 'addresschange', element: <AddressChange /> },
+
+      { path: 'search', element: <Search /> },
       { path: 'exchange/complete', element: <ExchangeOK /> },
       { path: 'return/complete', element: <ReturnOK /> },
+      { path: 'addaddress', element: <AddAddress /> },
+      { path: 'myPage/deliveryInfo', element: <DeliveryInfo /> },
+      { path: 'myPage/order', element: <OrderList /> },
+      { path: 'myPage/order/orderDetailPersonal', element: <OrderDetailPersonal /> },
+      { path: 'myPage/order/orderDetailTeam', element: <OrderDetailTeam /> },
+      { path: 'myPage/apply', element: <ApplyReturnOrExchange /> },
+
       { path: '*', element: <NotFound /> },
       { path: 'board', element: <Board /> },
       { path: 'agreement', element: <Agreement /> },
@@ -61,6 +76,8 @@ export const router = createBrowserRouter([
       { path: 'product/:id/photoReview', element: <PhotoReview /> },
       { path: 'product/:id/review', element: <Review /> },
       { path: 'payment/:status', element: <PaymentStatusWrapper /> },
+      { path: 'addaddress', element: <AddAddress /> },
+      { path: '*', element: <NotFound /> },
     ],
   },
 ]);

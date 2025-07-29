@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import { useModalStore } from '@/stores/modalStore';
+
 import StarRating from '@/components/product/starRating';
 
 import Heart from '@/assets/icons/heart.svg?react';
@@ -21,6 +23,7 @@ type TReviewCardProps = {
 };
 export default function ReviewCard({ data }: TReviewCardProps) {
   const navigate = useNavigate();
+  const { openModal } = useModalStore();
   const { id } = useParams<{ id: string }>();
   const { imageUrl, name, date, star, review, likeCount, product, images } = data;
   const [expanded, setExpanded] = useState(false);
@@ -82,13 +85,13 @@ export default function ReviewCard({ data }: TReviewCardProps) {
       <section className="flex items-center gap-2">
         {images.slice(0, 4).map((img, idx) => (
           <div key={idx} className="relative">
-            <img src={img} />
+            <img src={img} onClick={() => openModal('image', { src: img })} />
             {idx === 3 && images.length > 4 && (
               <div
                 className="flex justify-center items-center text-white text-body-regular absolute top-0 left-0 bg-[#00000099] w-full h-full"
                 onClick={() => navigate(`/product/${id}/photoReview`)}
               >
-                +{images.length - 4}
+                +{images.length - 3}
               </div>
             )}
           </div>

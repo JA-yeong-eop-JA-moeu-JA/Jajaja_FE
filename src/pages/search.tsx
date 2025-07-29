@@ -118,7 +118,7 @@ export default function Search() {
           <div ref={menuRef} className="py-4 relative w-fit ml-auto text-small-medium">
             <div onClick={() => setIsAsc((prev) => !prev)} className="flex items-center gap-2 cursor-pointer">
               <p>{sortOption}</p>
-              {isAsc ? <Down /> : <Up />}
+              {isAsc ? <Down className="w-3.5 h-2" /> : <Up />}
             </div>
 
             {!isAsc && (
