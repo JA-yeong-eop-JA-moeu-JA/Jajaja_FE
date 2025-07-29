@@ -17,7 +17,7 @@ export default function InputField({ label, placeholder, value, onChange, type =
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        className="w-full border border-black-1 rounded px-3 py-2.5 text-body-regular text-black-4"
+        className="w-full border border-black-1 rounded px-3 py-2.5 text-body-regular placeholder:text-black-4"
       />
     </div>
   );

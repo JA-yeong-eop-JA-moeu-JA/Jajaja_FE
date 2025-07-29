@@ -1,5 +1,7 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+
+import type { IAddress } from '@/constants/address/address';
 
 import { Button } from '@/components/common/button';
 import BaseCheckbox from '@/components/common/checkbox';
@@ -7,21 +9,51 @@ import InputField from '@/components/common/InputField';
 import BottomBar from '@/components/head_bottom/BottomBar';
 import PageHeader from '@/components/head_bottom/PageHeader';
 
-export default function AddAddress() {
+export default function EditAddress() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { address: initialAddress } = location.state || { address: null };
+
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [addressDetail, setAddressDetail] = useState('');
   const [gateCode, setGateCode] = useState('');
   const [checked, setChecked] = useState(false);
+
+  useEffect(() => {
+    if (initialAddress) {
+      setName(initialAddress.name || '');
+      setPhone(initialAddress.phone || '');
+      setAddress(initialAddress.address || '');
+      setAddressDetail(initialAddress.detailAddress || '');
+      setGateCode(initialAddress.gateCode || '');
+      setChecked(initialAddress.isDefault || false);
+    }
+  }, [initialAddress]);
+
   const isValidPhone = /^\d{3}-\d{3,4}-\d{4}$/.test(phone);
-  const isFormValid = name !== '' && isValidPhone && /* address !== '' && */ addressDetail !== '';
-  const navigate = useNavigate();
+  const isFormValid = name !== '' && isValidPhone && addressDetail !== '';
+
+  const handleSave = () => {
+    const updatedAddress: IAddress = {
+      ...initialAddress,
+      name,
+      phone,
+      address,
+      detailAddress: addressDetail,
+      gateCode,
+      isDefault: checked,
+    };
+
+    console.log('주소 수정:', updatedAddress);
+    navigate(-1);
+  };
 
   return (
     <div className="w-full h-screen flex flex-col justify-between max-w-[600px] mx-auto">
       <div>
-        <PageHeader title="배송지 추가" />
+        <PageHeader title="배송지 수정" />
         <InputField label="성함" placeholder="최대 10글자로 작성해주세요." value={name} onChange={(e) => setName(e.target.value)} />
         <InputField
           label="휴대폰 번호"
@@ -51,17 +83,17 @@ export default function AddAddress() {
               placeholder="주소 찾기로 입력해주세요."
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              className="flex-1 border border-black-0 rounded p-3 text-body-regular bg-black-1"
+              className="flex-1 border border-black-0 rounded p-3 text-body-regular bg-black-1 text-black-6 placeholder:text-black-4"
               readOnly
             />
           </div>
-          <div className="flex gap-2 mb-4 placeholder:text-black-4">
+          <div className="flex gap-2 mb-4">
             <input
               type="text"
               placeholder="상세 주소"
               value={addressDetail}
               onChange={(e) => setAddressDetail(e.target.value)}
-              className="flex-1 border border-black-1 rounded px-3 py-2.5 text-body-regular"
+              className="flex-1 border border-black-1 rounded px-3 py-2.5 text-body-regular text-black-6 placeholder:text-black-4"
             />
             <button className="px-4 border border-black-3 text-orange rounded text-body-regular">주소 찾기</button>
           </div>
@@ -85,8 +117,8 @@ export default function AddAddress() {
       </div>
 
       <div className="fixed bottom-14 left-0 right-0 w-full max-w-[600px] mx-auto">
-        <Button kind="basic" variant="solid-orange" disabled={!isFormValid} onClick={() => navigate(-1)} className="w-full">
-          저장하기
+        <Button kind="basic" variant="solid-orange" disabled={!isFormValid} onClick={handleSave} className="w-full">
+          수정하기
         </Button>
       </div>
 

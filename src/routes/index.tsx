@@ -9,6 +9,7 @@ import Board from '@/pages/board';
 import CategoryPage from '@/pages/categoryPage';
 import CouponsPage from '@/pages/coupon';
 import DeliveryInfo from '@/pages/deliveryInfo';
+import EditAddress from '@/pages/editAddress';
 import ExchangeOK from '@/pages/feedback/exchangeOk';
 import NotFound from '@/pages/feedback/NotFoundPage';
 import PaymentStatusWrapper from '@/pages/feedback/paymentStatusWrapper';
@@ -56,6 +57,7 @@ export const router = createBrowserRouter([
       { path: 'payment', element: <Payment /> },
       { path: 'shoppingcart', element: <ShoppingCart /> },
       { path: 'addresschange', element: <AddressChange /> },
+      { path: 'editaddress', element: <EditAddress /> },
 
       { path: 'search', element: <Search /> },
       { path: 'exchange/complete', element: <ExchangeOK /> },
