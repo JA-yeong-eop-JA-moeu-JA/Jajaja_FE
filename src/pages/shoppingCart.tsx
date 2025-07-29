@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { useModalStore } from '@/stores/modalStore';
 import { useProductCheckboxStore } from '@/stores/productCheckboxStore';
@@ -29,6 +30,7 @@ export default function ShoppingCart() {
   const productIds = cartList.map((item) => item.productId.toString());
   const { checkedItems, initialize, toggle, toggleAll, isAllChecked, reset } = useProductCheckboxStore();
   const { openModal } = useModalStore();
+  const navigate = useNavigate();
 
   useEffect(() => {
     initialize(productIds, false);
@@ -36,7 +38,7 @@ export default function ShoppingCart() {
 
   const totalPrice = cartList.reduce((acc: number, product: ICartItem) => {
     if (checkedItems[product.productId]) {
-      return acc + product.price;
+      return acc + product.price * (product.quantity || 1);
     }
     return acc;
   }, 0);
@@ -50,9 +52,20 @@ export default function ShoppingCart() {
     reset();
   };
 
+  const handleUpdateCartItem = (updatedItem: ICartItem) => {
+    setCartList((prev) => prev.map((item) => (item.productId === updatedItem.productId ? updatedItem : item)));
+  };
+
+  const handleOptionChange = (item: ICartItem) => {
+    openModal('cart-option', {
+      item,
+      onUpdate: handleUpdateCartItem,
+    });
+  };
+
   return (
     <>
-      <header className="px-2">
+      <header className="">
         <PageHeaderBar title="장바구니" />
       </header>
 
@@ -87,7 +100,7 @@ export default function ShoppingCart() {
                 <div className="flex items-start gap-3">
                   <BaseCheckbox checked={checkedItems[product.productId] || false} onClick={() => toggle(product.productId.toString())} />
                   <div className="flex-1">
-                    <OrderItem item={product} show={false} layout="horizontal" showPrice={false} />
+                    <OrderItem item={product} show={false} showPrice={false} />
                   </div>
                 </div>
 
@@ -95,21 +108,21 @@ export default function ShoppingCart() {
                   <Button kind="select-content" variant="outline-orange" className="flex-1 py-1">
                     팀 참여
                   </Button>
-                  <Button kind="select-content" variant="outline-gray" className="flex-1 py-1">
+                  <Button kind="select-content" variant="outline-gray" className="flex-1 py-1" onClick={() => handleOptionChange(product)}>
                     옵션 변경
                   </Button>
                 </div>
 
                 <div className="flex justify-end items-baseline gap-2 mt-3 w-full">
                   <p className="text-black-3 text-small-regular line-through">{product.originalPrice.toLocaleString()} 원</p>
-                  <p className="text-body-medium">{product.price.toLocaleString()} 원</p>
+                  <p className="text-body-medium">{(product.price * (product.quantity || 1)).toLocaleString()} 원</p>
                 </div>
               </section>
             ))}
 
             {!isCartEmpty && (
-              <div className="fixed bottom-16 left-0 right-0 w-full">
-                <Button kind="basic" variant="solid-orange" className="w-full" disabled={totalPrice === 0} onClick={() => {}}>
+              <div className="fixed bottom-14 left-0 right-0 w-full max-w-[600px] mx-auto">
+                <Button kind="basic" variant="solid-orange" className="w-full" disabled={totalPrice === 0} onClick={() => navigate(-1)}>
                   {totalPrice.toLocaleString()} 원 1인 구매하기
                 </Button>
               </div>

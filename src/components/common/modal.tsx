@@ -88,7 +88,7 @@ export default function ModalProvider({ children }: IModalProviderProps) {
     <>
       {children}
 
-      {(type === 'bottom-drawer' || type == 'bottom-drawer-team') && (
+      {(type === 'bottom-drawer' || type == 'bottom-drawer-team' || type === 'cart-option') && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center">
           <div
             ref={drawerRef}
