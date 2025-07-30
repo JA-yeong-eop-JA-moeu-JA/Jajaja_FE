@@ -41,7 +41,7 @@ export default function Home() {
   }, [lastY]);
 
   return (
-    <div className="pb-15">
+    <div className="pb-15 flex flex-col min-h-screen">
       <div
         className={`fixed top-0 left-0 right-0 z-50 bg-white transition-all duration-300
                     max-w-screen-sm mx-auto
@@ -50,12 +50,12 @@ export default function Home() {
         <header className="px-3">
           <Header showSearch={false} />
         </header>
-        <header className="w-full px-4 pb-2.5">
+        <header className="w-full px-4 pb-2.5 max-w-screen-sm mx-auto">
           <SearchInput value={''} onFocus={() => navigate('/search')} />
         </header>
       </div>
 
-      <div className="pt-[104px] pb-15">
+      <div className="pt-[100px] pb-15">
         <section className="w-full">
           <Banner />
         </section>
@@ -86,11 +86,12 @@ export default function Home() {
       </div>
 
       <div
-        className={`fixed bottom-0 left-0 right-0 z-50 transition-all duration-300
+        className={`fixed bottom-0 left-0 right-0 w-full h-14 transition-all duration-300
                     ${scrollDir === 'down' ? 'translate-y-[80px] opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}
       >
         <BottomBar />
       </div>
+      
     </div>
   );
 }
