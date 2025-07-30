@@ -66,13 +66,13 @@ export default function ReviewItem({ item }: IReviewDataProps) {
             <img
               src={url}
               alt={`Review image ${index + 1}`}
-              onClick={() => openModal('image', { src: url, imageList: item.images })}
+              onClick={() => openModal('image', { src: url, images: item.images })}
               className="w-19 h-19 object-cover"
             />
             {index === 3 && item.images && item.images.length > 4 && (
               <div
                 className="flex justify-center items-center text-white text-body-regular absolute top-0 left-0 bg-black/60 w-full h-full"
-                onClick={() => openModal('image', { src: url, imageList: item.images })}
+                onClick={() => openModal('image', { src: url, images: item.images })}
               >
                 +{item.images.length - 3}
               </div>

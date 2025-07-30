@@ -87,7 +87,7 @@ export default function ReviewCard({ data }: TReviewCardProps) {
       <section className="flex items-center gap-2">
         {imageList.slice(0, 4).map((img, idx) => (
           <div key={idx} className="relative">
-            <img src={img} onClick={() => openModal('image', { src: img, imageList: REVIEW_LIST.flatMap(({ images }) => images) })} />
+            <img src={img} onClick={() => openModal('image', { src: img, images: REVIEW_LIST.flatMap(({ images }) => images) })} />
             {idx === 3 && imageList.length > 4 && (
               <div
                 className="flex justify-center items-center text-white text-body-regular absolute top-0 left-0 bg-[#00000099] w-full h-full"

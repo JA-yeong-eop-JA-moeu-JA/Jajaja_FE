@@ -26,7 +26,7 @@ export default function PhotoReview() {
       </section>
       <section className="w-full grid grid-cols-3 gap-1">
         {imageList.map((img, idx) => (
-          <img src={img} key={idx} className="w-full aspect-square object-cover" onClick={() => openModal('image', { src: img, imageList: imageList })} />
+          <img src={img} key={idx} className="w-full aspect-square object-cover" onClick={() => openModal('image', { src: img, images: imageList })} />
         ))}
       </section>
     </div>
