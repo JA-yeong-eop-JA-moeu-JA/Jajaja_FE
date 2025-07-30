@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import type { ICoupon } from '@/constants/coupon/coupons';
@@ -16,19 +16,22 @@ export default function CouponsPage() {
     if (ownedCoupons.length === 0) {
       issueSignupCoupons();
     }
-  }, []);
+  }, [ownedCoupons.length, issueSignupCoupons]);
 
-  const handleSelect = (id: number) => {
-    selectCoupon(id);
-    setTimeout(() => {
-      navigate(-1);
-    }, 200);
-  };
+  const handleSelect = useCallback(
+    (id: number) => {
+      selectCoupon(id);
+      setTimeout(() => {
+        navigate(-1);
+      }, 200);
+    },
+    [selectCoupon, navigate],
+  );
 
   return (
     <>
       <PageHeader title="쿠폰" />
-      <div className="w-full h-screen bg-white">
+      <div className="w-full min-h-screen">
         <div className="flex flex-col gap-3 px-3">
           {ownedCoupons.map((coupon: ICoupon) => (
             <CouponCard key={coupon.id} coupon={coupon} isSelected={selectedCouponId === coupon.id} onClick={() => handleSelect(coupon.id)} />
