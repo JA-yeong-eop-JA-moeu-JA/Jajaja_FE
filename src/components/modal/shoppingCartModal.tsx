@@ -20,46 +20,31 @@ interface ICartModalProps {
 export default function CartModal({ item, onUpdate }: ICartModalProps) {
   const { closeModal } = useModalStore();
 
-  // 기존 아이템을 초기값으로 설정
-  const [selectedItems, setSelectedItems] = useState<{ id: number; name: string; price: number; quantity: number }[]>([
-    {
-      id: item.productId,
-      name: item.name,
-      price: item.price,
-      quantity: item.quantity || 1,
-    },
-  ]);
+  const [selectedItem, setSelectedItem] = useState<ICartItem>({
+    ...item,
+    quantity: item.quantity || 1,
+  });
 
   const handleSelect = (selectedId: number) => {
     const found = OPTIONS.find(({ id }) => id === selectedId);
     if (!found) return;
 
-    setSelectedItems([
-      {
-        id: item.productId,
-        name: found.name,
-        price: found.price,
-        quantity: selectedItems[0]?.quantity || 1,
-      },
-    ]);
+    setSelectedItem({
+      ...selectedItem,
+      name: found.name,
+      price: found.price,
+    });
   };
 
-  const handleCalculate = (id: number, offset: number) => {
-    setSelectedItems((prev) =>
-      prev.map((selectedItem) => (selectedItem.id === id ? { ...selectedItem, quantity: Math.max(selectedItem.quantity + offset, 1) } : selectedItem)),
-    );
+  const handleCalculate = (offset: number) => {
+    setSelectedItem((prev) => ({
+      ...prev,
+      quantity: Math.max((prev.quantity || 1) + offset, 1),
+    }));
   };
 
   const handleSave = () => {
-    if (selectedItems.length > 0) {
-      const updatedItem = {
-        ...item,
-        quantity: selectedItems[0].quantity,
-        price: selectedItems[0].price,
-        name: selectedItems[0].name,
-      };
-      onUpdate(updatedItem);
-    }
+    onUpdate(selectedItem);
     closeModal();
   };
 
@@ -68,31 +53,28 @@ export default function CartModal({ item, onUpdate }: ICartModalProps) {
       <div className="flex px-4 flex-col gap-2">
         <DropDown options={OPTIONS} onChange={({ id }) => handleSelect(id)} />
 
-        {selectedItems.length > 0 && (
-          <div className="flex flex-col gap-3">
-            {selectedItems.map(({ id, name, price, quantity }) => (
-              <div key={id} className="rounded-sm w-full min-h-22 bg-black-0 px-4 pt-5 pb-4 relative flex flex-col gap-3">
-                <p className="text-body-regular">{name}</p>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center w-21 h-6 border border-black-2">
-                    <div className="flex items-center justify-center w-6 h-full cursor-pointer" onClick={() => handleCalculate(id, -1)}>
-                      <Minus />
-                    </div>
-                    <div className="flex items-center justify-center w-9 h-full border-x border-black-2 text-small-regular">{quantity}</div>
-                    <div className="flex items-center justify-center w-6 h-full cursor-pointer" onClick={() => handleCalculate(id, 1)}>
-                      <Plus />
-                    </div>
-                  </div>
-                  <p className="text-body-medium">{(price * quantity).toLocaleString()} 원</p>
+        <div className="flex flex-col gap-3">
+          <div className="rounded-sm w-full min-h-22 bg-black-0 px-4 pt-5 pb-4 relative flex flex-col gap-3">
+            <p className="text-body-regular">{selectedItem.name}</p>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center w-21 h-6 border border-black-2">
+                <div className="flex items-center justify-center w-6 h-full cursor-pointer" onClick={() => handleCalculate(-1)}>
+                  <Minus />
+                </div>
+                <div className="flex items-center justify-center w-9 h-full border-x border-black-2 text-small-regular">{selectedItem.quantity || 1}</div>
+                <div className="flex items-center justify-center w-6 h-full cursor-pointer" onClick={() => handleCalculate(1)}>
+                  <Plus />
                 </div>
               </div>
-            ))}
-            <div className="flex justify-between items-center text-small-medium px-2">
-              <p>총 {selectedItems.reduce((acc, selectedItem) => acc + selectedItem.quantity, 0)}개</p>
-              <p>{selectedItems.reduce((acc, selectedItem) => acc + selectedItem.price * selectedItem.quantity, 0).toLocaleString()} 원</p>
+              <p className="text-body-medium">{(selectedItem.price * (selectedItem.quantity || 1)).toLocaleString()} 원</p>
             </div>
           </div>
-        )}
+
+          <div className="flex justify-between items-center text-small-medium px-2">
+            <p>총 {selectedItem.quantity || 1}개</p>
+            <p>{((selectedItem.price ?? 0) * ((selectedItem.quantity ?? 0) || 1)).toLocaleString()} 원</p>
+          </div>
+        </div>
       </div>
 
       <div className="w-full">
