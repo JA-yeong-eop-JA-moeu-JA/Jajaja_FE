@@ -13,10 +13,11 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://jajaja.kro.kr',
+        target: import.meta.env.VITE_API_URL,
         changeOrigin: true,
-        secure: false, // HTTPS 인증서가 self-signed인 경우 필요
+        secure: false,
       },
     },
   },
+
 });
