@@ -117,12 +117,12 @@ export default function CategoryPage() {
   };
 
   return (
-    <div className="text-body-regular">
+    <div className="text-body-regular flex flex-col min-h-screen">
       <header className="px-3">
         <Header />
       </header>
 
-      <div className="flex flex-col pb-14 h-screen bg-white">
+      <div className="relative flex-1 overflow-y-auto px-3">
         <PageButton items={['basic', 'industry']} selected={selectedTop1} onSelect={setSelectedTop1} />
 
         <div className="flex flex-1 overflow-y-auto relative">

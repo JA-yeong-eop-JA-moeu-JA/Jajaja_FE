@@ -7,7 +7,7 @@ import homeIcon from '@/assets/bar_icons/home.svg';
 import myIcon from '@/assets/bar_icons/my.svg';
 
 const navItems = [
-  { to: '/', icon: homeIcon, label: '홈' },
+  { to: '/home', icon: homeIcon, label: '홈' },
   { to: '/board', icon: boardIcon, label: '게시판' },
   { to: '/category', icon: categoryIcon, label: '카테고리' },
   { to: '/shoppingcart', icon: cartIcon, label: '장바구니' },
@@ -16,24 +16,33 @@ const navItems = [
 
 export default function BottomBar() {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 w-full max-w-screen-sm mx-auto bg-white grid grid-cols-5 px-2 py-2 text-tiny-medium h-14">
-      {navItems.map(({ to, icon, label }) => (
-        <NavLink
-          key={to}
-          to={to}
-          className={({ isActive }) =>
-            `flex flex-col items-center gap-1 transition-colors 
-            ${isActive ? 'text-gray-800' : 'text-black-4'} hover:text-gray-600`
-          }
-        >
-          {({ isActive }) => (
-            <>
-              <img src={icon} alt={`${label} 아이콘`} className={`w-5 h-5 ${isActive ? 'brightness-0' : 'brightness-100'}`} />
-              <span>{label}</span>
-            </>
-          )}
-        </NavLink>
-      ))}
-    </nav>
+    <div className="fixed bottom-0 left-0 right-0 w-full max-w-[600px] mx-auto">
+      <nav className="bg-white grid grid-cols-5 px-2 py-2 text-tiny-medium h-14">
+        {navItems.map(({ to, icon, label }) => (
+          <NavLink
+            key={to}
+            to={to}
+            className={({ isActive }) =>
+              `group flex flex-col items-center gap-2 transition-colors ${isActive ? 'text-black' : 'text-black-3'} hover:text-black`
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <img
+                  src={icon}
+                  alt={`${label} 아이콘`}
+                  className={`
+                    w-5 h-5 transition-all
+                    ${isActive ? 'brightness-0' : 'brightness-100'}
+                    group-hover:brightness-0
+                  `}
+                />
+                <span>{label}</span>
+              </>
+            )}
+          </NavLink>
+        ))}
+      </nav>
+    </div>
   );
 }
