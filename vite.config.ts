@@ -1,5 +1,4 @@
 import fs from 'fs';
-import path from 'path';
 
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
@@ -7,6 +6,7 @@ import { defineConfig } from 'vite';
 import svgr from 'vite-plugin-svgr';
 
 // https://vite.dev/config/
+const isCI = process.env.CI === 'true';
 export default defineConfig({
   plugins: [react(), tailwindcss(), svgr({ include: '**/*.svg?react' })],
   resolve: {
@@ -14,11 +14,17 @@ export default defineConfig({
       '@': '/src',
     },
   },
-  server: {
-    https: {
-      key: fs.readFileSync(path.resolve(__dirname, 'key.pem')),
-      cert: fs.readFileSync(path.resolve(__dirname, 'cert.pem')),
-    },
-    port: 3000,
-  },
+  server: !isCI
+    ? {
+        https: {
+          key: fs.readFileSync('./key.pem'),
+          cert: fs.readFileSync('./cert.pem'),
+        },
+        host: true,
+        port: 3000,
+      }
+    : {
+        host: true,
+        port: 3000,
+      },
 });
