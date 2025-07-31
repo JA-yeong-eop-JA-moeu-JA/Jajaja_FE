@@ -16,6 +16,7 @@ import { profileData } from '@/mocks/profileData';
 
 export default function MyPage() {
   const { data } = useUserInfo();
+  console.log(data);
   const { nickname, profileImage } = profileData;
   const navigate = useNavigate();
   return (
