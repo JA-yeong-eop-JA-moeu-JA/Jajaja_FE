@@ -6,7 +6,7 @@ import { defineConfig } from 'vite';
 import svgr from 'vite-plugin-svgr';
 
 // https://vite.dev/config/
-const isCI = process.env.CI === 'true';
+const hasCert = fs.existsSync('./key.pem') && fs.existsSync('./cert.pem');
 export default defineConfig({
   plugins: [react(), tailwindcss(), svgr({ include: '**/*.svg?react' })],
   resolve: {
@@ -14,7 +14,7 @@ export default defineConfig({
       '@': '/src',
     },
   },
-  server: !isCI
+  server: hasCert
     ? {
         https: {
           key: fs.readFileSync('./key.pem'),
