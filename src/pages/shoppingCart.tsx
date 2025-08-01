@@ -119,21 +119,13 @@ export default function ShoppingCart() {
                 </div>
               </section>
             ))}
-
-            {!isCartEmpty && (
-              <div className="fixed bottom-14 left-0 right-0 w-full max-w-[600px] mx-auto">
-                <Button kind="basic" variant="solid-orange" className="w-full" disabled={totalPrice === 0} onClick={() => navigate('/pa')}>
-                  {totalPrice.toLocaleString()} 원 1인 구매하기
-                </Button>
-              </div>
-            )}
           </>
         )}
       </div>
 
       {!isCartEmpty && (
-        <div className="fixed bottom-14 left-0 right-0 w-full max-w-[600px] mx-auto px-4">
-          <Button kind="basic" variant="solid-orange" className="w-full" disabled={totalPrice === 0} onClick={() => {}}>
+        <div className="fixed bottom-14 left-0 right-0 w-full max-w-[600px] mx-auto">
+          <Button kind="basic" variant="solid-orange" className="w-full" disabled={totalPrice === 0} onClick={() => navigate('/payment')}>
             {totalPrice.toLocaleString()} 원 1인 구매하기
           </Button>
         </div>

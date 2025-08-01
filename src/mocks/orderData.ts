@@ -30,7 +30,7 @@ export const orderData: IOrder[] = [
         price: 23920,
         image: '/src/assets/myPage/review/item/1.svg',
         option: '[기획 세트] 150스틱',
-        quantity: 2,
+        quantity: 1,
         reviewed: false,
         orderStatus: '배송 중',
         matchStatus: '매칭 중',
