@@ -119,7 +119,7 @@ export default function Payment() {
       <PageHeader title="주문 결제" />
 
       <section className="border-b-4 border-black-1">
-        <div className="w-full max-w-[500px] mx-auto bg-white">
+        <div className="w-full">
           <AddressSection name="이한비" phone="010-2812-1241" address="서울특별시 강서구 낙섬서로12번길 3-12" />
         </div>
       </section>
