@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { OPTIONS } from '@/constants/product/options';
 
@@ -12,6 +13,8 @@ import Minus from '@/assets/icons/minus.svg?react';
 import Plus from '@/assets/icons/plus.svg?react';
 
 export default function OptionModal({ type }: { type?: string }) {
+  const navigate = useNavigate();
+
   const { closeModal } = useModalStore();
   const [selectedItems, setSelectedItems] = useState<{ id: number; name: string; price: number; quantity: number }[]>([]);
   const isTeam = type === 'team';
@@ -74,7 +77,7 @@ export default function OptionModal({ type }: { type?: string }) {
         )}
       </div>
       <div className="flex items-center gap-4">
-        <Cart />
+        <Cart onClick={() => navigate('/shoppingcart')} />
         <button
           className={`w-full h-12 flex justify-center items-center rounded-sm text-body-medium text-white ${isTeam ? 'bg-black' : 'bg-orange'}`}
           onClick={() => closeModal()}
