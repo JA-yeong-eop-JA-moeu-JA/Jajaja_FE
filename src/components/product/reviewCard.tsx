@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import { REVIEW_LIST } from '@/constants/product/reviews';
+
 import { useModalStore } from '@/stores/modalStore';
 
 import StarRating from '@/components/product/starRating';
@@ -25,7 +27,7 @@ export default function ReviewCard({ data }: TReviewCardProps) {
   const navigate = useNavigate();
   const { openModal } = useModalStore();
   const { id } = useParams<{ id: string }>();
-  const { imageUrl, name, date, star, review, likeCount, product, images } = data;
+  const { imageUrl, name, date, star, review, likeCount, product, images: imageList } = data;
   const [expanded, setExpanded] = useState(false);
   const [showToggle, setShowToggle] = useState(false);
   const [liked, setLiked] = useState(false);
@@ -83,15 +85,15 @@ export default function ReviewCard({ data }: TReviewCardProps) {
         </section>
       )}
       <section className="flex items-center gap-2">
-        {images.slice(0, 4).map((img, idx) => (
+        {imageList.slice(0, 4).map((img, idx) => (
           <div key={idx} className="relative">
-            <img src={img} onClick={() => openModal('image', { src: img })} />
-            {idx === 3 && images.length > 4 && (
+            <img src={img} onClick={() => openModal('image', { src: img, images: REVIEW_LIST.flatMap(({ images }) => images) })} />
+            {idx === 3 && imageList.length > 4 && (
               <div
                 className="flex justify-center items-center text-white text-body-regular absolute top-0 left-0 bg-[#00000099] w-full h-full"
                 onClick={() => navigate(`/product/${id}/photoReview`)}
               >
-                +{images.length - 3}
+                +{imageList.length - 3}
               </div>
             )}
           </div>
