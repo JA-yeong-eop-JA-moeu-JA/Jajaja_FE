@@ -6,6 +6,14 @@ import Logo from '@/assets/sizeLogo.svg?react';
 import SubLogo from '@/assets/subLogo.svg?react';
 
 export default function Login() {
+  const handleKakaoLogin = () => {
+    window.location.href = `${import.meta.env.VITE_API_BASE_URL}/oauth2/authorization/kakao`;
+  };
+
+  const handleGoogleLogin = () => {
+    window.location.href = `${import.meta.env.VITE_API_BASE_URL}/oauth2/authorization/google`;
+  };
+
   return (
     <div className="w-full h-screen flex flex-col justify-between">
       <header className="px-2">
@@ -23,13 +31,13 @@ export default function Login() {
         </div>
 
         <div className="w-full flex flex-col items-center justify-center gap-4 px-4">
-          <button className="w-full h-12 rounded bg-[#FDDC3F] flex items-center justify-center relative">
+          <button className="w-full h-12 rounded bg-[#FDDC3F] flex items-center justify-center relative" onClick={handleKakaoLogin}>
             <span className="absolute left-6 flex items-center">
               <Kakao className="w-6.5 h-6" />
             </span>
             <p className="text-black text-body-medium mx-auto">카카오로 시작하기</p>
           </button>
-          <button className="w-full h-12 rounded border border-black-2 flex items-center justify-center relative">
+          <button className="w-full h-12 rounded border border-black-2 flex items-center justify-center relative" onClick={handleGoogleLogin}>
             <span className="absolute left-6 flex items-center">
               <Google className="w-6.5 h-6.5" />
             </span>
