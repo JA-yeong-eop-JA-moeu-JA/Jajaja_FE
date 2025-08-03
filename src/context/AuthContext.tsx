@@ -1,5 +1,4 @@
 import { createContext, type PropsWithChildren, useContext } from 'react';
-import { useLocation } from 'react-router-dom';
 
 import type { TGetUserInfoResponse } from '@/types/member/TGetUserInfo';
 
@@ -13,13 +12,8 @@ interface IAuthContextType {
 
 const AuthContext = createContext<IAuthContextType | null>(null);
 
-const protectedPaths = ['/mypage', '/notifications', '/payment', '/address'];
-
 export function AuthProvider({ children }: PropsWithChildren) {
-  const { pathname } = useLocation();
-  const shouldFetchUser = protectedPaths.some((path) => pathname.startsWith(path));
-
-  const { data } = useUserInfo({ enabled: shouldFetchUser });
+  const { data } = useUserInfo();
 
   const user = data?.result ?? null;
   const isLoggedIn = !!user;
