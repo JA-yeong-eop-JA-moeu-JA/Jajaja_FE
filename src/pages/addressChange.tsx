@@ -24,7 +24,7 @@ export default function AddressChange() {
         <AddressCard key={addr.id} address={addr} onDelete={handleDelete} />
       ))}
 
-      <Button kind="basic" variant="solid-gray" className="w-full" onClick={() => navigate('/addaddress')}>
+      <Button kind="basic" variant="solid-gray" className="w-full" onClick={() => navigate('/address/add')}>
         + 배송지 추가
       </Button>
     </div>

@@ -15,7 +15,7 @@ export default function MyDetailPage() {
           <Profile className="w-30 h-30" />
           <p>프로필 수정</p>
         </button>
-        <button className="w-full flex flex-col items-center justify-center gap-2 pb-6 pt-7" onClick={() => navigate('/mypage/me/address')}>
+        <button className="w-full flex flex-col items-center justify-center gap-2 pb-6 pt-7" onClick={() => navigate('/address/change')}>
           <Address className="w-30 h-30" />
           <p>배송지 관리</p>
         </button>

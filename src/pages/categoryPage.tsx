@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
+import axiosInstance from '@/apis/axiosInstance';
 
 import { PageButton, type TabId } from '@/components/common/button';
 import BottomBar from '@/components/head_bottom/BottomBar';
@@ -70,11 +71,12 @@ export default function CategoryPage() {
   useEffect(() => {
     const fetchMainCategories = async () => {
       try {
-        const res = await fetch(`/api/categories?group=${selectedGroup}`);
-        const data = await res.json();
-        if (data.isSuccess) {
-          setMainCategories(data.result);
-          setSelectedMainId(data.result[0]?.id ?? null);
+        const res = await axiosInstance.get(`/categories`, {
+          params: { group: selectedGroup },
+        });
+        if (res.data.isSuccess) {
+          setMainCategories(res.data.result);
+          setSelectedMainId(res.data.result[0]?.id ?? null);
         }
       } catch (err) {
         console.error('상위 카테고리 로딩 실패:', err);
@@ -89,12 +91,9 @@ export default function CategoryPage() {
 
     const fetchSubCategories = async () => {
       try {
-        const res = await fetch(`/api/categories/${selectedMainId}/subcategories`);
-        const data = await res.json();
-        console.log('data:', data);
-
-        if (data.isSuccess) {
-          setSubCategories(data.result);
+        const res = await axiosInstance.get(`/categories/${selectedMainId}/subcategories`);
+        if (res.data.isSuccess) {
+          setSubCategories(res.data.result);
         }
       } catch (err) {
         console.error('하위 카테고리 로딩 실패:', err);

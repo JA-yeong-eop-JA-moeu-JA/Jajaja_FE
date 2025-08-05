@@ -1,4 +1,4 @@
-name: ci/cd action
+name: Deploy to Vercel
 
 on:
   push:
@@ -6,45 +6,13 @@ on:
       - main
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout source code
         uses: actions/checkout@v3
 
-      - name: Check Node.js version
-        run: node -v
-
-      - name: Install pnpm
-        run: npm install -g pnpm
-
-      - name: Create .env file
+      - name: Trigger Vercel Deploy Hook
         run: |
-          echo "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}" >> .env
-          echo "VITE_API_IMAGE_ACCESS=${{ secrets.VITE_API_IMAGE_ACCESS }}" >> .env
-          echo "VITE_WEBSOCKET_URL=${{ secrets.VITE_WEBSOCKET_URL }}" >> .env
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-
-      - name: Generate build
-        run: pnpm run build
-
-
-      - name: Deploy to S3
-        run: |
-          aws s3 cp --recursive --region ap-northeast-2 dist s3://${{ secrets.AWS_BUCKET_NAME }}
-
-
-      - name: Invalidate CloudFront Cache
-        run: aws cloudfront create-invalidation --distribution-id ${{ secrets.AWS_DISTRIBUTION_ID }} --paths "/*"
-        continue-on-error: true
+          curl -X POST "https://api.vercel.com/v1/integrations/deploy/${{ secrets.VERCEL_DEPLOY_HOOK }}"
