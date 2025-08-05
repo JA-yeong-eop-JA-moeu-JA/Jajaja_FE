@@ -124,12 +124,10 @@ export default function CategoryPage() {
 
       {/* 전체 콘텐츠 영역 */}
       <div className="flex flex-col flex-1 overflow-hidden">
-        {/* ✅ PageButton은 고정 위치 */}
         <div className="px-3">
           <PageButton items={['basic', 'industry']} selected={selectedTop1} onSelect={setSelectedTop1} />
         </div>
 
-        {/* ✅ 아래 좌우 분할 영역 */}
         <div className="flex flex-1 overflow-hidden px-3">
           {/* 왼쪽 사이드바 */}
           <ul className="w-[116px] h-full bg-gray-50 text-body-regular text-black-4 flex-shrink-0">
