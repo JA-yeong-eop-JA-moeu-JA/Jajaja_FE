@@ -4,6 +4,8 @@ import { BENEFIT_LIST } from '@/constants/myPage/benefitList';
 import { MAIN_FUNCTIONS } from '@/constants/myPage/mainFunctions';
 import { SUB_FUNCTIONS } from '@/constants/myPage/subFunctions';
 
+import useUserInfo from '@/hooks/myPage/useUserInfo';
+
 import BenefitCard from '@/components/benefitCard';
 import BottomBar from '@/components/head_bottom/BottomBar';
 import Header from '@/components/head_bottom/HomeHeader';
@@ -13,6 +15,8 @@ import Right from '@/assets/right.svg?react';
 import { profileData } from '@/mocks/profileData';
 
 export default function MyPage() {
+  const { data } = useUserInfo();
+  console.log(data);
   const { nickname, profileImage } = profileData;
   const navigate = useNavigate();
   return (

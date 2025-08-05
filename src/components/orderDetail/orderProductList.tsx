@@ -31,8 +31,8 @@ export default function OrderProductList({ items, matchStatus }: IOrderProductLi
             rightText="배송 조회"
             leftVariant="outline-orange"
             rightVariant="outline-orange"
-            onLeftClick={() => navigate('/myPage/apply')}
-            onRightClick={() => navigate('/myPage/deliveryInfo')}
+            onLeftClick={() => navigate('/mypage/apply')}
+            onRightClick={() => navigate('/mypage/deliveryInfo')}
           />
         </div>
       ))}

@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { type PropsWithChildren, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Toaster } from 'sonner';
 
 import { useModalStore } from '@/stores/modalStore';
@@ -8,7 +8,7 @@ import ModalProvider from '@/components/common/modal';
 
 import BottomBar from '../components/head_bottom/BottomBar';
 
-export default function Layout() {
+export default function Layout({ children }: PropsWithChildren) {
   const { isModalOpen } = useModalStore();
 
   const path = useLocation().pathname;
@@ -31,7 +31,7 @@ export default function Layout() {
     <ModalProvider>
       <div className="min-h-screen flex flex-col">
         <main className="flex-1 overflow-y-auto">
-          <Outlet />
+          {children}
           <Toaster />
         </main>
         {showBottomBar && path !== '/' && <BottomBar />}
