@@ -1,0 +1,50 @@
+import type { TGetCartResponse } from '@/types/cart/Tcart';
+
+export const CartData: TGetCartResponse = {
+  isSuccess: true,
+  code: 'COMMON200',
+  message: '성공입니다.',
+  result: {
+    data: [
+      {
+        id: 1,
+        productId: 1,
+        productName: '복음자리 100% 땅콩버터 스무스 280g',
+        brand: '포레스티',
+        optionId: 1,
+        option: '[단품] 땅콩 버터 스무스',
+        quantity: 2,
+        productThumbnail: '',
+        unitPrice: 15000,
+        totalPrice: 27000,
+        teamAvailable: true,
+      },
+      {
+        id: 2,
+        productId: 2,
+        productName: '카누 미니 마일드 로스트 커피 0.9g x 150스틱',
+        brand: '카누',
+        optionId: 2,
+        option: '[기획 세트] 150 스틱',
+        quantity: 1,
+        productThumbnail: '',
+        unitPrice: 18000,
+        totalPrice: 18000,
+        teamAvailable: false,
+      },
+      {
+        id: 3,
+        productId: 3,
+        productName: '냉장 서울우유 멸균 유기농우유 120ml x 48개',
+        brand: '헬시너트',
+        optionId: 3,
+        option: '[신선 배송] 당일 생산 제품',
+        quantity: 3,
+        productThumbnail: '',
+        unitPrice: 22000,
+        totalPrice: 60000,
+        teamAvailable: true,
+      },
+    ],
+  },
+};
