@@ -1,20 +1,20 @@
 import { useState } from 'react';
 
-import { REVIEW_LIST } from '@/constants/bottomBar/review';
 import { TEAM_RECRUIT_LIST } from '@/constants/bottomBar/teamRecruit';
+import { REVIEW_LIST } from '@/constants/product/reviews';
 
 import HorizontalProductCard from '@/components/board/HorizontalProductCard';
-import ReviewCard from '@/components/board/ReviewCard';
 import { PageButton, type TabId } from '@/components/common/button';
 import BottomBar from '@/components/head_bottom/BottomBar';
 import Header from '@/components/head_bottom/HomeHeader';
+import ReviewCard from '@/components/product/reviewCard';
 
 export default function Board() {
   const [selectedTop2, setSelectedTop2] = useState<TabId>('review');
   const [sortType, setSortType] = useState<'latest' | 'popular'>('latest');
 
   const sortedReviewList = [...REVIEW_LIST].sort((a, b) =>
-    sortType === 'latest' ? new Date(b.date).getTime() - new Date(a.date).getTime() : b.likes - a.likes,
+    sortType === 'latest' ? new Date(b.date).getTime() - new Date(a.date).getTime() : b.likeCount - a.likeCount,
   );
 
   return (
@@ -45,12 +45,23 @@ export default function Board() {
                 ))}
               </div>
 
-              {sortedReviewList.map((item) => (
-                <ReviewCard key={item.id} data={item} />
-              ))}
+              <div className="flex flex-col gap-3">
+                {sortedReviewList.map((item, idx) => (
+                  <div key={item.id} className="flex flex-col gap-3">
+                    <ReviewCard data={item} />
+                    {idx !== sortedReviewList.length - 1 && <hr className="border-black-1" />}
+                  </div>
+                ))}
+
+                {sortedReviewList.length === 0 && (
+                  <div className="w-full flex justify-center items-center text-body-regular text-black-4 h-20">
+                    <p>아직 등록된 리뷰가 없어요.</p>
+                  </div>
+                )}
+              </div>
             </>
           ) : (
-            TEAM_RECRUIT_LIST.map((item) => <HorizontalProductCard key={item.id} data={item} />)
+            TEAM_RECRUIT_LIST.map((teamItem) => <HorizontalProductCard key={teamItem.id} data={teamItem} />)
           )}
         </ul>
       </div>

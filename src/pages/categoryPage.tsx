@@ -122,11 +122,17 @@ export default function CategoryPage() {
         <Header />
       </header>
 
-      <div className="relative flex-1 overflow-y-auto px-3">
-        <PageButton items={['basic', 'industry']} selected={selectedTop1} onSelect={setSelectedTop1} />
+      {/* 전체 콘텐츠 영역 */}
+      <div className="flex flex-col flex-1 overflow-hidden">
+        {/* ✅ PageButton은 고정 위치 */}
+        <div className="px-3">
+          <PageButton items={['basic', 'industry']} selected={selectedTop1} onSelect={setSelectedTop1} />
+        </div>
 
-        <div className="flex flex-1 overflow-y-auto relative">
-          <ul className="w-[116px] bg-gray-50 text-body-regular text-black-4 flex-shrink-0">
+        {/* ✅ 아래 좌우 분할 영역 */}
+        <div className="flex flex-1 overflow-hidden px-3">
+          {/* 왼쪽 사이드바 */}
+          <ul className="w-[116px] h-full bg-gray-50 text-body-regular text-black-4 flex-shrink-0">
             {mainCategories.map(({ id, name }) => (
               <li
                 key={id}
@@ -140,7 +146,8 @@ export default function CategoryPage() {
             ))}
           </ul>
 
-          <div className="relative flex-1">
+          {/* 오른쪽 하위 카테고리 */}
+          <div className="relative flex-1 overflow-y-auto">
             <AnimatePresence mode="wait">
               <motion.ul
                 key={selectedMainId}
@@ -167,9 +174,9 @@ export default function CategoryPage() {
             </AnimatePresence>
           </div>
         </div>
-
-        <BottomBar />
       </div>
+
+      <BottomBar />
     </div>
   );
 }
