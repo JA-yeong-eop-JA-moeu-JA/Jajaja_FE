@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import type { TCartItem } from '@/types/cart/Tcart';
 import { OPTIONS } from '@/constants/product/options';
 
 import { useModalStore } from '@/stores/modalStore';
@@ -10,17 +11,16 @@ import DropDown from './dropDown';
 
 import Minus from '@/assets/icons/minus.svg?react';
 import Plus from '@/assets/icons/plus.svg?react';
-import type { ICartItem } from '@/pages/shoppingCart';
 
 interface ICartModalProps {
-  item: ICartItem;
-  onUpdate: (item: ICartItem) => void;
+  item: TCartItem;
+  onUpdate: (item: TCartItem) => void;
 }
 
 export default function CartModal({ item, onUpdate }: ICartModalProps) {
   const { closeModal } = useModalStore();
 
-  const [selectedItem, setSelectedItem] = useState<ICartItem>({
+  const [selectedItem, setSelectedItem] = useState<TCartItem>({
     ...item,
     quantity: item.quantity || 1,
   });
@@ -37,7 +37,7 @@ export default function CartModal({ item, onUpdate }: ICartModalProps) {
   };
 
   const handleCalculate = (offset: number) => {
-    setSelectedItem((prev) => ({
+    setSelectedItem((prev: TCartItem) => ({
       ...prev,
       quantity: Math.max((prev.quantity || 1) + offset, 1),
     }));
@@ -66,7 +66,7 @@ export default function CartModal({ item, onUpdate }: ICartModalProps) {
                   <Plus />
                 </div>
               </div>
-              <p className="text-body-medium">{(selectedItem.price * (selectedItem.quantity || 1)).toLocaleString()} 원</p>
+              <p className="text-body-medium">{((selectedItem.price ?? selectedItem.unitPrice) * (selectedItem.quantity || 1)).toLocaleString()} 원</p>
             </div>
           </div>
 

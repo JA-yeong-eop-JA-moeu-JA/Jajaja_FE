@@ -2,6 +2,8 @@ import type { ComponentType } from 'react';
 import { createElement } from 'react';
 import { create } from 'zustand';
 
+import type { TCartItem } from '@/types/cart/Tcart';
+
 import DeliveryRequestModal from '@/components/modal/deliveryModal';
 import ExampleModal from '@/components/modal/exampleModal';
 import HomeModal from '@/components/modal/homeModal';
@@ -9,8 +11,6 @@ import ImageModal from '@/components/modal/imageModal';
 import OptionModal from '@/components/modal/optionModal';
 import ReviewModal from '@/components/modal/reviewModal';
 import CartModal from '@/components/modal/shoppingCartModal';
-
-import type { ICartItem } from '@/pages/shoppingCart';
 
 export type TModalType = 'alert' | 'confirm' | 'bottom-sheet' | 'bottom-drawer' | 'bottom-drawer-team' | 'image' | 'cart-option' | 'delivery';
 
@@ -30,8 +30,8 @@ const MODAL_COMPONENTS: Record<TModalType, TComponentType> = {
 interface IModalOptions {
   onDelete?: () => void;
   message?: string;
-  item?: ICartItem;
-  onUpdate?: (item: ICartItem) => void;
+  item?: TCartItem;
+  onUpdate?: (item: TCartItem) => void;
   onSelect?: (text: string) => void;
   [key: string]: any;
 }
