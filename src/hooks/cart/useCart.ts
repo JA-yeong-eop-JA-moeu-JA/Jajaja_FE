@@ -8,7 +8,7 @@ import { cartApi } from '@/apis/cart/cart';
 
 import { useCoreMutation, useCoreQuery } from '@/hooks/customQuery';
 
-import { CartData } from '@/mocks/cartData';
+import { CartData } from '@/mocks/CartData';
 
 export const useCart = () => {
   const queryClient = useQueryClient();
