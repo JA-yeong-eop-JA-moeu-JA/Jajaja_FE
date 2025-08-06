@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+
 import { categoryApi } from '@/apis/category/category';
 
 export function useCategory(selectedGroup: 'DEFAULT' | 'BUSINESS', selectedMainId: number | null) {

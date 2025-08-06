@@ -1,8 +1,6 @@
+import type { TGetMainCategoryResponse, TGetSubCategoryResponse } from '@/types/category';
+
 import axiosInstance from '../axiosInstance';
-import type{
-  TGetMainCategoryResponse,
-  TGetSubCategoryResponse,
-} from '@/types/category';
 
 export const categoryApi = {
   getMainCategories: async (group: 'DEFAULT' | 'BUSINESS'): Promise<TGetMainCategoryResponse> => {
