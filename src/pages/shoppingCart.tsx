@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { useModalStore } from '@/stores/modalStore';
 import { useProductCheckboxStore } from '@/stores/productCheckboxStore';
@@ -14,42 +15,30 @@ import EmptyCartImage from '@/assets/shoppingCart.svg';
 import type { IOrderItem } from '@/mocks/orderData';
 import { orderData } from '@/mocks/orderData';
 
-interface IProductType {
-  id: number;
-  imageUrl: string;
-  name: string;
-  company: string;
-  option: string;
-  quantity: number;
+export interface ICartItem extends IOrderItem {
   originalPrice: number;
-  price: number;
 }
 
-const initialCartList: IProductType[] = orderData[0].items.map((item) => ({
-  id: item.productId,
-  imageUrl: item.image,
-  name: item.name,
-  company: item.company,
-  option: item.option,
-  quantity: item.quantity,
+const initialCartList: ICartItem[] = orderData[0].items.map((item) => ({
+  ...item,
   originalPrice: item.price,
-  price: item.price,
 }));
 
 export default function ShoppingCart() {
-  const [cartList, setCartList] = useState<IProductType[]>(initialCartList);
+  const [cartList, setCartList] = useState<ICartItem[]>(initialCartList);
 
-  const productIds = cartList.map((item: IProductType) => item.id.toString());
+  const productIds = cartList.map((item) => item.productId.toString());
   const { checkedItems, initialize, toggle, toggleAll, isAllChecked, reset } = useProductCheckboxStore();
   const { openModal } = useModalStore();
+  const navigate = useNavigate();
 
   useEffect(() => {
     initialize(productIds, false);
   }, [cartList, initialize]);
 
-  const totalPrice = cartList.reduce((acc: number, product: IProductType) => {
-    if (checkedItems[product.id]) {
-      return acc + product.price;
+  const totalPrice = cartList.reduce((acc: number, product: ICartItem) => {
+    if (checkedItems[product.productId]) {
+      return acc + product.price * (product.quantity || 1);
     }
     return acc;
   }, 0);
@@ -58,32 +47,31 @@ export default function ShoppingCart() {
   const isCartEmpty = cartList.length === 0;
 
   const handleDeleteSelected = () => {
-    const newCartList = cartList.filter((product: IProductType) => !checkedItems[product.id]);
+    const newCartList = cartList.filter((product: ICartItem) => !checkedItems[product.productId]);
     setCartList(newCartList);
     reset();
   };
 
-  const convertToOrderItem = (product: IProductType): IOrderItem => ({
-    image: product.imageUrl,
-    name: product.name,
-    company: product.company,
-    option: product.option,
-    quantity: product.quantity,
-    price: product.price,
-    productId: product.id,
-    reviewed: false,
-    orderId: 0,
-  });
+  const handleUpdateCartItem = (updatedItem: ICartItem) => {
+    setCartList((prev) => prev.map((item) => (item.productId === updatedItem.productId ? updatedItem : item)));
+  };
+
+  const handleOptionChange = (item: ICartItem) => {
+    openModal('cart-option', {
+      item,
+      onUpdate: handleUpdateCartItem,
+    });
+  };
 
   return (
     <>
-      <header className="px-2">
+      <header className="">
         <PageHeaderBar title="장바구니" />
       </header>
 
-      <div className="w-full bg-white text-black pb-40">
+      <div className="w-full bg-white text-black pb-32">
         {isCartEmpty ? (
-          <section className="flex flex-col items-center justify-center pt-20 pb-10 px-4">
+          <section className="flex flex-col items-center justify-center h-[calc(100vh-56px-56px)] pt-20 pb-10 px-4">
             <img src={EmptyCartImage} alt="장바구니 비어 있음" className="w-40 h-40 mb-6" />
             <p className="text-subtitle-medium mb-2">장바구니에 담긴 상품이 없습니다.</p>
             <p className="text-body-regular text-black-4">원하는 상품을 찾아 장바구니를 채워보세요.</p>
@@ -108,11 +96,11 @@ export default function ShoppingCart() {
             </section>
 
             {cartList.map((product) => (
-              <section key={product.id} className="w-full px-4 py-5 border-b-4 border-black-0">
+              <section key={product.productId} className="w-full px-4 py-5 border-b-4 border-black-0">
                 <div className="flex items-start gap-3">
-                  <BaseCheckbox checked={checkedItems[product.id] || false} onClick={() => toggle(product.id.toString())} />
+                  <BaseCheckbox checked={checkedItems[product.productId] || false} onClick={() => toggle(product.productId.toString())} />
                   <div className="flex-1">
-                    <OrderItem item={convertToOrderItem(product)} show={false} layout="horizontal" showPrice={false} />
+                    <OrderItem item={product} show={false} showPrice={false} />
                   </div>
                 </div>
 
@@ -120,28 +108,28 @@ export default function ShoppingCart() {
                   <Button kind="select-content" variant="outline-orange" className="flex-1 py-1">
                     팀 참여
                   </Button>
-                  <Button kind="select-content" variant="outline-gray" className="flex-1 py-1">
+                  <Button kind="select-content" variant="outline-gray" className="flex-1 py-1" onClick={() => handleOptionChange(product)}>
                     옵션 변경
                   </Button>
                 </div>
 
                 <div className="flex justify-end items-baseline gap-2 mt-3 w-full">
                   <p className="text-black-3 text-small-regular line-through">{product.originalPrice.toLocaleString()} 원</p>
-                  <p className="text-body-medium">{product.price.toLocaleString()} 원</p>
+                  <p className="text-body-medium">{(product.price * (product.quantity || 1)).toLocaleString()} 원</p>
                 </div>
               </section>
             ))}
-
-            {!isCartEmpty && (
-              <div className="fixed bottom-16 left-0 right-0 w-full">
-                <Button kind="basic" variant="solid-orange" className="w-full" disabled={totalPrice === 0} onClick={() => {}}>
-                  {totalPrice.toLocaleString()} 원 1인 구매하기
-                </Button>
-              </div>
-            )}
           </>
         )}
       </div>
+
+      {!isCartEmpty && (
+        <div className="fixed bottom-14 left-0 right-0 w-full max-w-[600px] mx-auto">
+          <Button kind="basic" variant="solid-orange" className="w-full" disabled={totalPrice === 0} onClick={() => navigate('/payment')}>
+            {totalPrice.toLocaleString()} 원 1인 구매하기
+          </Button>
+        </div>
+      )}
 
       <BottomBar />
     </>
