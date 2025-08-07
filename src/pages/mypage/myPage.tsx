@@ -10,7 +10,6 @@ import BenefitCard from '@/components/benefitCard';
 import BottomBar from '@/components/head_bottom/BottomBar';
 import Header from '@/components/head_bottom/HomeHeader';
 
-import DefaultProfile from '@/assets/myPage/defaultProfile.svg?react';
 import Right from '@/assets/right.svg?react';
 
 export default function MyPage() {
