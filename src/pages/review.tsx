@@ -7,8 +7,8 @@ import { TOTALLIST } from '@/constants/search/totalList';
 import { useModalStore } from '@/stores/modalStore';
 
 import ProductHeader from '@/components/head_bottom/ProductHeader';
-import ReviewCard from '@/components/product/reviewCard';
 
+// import ReviewCard from '@/components/product/reviewCard';
 import Star from '@/assets/icons/star.svg?react';
 
 export default function PhotoReview() {
@@ -56,9 +56,10 @@ export default function PhotoReview() {
       </section>
       <section className="px-2">
         <div className="flex flex-col gap-3">
-          {REVIEW_LIST.map((item, idx) => (
+          {REVIEW_LIST.map((_, idx) => (
             <div key={idx} className="flex flex-col gap-3">
-              <ReviewCard data={item} />
+              {/* <ReviewCard {...item} />*/}
+              {/* TODO: 리뷰 조회 api 연결할때 */}
               {idx !== REVIEW_LIST.length - 1 && <hr className="border-black-1" />}
             </div>
           ))}
