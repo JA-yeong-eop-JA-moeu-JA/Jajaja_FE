@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 
 import { CATEGORIES } from '@/constants/onBoarding/categoryList';
 
+import Storage from '@/utils/storage';
+
 import useCategory from '@/hooks/onBoarding/useCategory';
 
 import { Button } from '@/components/common/button';
@@ -14,6 +16,7 @@ export default function OnBoarding() {
   const navigate = useNavigate();
   const [category, setCategory] = useState(0);
   const handleSubmit = () => {
+    Storage.setCategory(category);
     mutate({ businessCategoryId: category });
     navigate('/home');
   };
