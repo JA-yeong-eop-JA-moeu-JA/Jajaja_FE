@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 
 import { Button } from '@/components/common/button';
 import PageHeader from '@/components/head_bottom/PageHeader';
-import ImageUploader from '@/components/review/imageUploader';
+import ReviewImageUploader from '@/components/review/imageUploader';
 import OrderItem from '@/components/review/orderItem';
 import ReviewStarRating from '@/components/review/reviewStarRating';
 
@@ -21,10 +21,6 @@ export default function WriteReview() {
     setStar(true);
     console.log('선택한 별점:', score);
   };
-  const handleImagesChange = (files: File[]) => {
-    console.log(files);
-  };
-
   if (!order || !product) {
     return <NotFoundPage />;
   }
@@ -53,7 +49,7 @@ export default function WriteReview() {
           </div>
 
           <div>
-            <ImageUploader maxCount={5} onChange={handleImagesChange} />
+            <ReviewImageUploader />
           </div>
         </div>
       </div>
