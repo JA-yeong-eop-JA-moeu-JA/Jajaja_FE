@@ -12,7 +12,7 @@ class Storage {
     const category = localStorage.getItem('category');
     return category ? category : undefined;
   };
-  static setCategory = (category: string) => {
+  static setCategory = (category: number) => {
     localStorage.setItem('category', category.toString());
   };
   static clearStorage = () => {

@@ -14,7 +14,7 @@ import Star from '@/assets/icons/star.svg?react';
 export default function PhotoReview() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { review, star } = TOTALLIST[Number(id)];
+  const { reviewCount, rating } = TOTALLIST[Number(id)];
   const { openModal } = useModalStore();
   const imageList = REVIEW_LIST.flatMap(({ images }) => images);
   const [selected, setSelected] = useState<'latest' | 'recommend'>('latest');
@@ -22,10 +22,10 @@ export default function PhotoReview() {
     <div className="pb-3">
       <ProductHeader />
       <section className="px-4 pb-4 flex items-center gap-3">
-        <p>리뷰 {review}개</p>
+        <p>리뷰 {reviewCount}개</p>
         <div className="flex items-center gap-1">
           <Star className="w-4 h-4 fill-[#FFC800]" />
-          <p>{star}</p>
+          <p>{rating}</p>
         </div>
       </section>
       <section className="w-full grid grid-cols-3 gap-1">

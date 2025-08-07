@@ -4,8 +4,11 @@ import { type ChangeEvent, useEffect, useRef, useState } from 'react';
 import ScrollContainer from 'react-indiana-drag-scroll';
 import { useSearchParams } from 'react-router-dom';
 
-import { SEARCHWORD } from '@/constants/search/searchWord';
 import { TOTALLIST } from '@/constants/search/totalList';
+
+import { formatKoreanDateLabel } from '@/utils/time';
+
+import useGetKeyword from '@/hooks/search/useGetKeyword';
 
 import SearchInput from '@/components/common/SearchInput';
 import ProductCard from '@/components/home/productCard';
@@ -18,9 +21,9 @@ import NoResult from '@/assets/icons/noResult.svg?react';
 import Up from '@/assets/icons/up.svg?react';
 
 export default function Search() {
+  const { data } = useGetKeyword();
   const [searchParams] = useSearchParams();
   const menuRef = useRef<HTMLDivElement>(null);
-  const [filteredWords, setFilteredWords] = useState(SEARCHWORD);
   const [sortOption, setSortOption] = useState('인기순');
   const [change, setChange] = useState(false);
   const [inputValue, setValue] = useState('');
@@ -28,10 +31,10 @@ export default function Search() {
   const [filteredList, setFilteredList] = useState(TOTALLIST);
   const keywordParam = searchParams.get('keyword');
   const COLUMN_COUNT = 2;
-  const rowsPerColumn = Math.ceil(SEARCHWORD.length / COLUMN_COUNT);
-  const columns = Array.from({ length: COLUMN_COUNT }, (_, i) => SEARCHWORD.slice(i * rowsPerColumn, (i + 1) * rowsPerColumn));
-  const handleDelete = (id: number) => {
-    setFilteredWords((prev) => prev.filter((word) => word.id !== id));
+  const rowsPerColumn = data ? Math.ceil(data?.result.keywords.length / COLUMN_COUNT) : 0;
+  const columns = Array.from({ length: COLUMN_COUNT }, (_, i) => data?.result.keywords.slice(i * rowsPerColumn, (i + 1) * rowsPerColumn));
+  const handleDelete = () => {
+    //TODO: delete api 추가되면 연결 예정
   };
   const handleValue = (e: ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
@@ -85,26 +88,26 @@ export default function Search() {
           <section>
             <p className="text-subtitle-medium mb-2">최근 검색</p>
             <ScrollContainer className="flex w-full gap-2 overflow-x-auto cursor-grab" vertical={false}>
-              {!filteredWords.length && <p className="text-body-regular text-black-4 py-2.5">최근 검색어가 없습니다.</p>}
-              {filteredWords.map(({ id, name }) => (
+              {!data?.result.keywords.length && <p className="text-body-regular text-black-4 py-2.5">최근 검색어가 없습니다.</p>}
+              {data?.result.keywords.map((item, id) => (
                 <div key={id} className="shrink-0">
-                  <Tag msg={name} onDelete={() => handleDelete(id)} />
+                  <Tag msg={item} onDelete={() => handleDelete()} />
                 </div>
               ))}
             </ScrollContainer>
           </section>
           <section>
-            <div className="flex items-end justify-between mb-4">
+            <div className="flex items-center justify-between mb-4">
               <p className="text-subtitle-medium">인기 검색어</p>
-              <p className="text-small-medium text-black-4">07.24. 10:00 기준</p>
+              <p className="text-small-medium text-black-4">{formatKoreanDateLabel(data?.result.baseTime)}</p>
             </div>
             <div className="w-full grid grid-cols-2 gap-x-6">
               {columns.map((col, colIndex) => (
                 <div key={colIndex} className="flex flex-col gap-y-3">
-                  {col.map(({ id, name }) => (
+                  {col?.map((item, id) => (
                     <div key={id} className="flex gap-2 items-center">
-                      <p className="text-subtitle-medium text-green">{id}</p>
-                      <p className="text-body-regular">{name}</p>
+                      <p className="text-subtitle-medium text-green">{colIndex * col.length + id + 1}</p>
+                      <p className="text-body-regular">{item}</p>
                     </div>
                   ))}
                 </div>
@@ -135,7 +138,7 @@ export default function Search() {
           ) : (
             <div className="w-full grid grid-cols-2 gap-x-2 gap-y-6.5 items-center justify-center ">
               {filteredList.map((item) => (
-                <ProductCard key={item.id} data={item} />
+                <ProductCard key={item.id} {...item} />
               ))}
             </div>
           )}
