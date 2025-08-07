@@ -124,7 +124,6 @@ export default function ApplyReturnOrExchange() {
           </div>
         </section>
 
-        {/* (임시) 사유 선택 - 나중에 채채님 컴포넌트로 대체 예정*/}
         <section className="flex flex-col gap-2 px-4 pb-8 border-b border-b-black-1 border-b-4">
           <h2 className="text-subtitle-medium pb-2">사유</h2>
           <DropDown

@@ -7,12 +7,13 @@ import HorizontalProductCard from '@/components/board/HorizontalProductCard';
 import { PageButton, type TabId } from '@/components/common/button';
 import BottomBar from '@/components/head_bottom/BottomBar';
 import Header from '@/components/head_bottom/HomeHeader';
-import ReviewCard from '@/components/product/reviewCard';
+//import ReviewCard from '@/components/product/reviewCard';
+//import useGetProductDetail from '@/hooks/product/useGetProductDetail';
 
 export default function Board() {
   const [selectedTop2, setSelectedTop2] = useState<TabId>('review');
   const [sortType, setSortType] = useState<'latest' | 'popular'>('latest');
-
+  //const { data } = useGetProductDetail();
   const sortedReviewList = [...REVIEW_LIST].sort((a, b) =>
     sortType === 'latest' ? new Date(b.date).getTime() - new Date(a.date).getTime() : b.likeCount - a.likeCount,
   );
@@ -48,7 +49,7 @@ export default function Board() {
               <div className="flex flex-col gap-3">
                 {sortedReviewList.map((item, idx) => (
                   <div key={item.id} className="flex flex-col gap-3">
-                    <ReviewCard data={item} />
+                    {/*<ReviewCard {...item} /> 나중에 api 연동에 활용*/}
                     {idx !== sortedReviewList.length - 1 && <hr className="border-black-1" />}
                   </div>
                 ))}

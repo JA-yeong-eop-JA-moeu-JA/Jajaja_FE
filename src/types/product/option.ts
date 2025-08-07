@@ -6,8 +6,8 @@ export type TOptionRequest = {
 export type TOption = {
   id: number;
   name: string;
-  originPrice: number;
-  unitPrice: number;
+  originPrice?: number;
+  unitPrice?: number;
 };
 
 export type TGetOptionList = TCommonResponse<TOption[]>;

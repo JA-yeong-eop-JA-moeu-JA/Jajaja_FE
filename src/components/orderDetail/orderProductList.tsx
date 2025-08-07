@@ -16,18 +16,18 @@ export default function OrderProductList({ items, matchStatus }: IOrderProductLi
   const navigate = useNavigate();
 
   return (
-    <section className="px-4 pb-4 border-b border-b-4 border-b-black-1 flex flex-col gap-4">
+    <section className="px-2 pb-4 border-b border-b-4 border-b-black-1 flex flex-col gap-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-subtitle-medium px-2 py-2">주문 상품</h2>
+        <h2 className="text-subtitle-medium px-3 py-2">주문 상품</h2>
         {matchStatus && <span className={`text-small text-body-medium ${MATCH_STATUS_COLOR_MAP[matchStatus]}`}>{matchStatus}</span>}
       </div>
 
       {items.map((item) => (
         <div key={item.productId}>
-          <div className="flex flex-col gap-2 mb-4 px-4">
+          <div className="flex flex-col gap-2 mb-4 px-3">
             <OrderItem item={item} show={false} />
           </div>
-          <div className="text-body-medium md:flex-row justify-between">
+          <div className="text-body-medium w-full md:flex-row justify-between">
             <SelectButton
               kind="select-content"
               leftText="교환/반품"
