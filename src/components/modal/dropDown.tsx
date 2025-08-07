@@ -7,21 +7,25 @@ import Down from '@/assets/icons/down.svg?react';
 type TProps = {
   options?: TOption[];
   onChange?: (selected: { id: number }) => void;
+  defaultLabel?: string;
 };
 
-export default function DropDown({ options, onChange }: TProps) {
-  const optionList = [{ id: 0, name: '옵션 선택' }, ...(options ?? [])];
+export default function DropDown({ options, onChange, defaultLabel }: TProps) {
+  const optionList = [{ id: 0, name: defaultLabel ?? '옵션 선택' }, ...(options ?? [])];
   const [isOpen, setIsOpen] = useState(false);
   const [list, setList] = useState(optionList.slice(0, 1));
+  const [, setSelectedId] = useState(0); // 선택된 id 기억
 
-  const handleSelect = (id: number) => {
+  const handleSelect = (idx: number) => {
     if (!isOpen) {
       setIsOpen(true);
       setList(optionList);
     } else {
       setIsOpen(false);
-      setList(optionList.slice(0, 1));
-      onChange?.({ id });
+      const selected = optionList[idx];
+      setSelectedId(selected.id);
+      setList([selected]); // 선택한 항목으로 교체
+      onChange?.({ id: selected.id });
     }
   };
 
