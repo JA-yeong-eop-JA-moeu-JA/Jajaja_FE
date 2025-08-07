@@ -7,6 +7,7 @@ import { REVIEW_LIST } from '@/constants/product/reviews';
 import { formatKoreanDateLabel } from '@/utils/time';
 
 import { useModalStore } from '@/stores/modalStore';
+import usePatchLike from '@/hooks/product/usePatchLike';
 
 import StarRating from '@/components/product/starRating';
 
@@ -17,6 +18,9 @@ export default function ReviewCard({ review, isLike, imageUrls }: TGetReviews) {
   const navigate = useNavigate();
   const { openModal } = useModalStore();
   const { id } = useParams<{ id: string }>();
+  const { mutate } = usePatchLike();
+  const [like, setLike] = useState<boolean>(isLike);
+  const [likeCount, setLikeCount] = useState(review.likeCount);
   const [expanded, setExpanded] = useState(false);
   const [showToggle, setShowToggle] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -38,6 +42,11 @@ export default function ReviewCard({ review, isLike, imageUrls }: TGetReviews) {
     setExpanded((prev) => !prev);
     !expanded ? el.classList.remove('line-clamp-3') : el.classList.add('line-clamp-3');
   };
+  const handleLike = () => {
+    setLike((prev) => !prev);
+    setLikeCount((prev) => (like ? prev - 1 : prev + 1));
+    mutate({ reviewId: review.id });
+  };
   return (
     <div className="p-2 flex flex-col gap-2">
       <section>
@@ -55,9 +64,9 @@ export default function ReviewCard({ review, isLike, imageUrls }: TGetReviews) {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2" onClick={() => {}}>
-            <p className="text-tiny-medium text-orange">{isLike ? review.likeCount + 1 : review.likeCount}</p>
-            {isLike ? <HeartFill /> : <Heart />}
+          <div className="flex items-center gap-2" onClick={handleLike}>
+            <p className="text-tiny-medium text-orange">{likeCount}</p>
+            {like ? <HeartFill /> : <Heart />}
           </div>
         </div>
       </section>
