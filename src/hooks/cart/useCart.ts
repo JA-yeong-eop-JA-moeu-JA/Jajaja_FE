@@ -71,8 +71,6 @@ export const useCart = () => {
       return {
         cartItems: [],
         totalCount: 0,
-        summary: null,
-        appliedCoupon: null,
         isEmpty: true,
       };
     }

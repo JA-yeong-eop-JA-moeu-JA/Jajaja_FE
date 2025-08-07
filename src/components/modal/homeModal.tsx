@@ -23,7 +23,7 @@ export default function HomeModal() {
     <>
       <div className="relative w-full pt-7 px-4 flex flex-col items-center gap-4">
         <div className="absolute top-0 right-0" onClick={handleClose}>
-          <Close />
+          <Close className="w-5 h-5 absolute top-4.5 right-4.5" />
         </div>
         <div className="flex flex-col items-center text-title-semibold">
           <div className="flex items-center">

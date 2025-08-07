@@ -12,12 +12,6 @@ export type TCartItem = {
   unitPrice: number;
   totalPrice: number;
   teamAvailable: boolean;
-  orderId?: number;
-  name?: string;
-  company?: string;
-  price?: number;
-  image?: string;
-  reviewed?: boolean;
 };
 
 export type TAppliedCoupon = {
