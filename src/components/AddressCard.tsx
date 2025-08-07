@@ -23,7 +23,7 @@ function AddressCard({ address, onDelete }: IAddressCardProps) {
   };
 
   const handleCardClick = () => {
-    navigate('/editaddress', {
+    navigate('/address/edit', {
       state: { address },
     });
   };
