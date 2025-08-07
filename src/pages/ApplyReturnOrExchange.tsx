@@ -8,6 +8,9 @@ import DropDown from '@/components/modal/dropDown';
 import RefundInfo from '@/components/orderDetail/returnInfo';
 import OrderItem from '@/components/review/orderItem';
 
+import type { TOption } from '@/types/product/option';
+import type { TOptionBase } from '@/types/optionApply'; // reasonOptions 타입
+
 import { orderData } from '@/mocks/orderData';
 
 export default function ApplyReturnOrExchange() {
@@ -48,7 +51,6 @@ export default function ApplyReturnOrExchange() {
   ];
 
   const DELIVERY_REQUEST_OPTIONS = [
-    { id: 0, name: '배송 요청사항을 선택해주세요' },
     { id: 1, name: '문 앞에 놔주세요' },
     { id: 2, name: '직접 전달해주세요' },
     { id: 3, name: '경비실에 맡겨주세요' },
@@ -60,9 +62,10 @@ export default function ApplyReturnOrExchange() {
   const [selectedReason, setSelectedReason] = useState('');
   const [, setDeliveryRequest] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [dropdownKey, setDropdownKey] = useState(0);
 
   const isFormValid = selectedType !== null && selectedReason !== '';
-  const reasonOptions = selectedType === '반품' ? RETURN_REASONS : EXCHANGE_REASONS;
+  const reasonOptions: TOptionBase[] = selectedType === '반품' ? RETURN_REASONS : EXCHANGE_REASONS;
 
   const handleSubmit = async (): Promise<boolean> => {
     try {
@@ -118,8 +121,14 @@ export default function ApplyReturnOrExchange() {
               rightText="반품"
               leftVariant={selectedType === '교환' ? 'outline-orange' : 'outline-gray'}
               rightVariant={selectedType === '반품' ? 'outline-orange' : 'outline-gray'}
-              onLeftClick={() => setSelectedType('교환')}
-              onRightClick={() => setSelectedType('반품')}
+              onLeftClick={() => {
+                setSelectedType('교환');
+                setDropdownKey((prev) => prev + 1); 
+              }}
+              onRightClick={() => {
+                setSelectedType('반품');
+                setDropdownKey((prev) => prev + 1);
+              }}
             />
           </div>
         </section>
@@ -127,13 +136,15 @@ export default function ApplyReturnOrExchange() {
         <section className="flex flex-col gap-2 px-4 pb-8 border-b border-b-black-1 border-b-4">
           <h2 className="text-subtitle-medium pb-2">사유</h2>
           <DropDown
-            options={reasonOptions}
+            key={dropdownKey}
+            options={reasonOptions as TOption[]}            
             onChange={({ id }) => {
               const selected = reasonOptions.find((reason) => reason.id === id);
               if (selected) {
                 setSelectedReason(selected.name);
               }
             }}
+            defaultLabel='사유 선택'
           />
         </section>
 
@@ -150,11 +161,12 @@ export default function ApplyReturnOrExchange() {
             <p>{dummyDeliveryData.address}</p>
           </div>
           <DropDown
-            options={DELIVERY_REQUEST_OPTIONS.slice(1)}
+            options={DELIVERY_REQUEST_OPTIONS as TOption[]}
             onChange={({ id }) => {
               const selected = DELIVERY_REQUEST_OPTIONS.find((option) => option.id === id);
               setDeliveryRequest(selected?.id === 0 ? '' : (selected?.name ?? ''));
             }}
+            defaultLabel="배송 요청사항을 선택해주세요"
           />
         </section>
 
@@ -163,7 +175,7 @@ export default function ApplyReturnOrExchange() {
       </main>
 
       {/* 하단 고정 접수 버튼 */}
-      <div className="px-4 fixed bottom-0 left-0 right-0 z-10 bg-white max-w-screen-sm mx-auto w-full">
+      <div className="fixed bottom-0 left-0 right-0 z-10 bg-white max-w-screen-sm mx-auto w-full">
         <Button
           kind="basic"
           variant="solid-orange"
