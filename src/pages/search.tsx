@@ -135,7 +135,7 @@ export default function Search() {
           ) : (
             <div className="w-full grid grid-cols-2 gap-x-2 gap-y-6.5 items-center justify-center ">
               {filteredList.map((item) => (
-                <ProductCard key={item.id} data={item} />
+                <ProductCard key={item.id} {...item} />
               ))}
             </div>
           )}
