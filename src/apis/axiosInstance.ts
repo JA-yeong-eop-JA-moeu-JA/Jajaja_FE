@@ -1,48 +1,51 @@
 import axios from 'axios';
 
+import { reissue } from './auth/auth';
+
 export const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   withCredentials: true,
 });
 
-axiosInstance.interceptors.request.use(
-  (config) => config,
-  (error) => Promise.reject(error),
-);
-
-let isRefreshing = false;
+let hasHandledLogout = false;
 
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
+    const status = error.response?.status;
+    const code = error.response?.data?.code;
     const originalRequest = error.config;
-    const { status, data } = error.response || {};
+    console.log(status, code);
 
-    if (status === 401 && data?.code === 'AUTH4011') {
-      if (originalRequest._retry) {
-        return Promise.reject(error);
-      }
-
+    if (status === 401 && code === 'AUTH4011' && !originalRequest._retry) {
       originalRequest._retry = true;
-
-      if (!isRefreshing) {
-        isRefreshing = true;
-
-        try {
-          await axiosInstance.post('/api/auth/reissue');
+      try {
+        const { isSuccess } = await reissue();
+        if (isSuccess) {
           return axiosInstance(originalRequest);
-        } catch (reissueError) {
-          alert('세션이 만료되었습니다. 다시 로그인 해주세요.');
-          window.location.href = '/login';
-          return Promise.reject(reissueError);
-        } finally {
-          isRefreshing = false;
+        } else {
+          throw new Error('토큰 재발급 실패');
         }
+      } catch (e) {
+        if (!hasHandledLogout) {
+          hasHandledLogout = true;
+          alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
+          window.location.href = '/login';
+        }
+        return Promise.reject(e);
       }
     }
+    if (status === 401 && code === 'AUTH4014') {
+      if (!hasHandledLogout) {
+        hasHandledLogout = true;
+        alert('로그인이 필요합니다.');
+        window.location.href = '/login';
+      }
+      return Promise.reject(error);
+    }
 
-    if (status === 500) {
-      alert('서버 에러가 발생했습니다. 잠시 후 다시 시도해주세요.');
+    if (status >= 500) {
+      alert('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
     }
 
     return Promise.reject(error);
