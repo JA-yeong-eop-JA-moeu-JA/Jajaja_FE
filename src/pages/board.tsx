@@ -21,14 +21,14 @@ export default function Board() {
     <div className="flex flex-col min-h-screen">
       <header className="px-3">
         <Header />
-        <PageButton items={['review', 'team']} selected={selectedTop2} onSelect={setSelectedTop2} />
       </header>
+      <PageButton items={['review', 'team']} selected={selectedTop2} onSelect={setSelectedTop2} />
 
       <div className="relative flex-1 overflow-y-auto">
         <ul key={selectedTop2 + sortType} className="absolute inset-0 bg-white px-4 py-3 flex flex-col gap-3">
           {selectedTop2 === 'review' ? (
             <>
-              <div className="flex justify-end gap-2 text-sm text-black-4 mb-1">
+              <div className="flex justify-end text-sm text-black-4 mb-1">
                 {[
                   { label: '최신순', value: 'latest' },
                   { label: '추천순', value: 'popular' },

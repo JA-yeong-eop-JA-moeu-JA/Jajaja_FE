@@ -43,24 +43,24 @@ export default function CategoryPage() {
       </header>
 
       <div className="flex flex-col flex-1 overflow-hidden">
-        <div className="px-3">
+        <div>
           <PageButton items={['basic', 'industry']} selected={selectedTop1} onSelect={setSelectedTop1} />
         </div>
 
-        <div className="flex flex-1 overflow-hidden px-3">
-          <ul className="w-[116px] h-full bg-gray-50 text-body-regular text-black-4 flex-shrink-0">
+        <div className="flex flex-1 overflow-hidden">
+          <div className="w-[116px] h-full bg-gray-50 text-body-regular text-black-4 flex-shrink-0">
             {mainCategories.map(({ id, name }) => (
               <li
                 key={id}
                 onClick={() => setSelectedMainId(id)}
-                className={`px-3 py-4 border-none cursor-pointer flex items-center justify-center ${
+                className={`py-4 border-none cursor-pointer flex items-center justify-center ${
                   selectedMainId === id ? 'bg-white text-black font-semibold' : ''
                 }`}
               >
                 {name}
               </li>
             ))}
-          </ul>
+          </div>
 
           <div className="relative flex-1 overflow-y-auto">
             <AnimatePresence mode="wait">
@@ -76,7 +76,7 @@ export default function CategoryPage() {
                   <li
                     key={label}
                     onClick={() => handleSubCategoryClick(label)}
-                    className="flex items-center justify-between py-3 px-4 border-none cursor-pointer"
+                    className="flex items-center justify-between py-4 px-2 border-none cursor-pointer"
                   >
                     <div className="flex items-center gap-2">
                       {icon && <span>{icon}</span>}

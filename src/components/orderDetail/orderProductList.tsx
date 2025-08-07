@@ -18,23 +18,29 @@ export default function OrderProductList({ items, matchStatus }: IOrderProductLi
   return (
     <section className="px-4 pb-4 border-b border-b-4 border-b-black-1 flex flex-col gap-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-subtitle-medium">주문 상품</h2>
+        <h2 className="text-subtitle-medium px-2 py-2">주문 상품</h2>
         {matchStatus && <span className={`text-small text-body-medium ${MATCH_STATUS_COLOR_MAP[matchStatus]}`}>{matchStatus}</span>}
       </div>
 
       {items.map((item) => (
-        <div key={item.productId} className="flex flex-col gap-2">
+        <div>
+          <div key={item.productId} className="flex flex-col gap-2 mb-4 px-4">
           <OrderItem item={item} show={false} />
-          <SelectButton
-            kind="select-content"
-            leftText="교환/반품"
-            rightText="배송 조회"
-            leftVariant="outline-orange"
-            rightVariant="outline-orange"
-            onLeftClick={() => navigate('/mypage/apply')}
-            onRightClick={() => navigate('/mypage/deliveryInfo')}
-          />
+          
+          </div>
+          <div className="text-body-medium md:flex-row justify-between">
+            <SelectButton
+              kind="select-content"
+              leftText="교환/반품"
+              rightText="배송 조회"
+              leftVariant="outline-orange"
+              rightVariant="outline-orange"
+              onLeftClick={() => navigate('/mypage/apply')}
+              onRightClick={() => navigate('/mypage/deliveryInfo')}
+            />
+          </div>
         </div>
+        
       ))}
     </section>
   );
