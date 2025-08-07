@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import type { TOptionBase } from '@/types/optionApply'; // reasonOptions 타입
+import type { TOption } from '@/types/product/option';
+
 import { Button, SelectButton } from '@/components/common/button';
 import PageHeader from '@/components/head_bottom/PageHeader';
 import ConfirmModal from '@/components/modal/confirmModal';
 import DropDown from '@/components/modal/dropDown';
 import RefundInfo from '@/components/orderDetail/returnInfo';
 import OrderItem from '@/components/review/orderItem';
-
-import type { TOption } from '@/types/product/option';
-import type { TOptionBase } from '@/types/optionApply'; // reasonOptions 타입
 
 import { orderData } from '@/mocks/orderData';
 
@@ -123,7 +123,7 @@ export default function ApplyReturnOrExchange() {
               rightVariant={selectedType === '반품' ? 'outline-orange' : 'outline-gray'}
               onLeftClick={() => {
                 setSelectedType('교환');
-                setDropdownKey((prev) => prev + 1); 
+                setDropdownKey((prev) => prev + 1);
               }}
               onRightClick={() => {
                 setSelectedType('반품');
@@ -137,14 +137,14 @@ export default function ApplyReturnOrExchange() {
           <h2 className="text-subtitle-medium pb-2">사유</h2>
           <DropDown
             key={dropdownKey}
-            options={reasonOptions as TOption[]}            
+            options={reasonOptions as TOption[]}
             onChange={({ id }) => {
               const selected = reasonOptions.find((reason) => reason.id === id);
               if (selected) {
                 setSelectedReason(selected.name);
               }
             }}
-            defaultLabel='사유 선택'
+            defaultLabel="사유 선택"
           />
         </section>
 
