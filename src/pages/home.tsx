@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useModalStore } from '@/stores/modalStore';
+import useHomeProduct from '@/hooks/home/useGetProduct';
 
 import SearchInput from '@/components/common/SearchInput';
 import BottomBar from '@/components/head_bottom/BottomBar';
@@ -15,8 +16,8 @@ export default function Home() {
   const [scrollDir, setScrollDir] = useState<'up' | 'down'>('up');
   const [lastY, setLastY] = useState(0);
   const { openModal } = useModalStore();
+  const { data } = useHomeProduct();
   const navigate = useNavigate();
-
   useLayoutEffect(() => {
     const shouldShow = !document.cookie.includes('hidePopup=true');
     if (shouldShow) {
@@ -41,7 +42,7 @@ export default function Home() {
   }, [lastY]);
 
   return (
-    <div className="pb-15 flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen">
       <div
         className={`fixed top-0 left-0 right-0 z-50 bg-white transition-all duration-300
                     max-w-screen-sm mx-auto
@@ -55,17 +56,17 @@ export default function Home() {
         </header>
       </div>
 
-      <div className="pt-[100px] pb-15">
+      <div className="pt-[100px]">
         <section className="w-full">
           <Banner />
         </section>
 
-        <section className="w-full px-4 py-7 flex flex-col items-center gap-8">
-          <Recommand />
-          <Popular />
-          <New />
+        <section className="w-full px-4 py-7 flex flex-col items-center gap-26">
+          <Recommand data={data?.result.recommendProducts} />
+          <Popular data={data?.result.popularProducts} />
+          <New data={data?.result.newProducts} />
         </section>
-        <footer className="px-4 py-5 bg-black-0 flex flex-col gap-4">
+        <footer className="pb-20 px-4 pt-5 bg-black-0 flex flex-col gap-4">
           <div className="flex items-center px-1 gap-2 text-small-regular">
             <p className="text-black-4">이용약관</p>
             <p>|</p>
