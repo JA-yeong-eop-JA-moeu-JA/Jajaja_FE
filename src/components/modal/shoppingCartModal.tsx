@@ -31,8 +31,8 @@ export default function CartModal({ item, onUpdate }: ICartModalProps) {
 
     setSelectedItem({
       ...selectedItem,
-      name: found.name,
-      price: found.price,
+      productName: found.name,
+      unitPrice: found.price,
     });
   };
 
@@ -55,7 +55,7 @@ export default function CartModal({ item, onUpdate }: ICartModalProps) {
 
         <div className="flex flex-col gap-3">
           <div className="rounded-sm w-full min-h-22 bg-black-0 px-4 pt-5 pb-4 relative flex flex-col gap-3">
-            <p className="text-body-regular">{selectedItem.name}</p>
+            <p className="text-body-regular">{selectedItem.productName}</p>
             <div className="flex items-center justify-between">
               <div className="flex items-center w-21 h-6 border border-black-2">
                 <div className="flex items-center justify-center w-6 h-full cursor-pointer" onClick={() => handleCalculate(-1)}>
@@ -66,13 +66,13 @@ export default function CartModal({ item, onUpdate }: ICartModalProps) {
                   <Plus />
                 </div>
               </div>
-              <p className="text-body-medium">{((selectedItem.price ?? selectedItem.unitPrice) * (selectedItem.quantity || 1)).toLocaleString()} 원</p>
+              <p className="text-body-medium">{((selectedItem.unitPrice ?? selectedItem.totalPrice) * (selectedItem.quantity || 1)).toLocaleString()} 원</p>
             </div>
           </div>
 
           <div className="flex justify-between items-center text-small-medium px-2">
             <p>총 {selectedItem.quantity || 1}개</p>
-            <p>{((selectedItem.price ?? 0) * ((selectedItem.quantity ?? 0) || 1)).toLocaleString()} 원</p>
+            <p>{((selectedItem.unitPrice ?? 0) * ((selectedItem.quantity ?? 0) || 1)).toLocaleString()} 원</p>
           </div>
         </div>
       </div>

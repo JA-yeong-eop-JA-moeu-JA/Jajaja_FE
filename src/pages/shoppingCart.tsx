@@ -19,7 +19,7 @@ export default function ShoppingCart() {
   const { openModal } = useModalStore();
   const navigate = useNavigate();
 
-  const { cartItems, summary, appliedCoupon, isEmpty, updateCartItem, deleteMultipleItems, isUpdating, isDeleting } = useCart();
+  const { cartItems, isEmpty, updateCartItem, deleteMultipleItems, isUpdating, isDeleting } = useCart();
 
   const productIds = useMemo(() => cartItems.map((item) => item.productId.toString()), [cartItems]);
   const { checkedItems, initialize, toggle, toggleAll, isAllChecked, reset } = useProductCheckboxStore();
@@ -80,7 +80,7 @@ export default function ShoppingCart() {
         selectedItems,
       },
     });
-  }, [cartItems, checkedItems, selectedItemsTotal, summary, appliedCoupon, navigate]);
+  }, [cartItems, checkedItems, selectedItemsTotal, navigate]);
 
   return (
     <>
