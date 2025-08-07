@@ -13,11 +13,11 @@ export default function usePatchUserInfo() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  const { mutate, isSuccess } = useCoreMutation<TGetUserInfoResponse, TVariables>(({ memberId, memberData }) => patchUserInfo(memberId, memberData), {
+  const { mutate } = useCoreMutation<TGetUserInfoResponse, TVariables>(({ memberId, memberData }) => patchUserInfo(memberId, memberData), {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.GET_USER_INFO });
       navigate('/mypage');
     },
   });
-  return { mutate, isSuccess };
+  return { mutate };
 }

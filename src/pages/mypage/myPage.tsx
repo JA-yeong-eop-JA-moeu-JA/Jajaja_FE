@@ -4,6 +4,7 @@ import { BENEFIT_LIST } from '@/constants/myPage/benefitList';
 import { MAIN_FUNCTIONS } from '@/constants/myPage/mainFunctions';
 import { SUB_FUNCTIONS } from '@/constants/myPage/subFunctions';
 
+import useLogout from '@/hooks/auth/useLogout';
 import useUserInfo from '@/hooks/myPage/useUserInfo';
 
 import BenefitCard from '@/components/benefitCard';
@@ -14,6 +15,7 @@ import Right from '@/assets/right.svg?react';
 
 export default function MyPage() {
   const { data } = useUserInfo();
+  const { logout } = useLogout();
   const navigate = useNavigate();
   return (
     <div className="w-full h-screen">
@@ -67,6 +69,7 @@ export default function MyPage() {
               <button
                 onClick={() => {
                   if (path) navigate(path);
+                  if (name === '로그아웃') logout();
                 }}
                 key={id}
                 className={`${name === '로그아웃' ? 'text-error-3' : 'text-black'}
