@@ -1,4 +1,5 @@
-import axios from 'axios'
+import axios from 'axios';
+
 import type { IReviewResponse } from '@/types/review';
 
 export const getReviews = async ({
@@ -12,14 +13,11 @@ export const getReviews = async ({
   size?: number;
   token: string;
 }) => {
-  const response = await axios.get<IReviewResponse>(
-    `/api/reviews?sort=${sort}&page=${page}&size=${size}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+  const response = await axios.get<IReviewResponse>(`/api/reviews?sort=${sort}&page=${page}&size=${size}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
   return response.data;
 };
