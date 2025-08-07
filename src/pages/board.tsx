@@ -5,17 +5,17 @@ import { mockTeamProducts } from '@/mocks/teamRecruit';
 import useUserInfo from '@/hooks/myPage/useUserInfo';
 
 import { PageButton } from '@/components/common/button';
-import ReviewCard from '@/components/product/reviewCard';
+//import ReviewCard from '@/components/product/reviewCard';
 import HorizontalProductCard from '@/components/board/HorizontalProductCard';
 import Header from '@/components/head_bottom/HomeHeader';
 import BottomBar from '@/components/head_bottom/BottomBar';
 
-import type { IReviewItem } from '@/types/board/reviewBoard';
+//import type { IReviewItem } from '@/types/board/reviewBoard';
 
 export default function Board() {
   const [selectedTop2, setSelectedTop2] = useState<'review' | 'team'>('review');
   const [sortType, setSortType] = useState<'latest' | 'recommend'>('latest');
-  const [reviewList, ] = useState<IReviewItem[]>([]);
+  //const [reviewList, ] = useState<IReviewItem[]>([]);
   const [page, setPage] = useState(0);
 
   const {
@@ -79,7 +79,7 @@ export default function Board() {
                 ))}
               </div>
 
-              {reviewList.map((item) => (
+             {/*} {reviewList.map((item) => (
                 <ReviewCard
                   key={item.review.id}
                   data={{
@@ -94,7 +94,7 @@ export default function Board() {
                     images: item.imageUrls,
                   }}
                 />
-              ))}
+              ))}*/}
             </>
           ) : (
             <>
