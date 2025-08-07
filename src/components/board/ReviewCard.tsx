@@ -29,7 +29,7 @@ export default function ReviewCard({ data }: TReviewCardProps) {
   };
 
   return (
-    <div className="border-b border-b-1 p-2" style={{ borderBottomColor: 'var(--color-black-2)' }}>
+    <div className="border-b-1 p-2" style={{ borderBottomColor: 'var(--color-black-2)' }}>
       {/* 작성자 정보 + 좋아요 버튼 */}
       <div className="flex justify-between items-center text-sm">
         <div className="flex items-center gap-3">

@@ -9,8 +9,6 @@ import useUserInfo from '@/hooks/myPage/useUserInfo';
 import { Button } from '@/components/common/button';
 import PageHeaderBar from '@/components/head_bottom/PageHeader';
 
-import DefaultProfile from '@/assets/myPage/defaultProfile.svg?react';
-
 export default function Profile() {
   const { data } = useUserInfo();
   const { mutate } = usePatchUserInfo();
@@ -94,11 +92,7 @@ export default function Profile() {
         <PageHeaderBar title="프로필 수정" />
 
         <div className="w-full flex flex-col items-center justify-center px-4 pt-2 pb-11">
-          {currentPreviewUrl ? (
-            <img src={currentPreviewUrl} alt="프로필 이미지" className="w-30 h-30 rounded-full object-cover" />
-          ) : (
-            <DefaultProfile className="w-30 h-30" />
-          )}
+          <img src={currentPreviewUrl} alt="프로필 이미지" className="w-30 h-30 rounded-full object-cover" />
           <div className="flex justify-center items-center gap-3 py-3.5">
             <input ref={inputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
             <button className="text-black text-body-regular underline" onClick={openFileDialog}>
