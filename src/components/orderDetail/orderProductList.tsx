@@ -23,10 +23,9 @@ export default function OrderProductList({ items, matchStatus }: IOrderProductLi
       </div>
 
       {items.map((item) => (
-        <div>
-          <div key={item.productId} className="flex flex-col gap-2 mb-4 px-4">
-          <OrderItem item={item} show={false} />
-          
+        <div key={item.productId}>
+          <div className="flex flex-col gap-2 mb-4 px-4">
+            <OrderItem item={item} show={false} />
           </div>
           <div className="text-body-medium md:flex-row justify-between">
             <SelectButton
@@ -40,7 +39,6 @@ export default function OrderProductList({ items, matchStatus }: IOrderProductLi
             />
           </div>
         </div>
-        
       ))}
     </section>
   );

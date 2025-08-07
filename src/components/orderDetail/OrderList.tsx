@@ -18,12 +18,7 @@ export default function OrderList({ orders }: IOrderProps) {
   return (
     <div className="w-full flex flex-col">
       {orders.map((order, index) => (
-        <section
-          key={order.id}
-          className={`w-full pb-4 mb-4 ${
-            index !== orders.length - 1 ? 'border-b-black-1 border-b-4' : ''
-          }`}
-        >
+        <section key={order.id} className={`w-full pb-4 mb-4 ${index !== orders.length - 1 ? 'border-b-black-1 border-b-4' : ''}`}>
           <button className="w-full flex items-center justify-between pb-2 px-4" onClick={() => navigate('/mypage/order/orderDetailPersonal')}>
             {/** 나중에 /mypage/order/${order.id}로 바꿔야함!! */}
             <p className="text-subtitle-medium text-left">{order.createdAt}</p>
@@ -44,16 +39,8 @@ export default function OrderList({ orders }: IOrderProps) {
               {/* 상태 텍스트 */}
               {(item.orderStatus || item.matchStatus) && (
                 <div className="flex justify-between text-body-medium">
-                  {item.orderStatus && (
-                    <span className={ORDER_STATUS_COLOR_MAP[item.orderStatus]}>
-                      {item.orderStatus}
-                    </span>
-                  )}
-                  {item.matchStatus && (
-                    <span className={MATCH_STATUS_COLOR_MAP[item.matchStatus]}>
-                      {item.matchStatus}
-                    </span>
-                  )}
+                  {item.orderStatus && <span className={ORDER_STATUS_COLOR_MAP[item.orderStatus]}>{item.orderStatus}</span>}
+                  {item.matchStatus && <span className={MATCH_STATUS_COLOR_MAP[item.matchStatus]}>{item.matchStatus}</span>}
                 </div>
               )}
 
