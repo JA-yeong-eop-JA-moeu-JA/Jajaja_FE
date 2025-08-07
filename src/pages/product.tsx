@@ -65,24 +65,24 @@ export default function Product() {
       <img src={product?.imageUrl} className="w-full" alt={product?.name} />
       <section className="py-5 px-4 flex flex-col gap-3">
         <div className="flex flex-col gap-2">
-          <p className="text-body-medium">{product?.company}</p>
+          <p className="text-body-medium">{product?.store}</p>
           <p className="text-body-regular">{product?.name}</p>
         </div>
         <div>
-          {product?.sale && (
+          {product?.discountRate && (
             <div className="flex items-center gap-2 text-body-regular text-black-4">
-              <p className="line-through">{Math.round(product?.price * (1 + product?.sale / 100)).toLocaleString()}</p>
+              <p className="line-through">{Math.round(product?.price * (1 + product?.discountRate / 100)).toLocaleString()}</p>
               <p>원</p>
             </div>
           )}
           <div className="flex items-center text-title-medium gap-2 mb-1.5">
-            {product?.sale && <p className="text-error-3">{product?.sale}%</p>}
+            {product?.discountRate && <p className="text-error-3">{product?.discountRate}%</p>}
             <p>{product?.price.toLocaleString()} 원</p>
           </div>
           <div className="flex items-center gap-2 text-body-regular">
-            <StarRating star={product?.star || 0} />
-            <p className="text-[#ffc800]">{product?.star || 0}</p>
-            <p className="text-black-4">· {product?.review || 0} 건 리뷰</p>
+            <StarRating star={product?.rating || 0} />
+            <p className="text-[#ffc800]">{product?.rating || 0}</p>
+            <p className="text-black-4">· {product?.reviewCount || 0} 건 리뷰</p>
           </div>
         </div>
       </section>
