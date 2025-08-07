@@ -48,7 +48,7 @@ export default function CategoryPage() {
         </div>
 
         <div className="flex flex-1 overflow-hidden">
-          <div className="w-[116px] h-full bg-gray-50 text-body-regular text-black-4 flex-shrink-0">
+          <div className="w-[116px] bg-black-0 text-body-regular text-black-4 flex-shrink-0 relative overflow-y-auto">
             {mainCategories.map(({ id, name }) => (
               <li
                 key={id}
