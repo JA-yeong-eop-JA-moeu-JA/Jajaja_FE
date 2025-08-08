@@ -34,15 +34,15 @@ export default function CategoryPage() {
   }));
 
   const handleSubCategoryClick = (id: number, label: string) => {
-  const qs = new URLSearchParams({
-    subcategoryId: String(id),
-    sort: 'NEW',
-    page: '0',
-    size: '20',
-    keyword: label,
-  });
-  navigate(`/search?${qs.toString()}`);
-};
+    const qs = new URLSearchParams({
+      subcategoryId: String(id),
+      sort: 'NEW',
+      page: '0',
+      size: '20',
+      keyword: label,
+    });
+    navigate(`/search?${qs.toString()}`);
+  };
 
   return (
     <div className="text-body-regular flex flex-col min-h-screen">

@@ -4,10 +4,14 @@ import { type ChangeEvent, useEffect, useRef, useState } from 'react';
 import ScrollContainer from 'react-indiana-drag-scroll';
 import { useSearchParams } from 'react-router-dom';
 
+import type { TCategorySort } from '@/types/category';
 import { TOTALLIST } from '@/constants/search/totalList';
 
 import { formatKoreanDateLabel } from '@/utils/time';
 
+// search 에 카테고리 api 연동을 위해서 추가, 수정 부분은 아이콘으로 표시 해뒀습니다!!
+// ⭐ 추가
+import { useCategoryProducts } from '@/hooks/category/useCategoryProduct';
 import useGetKeyword from '@/hooks/search/useGetKeyword';
 
 import SearchInput from '@/components/common/SearchInput';
@@ -19,10 +23,6 @@ import Back from '@/assets/icons/back.svg?react';
 import Down from '@/assets/icons/down.svg?react';
 import NoResult from '@/assets/icons/noResult.svg?react';
 import Up from '@/assets/icons/up.svg?react';
-// search 에 카테고리 api 연동을 위해서 추가, 수정 부분은 아이콘으로 표시 해뒀습니다!!
-// ⭐ 추가
-import { useCategoryProducts } from '@/hooks/category/useCategoryProduct';
-import type { CategorySort } from '@/types/category';
 
 export default function Search() {
   const { data } = useGetKeyword();
@@ -36,15 +36,12 @@ export default function Search() {
   const keywordParam = searchParams.get('keyword');
   const COLUMN_COUNT = 2;
   const rowsPerColumn = data ? Math.ceil(data?.result.keywords.length / COLUMN_COUNT) : 0;
-  const columns = Array.from(
-    { length: COLUMN_COUNT },
-    (_, i) => data?.result.keywords.slice(i * rowsPerColumn, (i + 1) * rowsPerColumn)
-  );
+  const columns = Array.from({ length: COLUMN_COUNT }, (_, i) => data?.result.keywords.slice(i * rowsPerColumn, (i + 1) * rowsPerColumn));
 
   // ⭐ 추가: 카테고리 모드 감지 & 라벨↔ENUM 매핑
   const subcategoryId = Number(searchParams.get('subcategoryId') || '');
   const isCategoryMode = !!subcategoryId;
-  const SORT_LABEL_TO_ENUM: Record<string, CategorySort> = {
+  const SORT_LABEL_TO_ENUM: Record<string, TCategorySort> = {
     '인기순': 'POPULAR',
     '신상품순': 'NEW',
     '낮은 가격순': 'PRICE_ASC',
@@ -53,32 +50,30 @@ export default function Search() {
   //const displayList = isCategoryMode
   //  ? categoryProducts.map(mapToProductCard)
   //  : filteredList;
-  
+
   // ⭐ 추가: page/size 읽기 + API 정렬 값 + 카테고리 상품 조회
   const page = Number(searchParams.get('page') || '0');
   const size = Number(searchParams.get('size') || '20');
-  const apiSort: CategorySort = SORT_LABEL_TO_ENUM[sortOption] || 'NEW';
-  const {
-    products: categoryProducts,
-  } = useCategoryProducts({
+  const apiSort: TCategorySort = SORT_LABEL_TO_ENUM[sortOption] || 'NEW';
+  const { products: categoryProducts } = useCategoryProducts({
     subcategoryId: isCategoryMode ? subcategoryId : undefined,
     sort: apiSort,
     page,
     size,
   });
   // ⭐ 추가: API → ProductCard/TOTALLIST 아이템으로 매핑
-  type ProductCardItem = typeof TOTALLIST[number];
+  type TProductCardItem = (typeof TOTALLIST)[number];
 
-  const mapToProductCard = (p: any): ProductCardItem => ({
+  const mapToProductCard = (p: any): TProductCardItem => ({
     id: p.productId,
     name: p.name,
     price: p.salePrice,
     discountRate: p.discountRate,
-    imageUrl: p.imageUrl, 
+    imageUrl: p.imageUrl,
     store: p.store,
     rating: p.rating,
     reviewCount: p.reviewCount,
-    tag: '',            
+    tag: '',
   });
 
   // ⭐ 추가: 카테고리 모드일 때 filteredList에 API 결과 주입
@@ -94,7 +89,6 @@ export default function Search() {
     const labelFromUrl = searchParams.get('keyword') || searchParams.get('subcategoryName');
     if (labelFromUrl) setValue(labelFromUrl); // 표시만 함, handleFilter는 호출 X
   }, [isCategoryMode, searchParams]);
-
 
   const handleDelete = () => {
     //TODO: delete api 추가되면 연결 예정
@@ -206,7 +200,7 @@ export default function Search() {
               </div>
             )}
           </div>
-          
+
           {/* ❗ 수정안함: filteredList → displayList 고려해봐야함 */}
           {filteredList.length === 0 ? (
             <div className="w-full flex flex-col items-center justify-center h-[calc(100vh-144px)] gap-3">
