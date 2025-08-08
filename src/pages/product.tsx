@@ -22,29 +22,9 @@ export default function Product() {
   const { data } = useGetProductDetail();
   const { id } = useParams<{ id: string }>();
   const { openModal } = useModalStore();
-  // const [teams, setTeams] = useState(() =>
-  //   TEAMS.map((team) => ({
-  //     ...team,
-  //     time: team.time,
-  //   })),
-  // );
   const [fold, setFold] = useState(false);
   const [showNav, setShowNav] = useState(false);
   const shortReview = REVIEW_LIST.slice(0, 3);
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     setTeams((prev) =>
-  //       prev
-  //         .map((team) => ({
-  //           ...team,
-  //           time: team.time - 1000,
-  //         }))
-  //         .filter((team) => team.time > 0),
-  //     );
-  //   }, 1000);
-
-  //   return () => clearInterval(interval);
-  // }, []);
   useEffect(() => {
     const handleScroll = () => {
       setShowNav(window.scrollY > 0);
@@ -53,12 +33,6 @@ export default function Product() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-  // const formatTime = (ms: number) => {
-  //   const totalSeconds = Math.floor(ms / 1000);
-  //   const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
-  //   const seconds = String(totalSeconds % 60).padStart(2, '0');
-  //   return `${minutes}:${seconds}`;
-  // };
   return (
     <div className="pb-16">
       <ProductHeader />
@@ -186,10 +160,10 @@ export default function Product() {
       )}
 
       <footer className="px-4 py-2 fixed bottom-0 max-w-[600px] bg-white w-full h-16 flex justify-center gap-2 items-center text-body-medium text-white">
-        <button className="rounded-sm bg-black py-2.5 w-full" onClick={() => openModal('bottom-drawer')}>
+        <button className="rounded-sm h-12 bg-black py-2.5 w-full" onClick={() => openModal('bottom-drawer-team')}>
           1인 구매하기
         </button>
-        <button className="rounded-sm bg-orange py-2.5 w-full" onClick={() => openModal('bottom-drawer-team')}>
+        <button className="rounded-sm h-12 bg-orange py-2.5 w-full" onClick={() => openModal('bottom-drawer')}>
           팀 생성하기
         </button>
       </footer>

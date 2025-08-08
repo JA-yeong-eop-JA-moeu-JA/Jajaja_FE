@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { useModalStore } from '@/stores/modalStore';
 import useGetOption from '@/hooks/product/useGetOption';
+import useMakeTeam from '@/hooks/product/useMakeTeam';
 
 import DropDown from './dropDown';
 
@@ -15,6 +16,9 @@ export default function OptionModal({ type }: { type?: string }) {
   const navigate = useNavigate();
   const { data } = useGetOption();
   const { closeModal } = useModalStore();
+  const { id: product } = useParams<{ id: string }>();
+  const productId = Number(product);
+  const { mutate } = useMakeTeam();
   const [selectedItems, setSelectedItems] = useState<{ id: number; name: string; originPrice: number; unitPrice: number; quantity: number }[]>([]);
   const isTeam = type === 'team';
   const handleSelect = (selectedId: number) => {
@@ -36,6 +40,11 @@ export default function OptionModal({ type }: { type?: string }) {
   const handleRemove = (id: number) => {
     setSelectedItems((prev) => prev.filter((item) => item.id !== id));
   };
+  const handleTeam = () => {
+    mutate({ productId });
+    closeModal();
+  };
+
   const totalQuantity = selectedItems.reduce((acc, item) => acc + item.quantity, 0);
   const originTotalPrice = selectedItems.reduce((acc, item) => acc + item.originPrice * item.quantity, 0);
   const unitTotalPrice = selectedItems.reduce((acc, item) => acc + item.unitPrice * item.quantity, 0);
@@ -82,12 +91,15 @@ export default function OptionModal({ type }: { type?: string }) {
       </div>
       <div className="flex items-center gap-4">
         <Cart onClick={() => navigate('/shoppingcart')} />
-        <button
-          className={`w-full h-12 flex justify-center items-center rounded-sm text-body-medium text-white ${isTeam ? 'bg-black' : 'bg-orange'}`}
-          onClick={() => closeModal()}
-        >
-          {isTeam ? '1인 구매하기' : '팀 생성하기'}
-        </button>
+        {isTeam ? (
+          <button className="w-full h-12 flex justify-center items-center rounded-sm text-body-medium text-white bg-black" onClick={() => closeModal()}>
+            1인 구매하기
+          </button>
+        ) : (
+          <button className="w-full h-12 flex justify-center items-center rounded-sm text-body-medium text-white bg-orange" onClick={handleTeam}>
+            팀 생성하기
+          </button>
+        )}
       </div>
     </div>
   );
