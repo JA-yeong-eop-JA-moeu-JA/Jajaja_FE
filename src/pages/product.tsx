@@ -8,6 +8,7 @@ import { Timer } from '@/utils/timer';
 
 import { useModalStore } from '@/stores/modalStore';
 import useGetProductDetail from '@/hooks/product/useGetProductDetail';
+import useJoinTeam from '@/hooks/product/useJoinTeam';
 
 import { Button } from '@/components/common/button';
 import ProductHeader from '@/components/head_bottom/ProductHeader';
@@ -19,6 +20,7 @@ import Share from '@/assets/icons/share.svg?react';
 
 export default function Product() {
   const navigate = useNavigate();
+  const { mutate } = useJoinTeam();
   const { data } = useGetProductDetail();
   const { id } = useParams<{ id: string }>();
   const { openModal } = useModalStore();
@@ -88,7 +90,7 @@ export default function Product() {
               </div>
               <div className="flex items-center gap-3">
                 {expireAt && <Timer expireAt={expireAt} />}
-                <button className="px-4 py-2 rounded-sm text-body-regular border-1 border-green-hover" onClick={() => openModal('bottom-drawer-team')}>
+                <button className="px-4 py-2 rounded-sm text-body-regular border-1 border-green-hover" onClick={() => mutate(teamId)}>
                   참여
                 </button>
               </div>
