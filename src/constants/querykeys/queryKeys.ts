@@ -7,4 +7,5 @@ export const QUERY_KEYS = {
   GET_COUPONS: ['getCoupons'],
   GET_NOTI_LIST: ['getNotiList'],
   GET_NOTI_UNREAD: ['getNotiUnread'],
+  GET_PRODUCT_REVIEW: ['getProductReview'],
 };
