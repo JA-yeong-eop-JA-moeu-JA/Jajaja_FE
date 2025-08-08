@@ -4,6 +4,8 @@ import { toast } from 'sonner';
 
 import { REVIEW_LIST } from '@/constants/product/reviews';
 
+import { Timer } from '@/utils/timer';
+
 import { useModalStore } from '@/stores/modalStore';
 import useGetProductDetail from '@/hooks/product/useGetProductDetail';
 
@@ -104,14 +106,14 @@ export default function Product() {
       <section className="px-4 py-7.5">
         <p className="text-subtitle-medium mb-8.5">팀 구매 참여</p>
         <div className="flex flex-col gap-7">
-          {data?.result.teams.map(({ id: teamId, nickname, createdAt }) => (
+          {data?.result.teams.map(({ id: teamId, nickname, expireAt, profileUrl }) => (
             <div key={teamId} className="flex justify-between items-center">
               <div className="flex items-center gap-3 text-body-regular">
-                {/* <img src={imageUrl} /> */}
+                <img className="w-9 h-9" src={profileUrl} />
                 <p>{nickname}</p>
               </div>
               <div className="flex items-center gap-3">
-                <p className="text-body-medium text-green-hover">{createdAt}</p>
+                {expireAt && <Timer expireAt={expireAt} />}
                 <button className="px-4 py-2 rounded-sm text-body-regular border-1 border-green-hover" onClick={() => openModal('bottom-drawer-team')}>
                   참여
                 </button>

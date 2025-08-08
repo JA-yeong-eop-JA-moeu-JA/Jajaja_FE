@@ -8,7 +8,9 @@ import { TOTALLIST } from '@/constants/search/totalList';
 
 import { formatKoreanDateLabel } from '@/utils/time';
 
+import useDeleteRecent from '@/hooks/search/useDeleteRecent';
 import useGetKeyword from '@/hooks/search/useGetKeyword';
+import useGetRecent from '@/hooks/search/useGetRecent';
 
 import SearchInput from '@/components/common/SearchInput';
 import ProductCard from '@/components/home/productCard';
@@ -29,12 +31,14 @@ export default function Search() {
   const [inputValue, setValue] = useState('');
   const [isAsc, setIsAsc] = useState(true);
   const [filteredList, setFilteredList] = useState(TOTALLIST);
+  const { data: recent } = useGetRecent();
+  const { mutate } = useDeleteRecent();
   const keywordParam = searchParams.get('keyword');
   const COLUMN_COUNT = 2;
   const rowsPerColumn = data ? Math.ceil(data?.result.keywords.length / COLUMN_COUNT) : 0;
   const columns = Array.from({ length: COLUMN_COUNT }, (_, i) => data?.result.keywords.slice(i * rowsPerColumn, (i + 1) * rowsPerColumn));
-  const handleDelete = () => {
-    //TODO: delete api 추가되면 연결 예정
+  const handleDelete = (id: number) => {
+    mutate(id);
   };
   const handleValue = (e: ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
@@ -89,9 +93,9 @@ export default function Search() {
             <p className="text-subtitle-medium mb-2">최근 검색</p>
             <ScrollContainer className="flex w-full gap-2 overflow-x-auto cursor-grab" vertical={false}>
               {!data?.result.keywords.length && <p className="text-body-regular text-black-4 py-2.5">최근 검색어가 없습니다.</p>}
-              {data?.result.keywords.map((item, id) => (
+              {recent?.result.map(({ id, keyword }) => (
                 <div key={id} className="shrink-0">
-                  <Tag msg={item} onDelete={() => handleDelete()} />
+                  <Tag msg={keyword} onDelete={() => handleDelete(id)} />
                 </div>
               ))}
             </ScrollContainer>
