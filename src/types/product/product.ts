@@ -21,8 +21,9 @@ export type TGetReviews = {
 };
 export type TGetTeams = {
   id: number;
+  profileUrl: string;
   nickname: string;
-  createdAt: string;
+  expireAt: string;
 };
 export type TGetProductDetail = TCommonResponse<{
   thumbnailUrl: string;
