@@ -1,16 +1,20 @@
-import { useState } from 'react';
+import { differenceInCalendarDays } from 'date-fns';
+
+import type { TGetNoti } from '@/types/notifications/TGetNotiList';
+
+import useGetNotiList from '@/hooks/notifications/useGetNotiList';
+import useGetNotiUnread from '@/hooks/notifications/useGetNotiUnread';
+import usePatchNotiReadAll from '@/hooks/notifications/usePatchNotiReadAll';
 
 import PageHeader from '@/components/head_bottom/PageHeader';
 import NotiCard from '@/components/notiCard';
 
-import { notiData as initialNotiData } from '@/mocks/notiData';
+export function getDateCategory(dateString?: string): string {
+  if (!dateString) return '이전';
 
-function getDateCategory(dateStr: string) {
-  const now = new Date();
-  const target = new Date(dateStr.replace(' ', 'T'));
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const targetDay = new Date(target.getFullYear(), target.getMonth(), target.getDate());
-  const diff = (today.getTime() - targetDay.getTime()) / (1000 * 60 * 60 * 24);
+  const date = new Date(dateString);
+  const today = new Date();
+  const diff = differenceInCalendarDays(today, date);
 
   if (diff === 0) return '오늘';
   if (diff === 1) return '어제';
@@ -19,27 +23,25 @@ function getDateCategory(dateStr: string) {
 }
 
 export default function Notifications() {
-  const [notiData, setNotiData] = useState(initialNotiData);
-  const hasUnread = notiData.some((noti) => !noti.isRead);
+  const { data } = useGetNotiList();
+  const { mutate: readAll } = usePatchNotiReadAll();
+  const { data: unread } = useGetNotiUnread();
+  const hasUnread = (unread?.result?.unreadCount ?? 0) > 0;
 
-  const categories = {
-    '오늘': [] as typeof notiData,
-    '어제': [] as typeof notiData,
-    '최근 일주일': [] as typeof notiData,
-    '이전': [] as typeof notiData,
+  const categories: Record<string, TGetNoti[]> = {
+    '오늘': [],
+    '어제': [],
+    '최근 일주일': [],
+    '이전': [],
   };
 
-  notiData.forEach((noti) => {
+  data?.result.forEach((noti: TGetNoti) => {
     const category = getDateCategory(noti.createdAt);
     categories[category].push(noti);
   });
 
   const handleAllRead = () => {
-    setNotiData(notiData.map((noti) => ({ ...noti, isRead: true })));
-  };
-
-  const handleRead = (id: number) => {
-    setNotiData((notis) => notis.map((noti) => (noti.id === id ? { ...noti, isRead: true } : noti)));
+    if (hasUnread) readAll(null);
   };
 
   return (
@@ -61,7 +63,7 @@ export default function Notifications() {
               <div key={category} className="w-full">
                 <p className="text-black text-subtitle-medium px-4 text-start pb-2">{category}</p>
                 {list.map((noti) => (
-                  <NotiCard key={noti.id} {...noti} onRead={handleRead} />
+                  <NotiCard key={noti.id} {...noti} />
                 ))}
               </div>
             ),

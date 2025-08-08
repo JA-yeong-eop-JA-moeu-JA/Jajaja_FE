@@ -8,6 +8,7 @@ export type TGetReviews = {
   review: {
     id: number;
     nickname: string;
+    profileUrl: string;
     createDate: string;
     rating: number;
     option: string;
@@ -15,13 +16,14 @@ export type TGetReviews = {
     likeCount: number;
     imagesCount: number;
   };
-  isLike: true;
+  isLike: boolean;
   imageUrls: string[];
 };
 export type TGetTeams = {
   id: number;
+  profileUrl: string;
   nickname: string;
-  createdAt: string;
+  expireAt: string;
 };
 export type TGetProductDetail = TCommonResponse<{
   thumbnailUrl: string;
