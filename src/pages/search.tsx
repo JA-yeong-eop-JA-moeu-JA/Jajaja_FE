@@ -20,6 +20,10 @@ import Down from '@/assets/icons/down.svg?react';
 import NoResult from '@/assets/icons/noResult.svg?react';
 import Up from '@/assets/icons/up.svg?react';
 
+// ⭐ 추가
+import { useCategoryProducts } from '@/hooks/category/useCategoryProduct';
+import type { CategorySort } from '@/types/category';
+
 export default function Search() {
   const { data } = useGetKeyword();
   const [searchParams] = useSearchParams();
@@ -32,7 +36,69 @@ export default function Search() {
   const keywordParam = searchParams.get('keyword');
   const COLUMN_COUNT = 2;
   const rowsPerColumn = data ? Math.ceil(data?.result.keywords.length / COLUMN_COUNT) : 0;
-  const columns = Array.from({ length: COLUMN_COUNT }, (_, i) => data?.result.keywords.slice(i * rowsPerColumn, (i + 1) * rowsPerColumn));
+  const columns = Array.from(
+    { length: COLUMN_COUNT },
+    (_, i) => data?.result.keywords.slice(i * rowsPerColumn, (i + 1) * rowsPerColumn)
+  );
+
+  // ⭐ 추가: 카테고리 모드 감지 & 라벨↔ENUM 매핑
+  const subcategoryId = Number(searchParams.get('subcategoryId') || '');
+  const isCategoryMode = !!subcategoryId;
+  const SORT_LABEL_TO_ENUM: Record<string, CategorySort> = {
+    '인기순': 'POPULAR',
+    '신상품순': 'NEW',
+    '낮은 가격순': 'PRICE_ASC',
+    '리뷰순': 'REVIEW',
+  };
+  //const displayList = isCategoryMode
+  //  ? categoryProducts.map(mapToProductCard)
+  //  : filteredList;
+  
+  // ⭐ 추가: page/size 읽기 + API 정렬 값 + 카테고리 상품 조회
+  const page = Number(searchParams.get('page') || '0');
+  const size = Number(searchParams.get('size') || '20');
+  const apiSort: CategorySort = SORT_LABEL_TO_ENUM[sortOption] || 'NEW';
+  const {
+    products: categoryProducts,
+    isLoading: isCategoryLoading,
+    isError: isCategoryError,
+    error: categoryError,
+  } = useCategoryProducts({
+    subcategoryId: isCategoryMode ? subcategoryId : undefined,
+    sort: apiSort,
+    page,
+    size,
+  });
+  // ⭐ 추가: API → ProductCard/TOTALLIST 아이템으로 매핑
+  type ProductCardItem = typeof TOTALLIST[number];
+
+  const mapToProductCard = (p: any): ProductCardItem => ({
+    id: p.productId,
+    name: p.name,
+    price: p.salePrice,
+    discountRate: p.discountRate,
+    imageUrl: p.imageUrl, 
+    store: p.store,
+    rating: p.rating,
+    reviewCount: p.reviewCount,
+    tag: '',            
+  });
+
+  // ⭐ 추가: 카테고리 모드일 때 filteredList에 API 결과 주입
+  useEffect(() => {
+    if (isCategoryMode && categoryProducts) {
+      setFilteredList(categoryProducts.map(mapToProductCard));
+      setChange(true);
+    }
+  }, [isCategoryMode, categoryProducts]);
+  // ⭐ 추가: 카테고리 모드일 때 URL 검색어 초기화
+  useEffect(() => {
+    if (!isCategoryMode) return;
+    const labelFromUrl = searchParams.get('keyword') || searchParams.get('subcategoryName');
+    if (labelFromUrl) setValue(labelFromUrl); // 표시만 함, handleFilter는 호출 X
+  }, [isCategoryMode, searchParams]);
+
+
   const handleDelete = () => {
     //TODO: delete api 추가되면 연결 예정
   };
@@ -56,8 +122,17 @@ export default function Search() {
       setFilteredList([]);
     }
   };
+  // ❗ 수정: 카테고리 모드일 때 URL sort 변경 + change 상태 유지
   const handleSortSelect = (value?: string) => {
-    if (value) setSortOption(value);
+    if (value) {
+      setSortOption(value);
+      if (isCategoryMode) {
+        const qs = new URLSearchParams(searchParams);
+        qs.set('sort', SORT_LABEL_TO_ENUM[value] || 'NEW');
+        qs.set('page', '0');
+        window.history.replaceState(null, '', `/search?${qs.toString()}`);
+      }
+    }
     setIsAsc(true);
   };
   useEffect(() => {
@@ -76,7 +151,11 @@ export default function Search() {
       setChange(true);
       handleFilter(keywordParam);
     }
-  }, [keywordParam]);
+    // ⭐ 추가: 카테고리 모드면 바로 change=true
+    if (isCategoryMode) {
+      setChange(true);
+    }
+  }, [keywordParam, isCategoryMode]);
   return (
     <>
       <header className="w-full pr-4 py-1 flex items-center">
@@ -130,6 +209,8 @@ export default function Search() {
               </div>
             )}
           </div>
+          
+          {/* ❗ 수정안함: filteredList → displayList 고려해봐야함 */}
           {filteredList.length === 0 ? (
             <div className="w-full flex flex-col items-center justify-center h-[calc(100vh-144px)] gap-3">
               <NoResult />
