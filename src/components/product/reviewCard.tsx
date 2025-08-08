@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import type { TGetReviews } from '@/types/product/product';
-import { REVIEW_LIST } from '@/constants/product/reviews';
 
 import { formatKoreanDateLabel } from '@/utils/time';
 
@@ -52,7 +51,7 @@ export default function ReviewCard({ review, isLike, imageUrls }: TGetReviews) {
       <section>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.75">
-            {/* <img src={imageUrl} /> */}
+            <img className="w-8 h-8" src={review.profileUrl} />
             <div>
               <div className="flex items-center gap-2 text-small-regular">
                 <p>{review.nickname}</p>
@@ -84,7 +83,7 @@ export default function ReviewCard({ review, isLike, imageUrls }: TGetReviews) {
       <section className="flex items-center gap-2">
         {imageUrls.slice(0, 4).map((img, idx) => (
           <div key={idx} className="relative">
-            <img src={img} onClick={() => openModal('image', { src: img, images: REVIEW_LIST.flatMap(({ images }) => images) })} />
+            <img src={img} onClick={() => openModal('image', { src: img, images: imageUrls })} />
             {idx === 3 && review.imagesCount > 4 && (
               <div
                 className="flex justify-center items-center text-white text-body-regular absolute top-0 left-0 bg-[#00000099] w-full h-full"
