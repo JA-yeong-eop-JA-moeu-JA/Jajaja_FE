@@ -144,7 +144,7 @@ export default function ApplyReturnOrExchange() {
                 setSelectedReason(selected.name);
               }
             }}
-            defaultLabel="사유 선택"
+            // defaultLabel="사유 선택"
           />
         </section>
 
@@ -166,7 +166,7 @@ export default function ApplyReturnOrExchange() {
               const selected = DELIVERY_REQUEST_OPTIONS.find((option) => option.id === id);
               setDeliveryRequest(selected?.id === 0 ? '' : (selected?.name ?? ''));
             }}
-            defaultLabel="배송 요청사항을 선택해주세요"
+            // defaultLabel="배송 요청사항을 선택해주세요"
           />
         </section>
 
