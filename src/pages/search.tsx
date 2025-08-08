@@ -19,7 +19,7 @@ import Back from '@/assets/icons/back.svg?react';
 import Down from '@/assets/icons/down.svg?react';
 import NoResult from '@/assets/icons/noResult.svg?react';
 import Up from '@/assets/icons/up.svg?react';
-
+// search 에 카테고리 api 연동을 위해서 추가, 수정 부분은 아이콘으로 표시 해뒀습니다!!
 // ⭐ 추가
 import { useCategoryProducts } from '@/hooks/category/useCategoryProduct';
 import type { CategorySort } from '@/types/category';
@@ -60,9 +60,6 @@ export default function Search() {
   const apiSort: CategorySort = SORT_LABEL_TO_ENUM[sortOption] || 'NEW';
   const {
     products: categoryProducts,
-    isLoading: isCategoryLoading,
-    isError: isCategoryError,
-    error: categoryError,
   } = useCategoryProducts({
     subcategoryId: isCategoryMode ? subcategoryId : undefined,
     sort: apiSort,

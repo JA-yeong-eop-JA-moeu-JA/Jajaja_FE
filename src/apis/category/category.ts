@@ -21,7 +21,7 @@ export const categoryApi = {
     size = 20
   ): Promise<TGetCategoryProductsResponse> => {
     try {
-      const res = await axiosInstance.get(`/api/categories/${subcategoryId}/products`, {
+      const res = await axiosInstance.get(`/api/products/categories/${subcategoryId}/products`, {
         params: { sort, page, size },
       });
       return res.data;
