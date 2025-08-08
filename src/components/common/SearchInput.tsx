@@ -23,7 +23,7 @@ export default function SearchInput({ value, onEnter, onFocus, onChange, onClick
       <input
         type="text"
         value={value}
-        onChange={onChange}
+        onChange={onChange ?? (() => {})}
         onFocus={onFocus}
         autoFocus={autoFocus}
         onKeyDown={handleKeyDown}
