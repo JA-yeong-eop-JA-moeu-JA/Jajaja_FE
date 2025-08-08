@@ -27,13 +27,21 @@ export default function CategoryPage() {
 
   const navigate = useNavigate();
 
-  const parsedSubCategories = subCategories.map(({ name }) => ({
+  const parsedSubCategories = subCategories.map(({ id, name }) => ({
+    id,
     label: name,
     icon: CATEGORY_ICON_MAP[name] ?? '',
   }));
 
-  const handleSubCategoryClick = (name: string) => {
-    navigate(`/search?keyword=${encodeURIComponent(name)}`);
+  const handleSubCategoryClick = (id: number, label: string) => {
+    const qs = new URLSearchParams({
+      subcategoryId: String(id),
+      sort: 'NEW',
+      page: '0',
+      size: '20',
+      keyword: label,
+    });
+    navigate(`/search?${qs.toString()}`);
   };
 
   return (
@@ -72,10 +80,10 @@ export default function CategoryPage() {
                 transition={{ duration: 0.3 }}
                 className="absolute inset-0 bg-white text-body-medium"
               >
-                {parsedSubCategories.map(({ label, icon }) => (
+                {parsedSubCategories.map(({ id, label, icon }) => (
                   <li
-                    key={label}
-                    onClick={() => handleSubCategoryClick(label)}
+                    key={id}
+                    onClick={() => handleSubCategoryClick(id, label)}
                     className="flex items-center justify-between py-4 px-2 border-none cursor-pointer"
                   >
                     <div className="flex items-center gap-2">

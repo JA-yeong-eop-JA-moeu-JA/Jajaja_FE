@@ -6,8 +6,8 @@ import type { TOption } from '@/types/product/option';
 
 import { Button, SelectButton } from '@/components/common/button';
 import PageHeader from '@/components/head_bottom/PageHeader';
+import ApplyDropDown from '@/components/modal/applyDropDown';
 import ConfirmModal from '@/components/modal/confirmModal';
-import DropDown from '@/components/modal/dropDown';
 import RefundInfo from '@/components/orderDetail/returnInfo';
 import OrderItem from '@/components/review/orderItem';
 
@@ -135,7 +135,7 @@ export default function ApplyReturnOrExchange() {
 
         <section className="flex flex-col gap-2 px-4 pb-8 border-b border-b-black-1 border-b-4">
           <h2 className="text-subtitle-medium pb-2">사유</h2>
-          <DropDown
+          <ApplyDropDown
             key={dropdownKey}
             options={reasonOptions as TOption[]}
             onChange={({ id }) => {
@@ -160,7 +160,7 @@ export default function ApplyReturnOrExchange() {
             <p>{dummyDeliveryData.phone}</p>
             <p>{dummyDeliveryData.address}</p>
           </div>
-          <DropDown
+          <ApplyDropDown
             options={DELIVERY_REQUEST_OPTIONS as TOption[]}
             onChange={({ id }) => {
               const selected = DELIVERY_REQUEST_OPTIONS.find((option) => option.id === id);
