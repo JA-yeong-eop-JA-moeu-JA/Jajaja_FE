@@ -1,11 +1,9 @@
-import { axiosInstance } from '@/apis/axiosInstance';
+import type { ITeamProductResult } from '@/types/board/team';
 import type { TCommonResponse } from '@/types/common';
-import type { TTeamProductResult } from '@/types/board/team';
 
-export const getTeamProducts = async (
-  page: number,
-  size: number,
-): Promise<TCommonResponse<TTeamProductResult>> => {
+import { axiosInstance } from '@/apis/axiosInstance';
+
+export const getTeamProducts = async (page: number, size: number): Promise<TCommonResponse<ITeamProductResult>> => {
   try {
     const match = document.cookie.match(/accessToken=([^;]+)/);
     const token = match?.[1];

@@ -12,7 +12,7 @@ export interface ITeamProduct {
 }
 
 // 2. TTeamProductResult가 그걸 사용
-export interface TTeamProductResult {
+export interface ITeamProductResult {
   page: {
     size: number;
     totalElements: number;
@@ -26,5 +26,4 @@ export interface TTeamProductResult {
   teams: ITeamProduct[];
 }
 
-
-export type TGetTeamProductsResponse = TCommonResponse<TTeamProductResult>;
+export type TGetTeamProductsResponse = TCommonResponse<ITeamProductResult>;

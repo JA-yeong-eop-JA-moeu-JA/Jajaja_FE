@@ -3,4 +3,3 @@ export const QUERY_KEYS = {
   GET_TEAM_PRODUCTS: ['getTeamProducts'],
   GET_REVIEWS: ['getReviews'],
 };
-

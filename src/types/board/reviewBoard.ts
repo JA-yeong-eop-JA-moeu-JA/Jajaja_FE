@@ -1,21 +1,19 @@
-export interface IReview {
-  id: number;
-  nickname: string;
-  createDate: string;
-  rating: number;
-  option: string | null;
-  content: string;
-  likeCount: number;
-  imagesCount: number;
-}
-
-export interface IReviewItem {
-  review: IReview;
+export type TReviewItem = {
+  review: {
+    id: number;
+    nickname: string;
+    createDate: string;
+    rating: number;
+    option: string | null;
+    content: string;
+    likeCount: number;
+    imagesCount: number;
+  };
   isLike: boolean;
   imageUrls: string[];
-}
+};
 
-export interface IReviewPageInfo {
+export type TReviewPage = {
   size: number;
   totalElements: number;
   currentElements: number;
@@ -24,14 +22,20 @@ export interface IReviewPageInfo {
   hasNextPage: boolean;
   hasPreviousPage: boolean;
   isLast: boolean;
-}
+};
 
-export interface IReviewResponse {
-  isSuccess: boolean;
-  code: string;
+export type TGetReviewsSuccess = {
+  isSuccess: true;
+  code: 'COMMON200';
   message: string;
   result: {
-    page: IReviewPageInfo;
-    reviews: IReviewItem[];
+    page: TReviewPage;
+    reviews: TReviewItem[];
   };
-}
+};
+
+export type TGetReviewsFail = { isSuccess: false; code: 'REVIEW4001'; message: string } | { isSuccess: false; code: string; message: string };
+
+export type TGetReviewsResponse = TGetReviewsSuccess | TGetReviewsFail;
+
+export type TReviewSort = 'latest' | 'recommend';

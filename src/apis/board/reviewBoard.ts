@@ -1,25 +1,16 @@
-import type { IReviewResponse } from '@/types/review';
+import type { TGetReviewsResponse, TReviewSort } from '@/types/board/reviewBoard';
 
-import axiosInstance from '@/apis/axiosInstance';
+import { axiosInstance } from '@/apis/axiosInstance';
 
-interface GetReviewsParams {
-  sort?: 'latest' | 'recommend';
+type TParams = {
+  sort?: TReviewSort;
   page?: number;
   size?: number;
-  token: string;
-}
+};
 
-export const getReviews = async ({ sort = 'latest', page = 0, size = 5, token }: GetReviewsParams): Promise<IReviewResponse> => {
-  const response = await axiosInstance.get('/api/reviews', {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    params: {
-      sort,
-      page,
-      size,
-    },
+export const getReviews = async ({ sort = 'latest', page = 0, size = 5 }: TParams) => {
+  const { data } = await axiosInstance.get<TGetReviewsResponse>('/api/reviews', {
+    params: { sort, page, size },
   });
-
-  return response.data;
+  return data;
 };
