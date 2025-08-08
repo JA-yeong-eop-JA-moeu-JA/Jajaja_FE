@@ -7,13 +7,14 @@ import { useTeamProducts } from '@/hooks/board/useTeamProducts';
 import useUserInfo from '@/hooks/myPage/useUserInfo';
 
 import HorizontalProductCard from '@/components/board/HorizontalProductCard';
-import { PageButton } from '@/components/common/button';
+import { PageButton, type TabId } from '@/components/common/button';
 import BottomBar from '@/components/head_bottom/BottomBar';
 import Header from '@/components/head_bottom/HomeHeader';
 import ReviewCard from '@/components/product/reviewCard';
 
 export default function Board() {
-  const [selectedTop2, setSelectedTop2] = useState<'review' | 'team'>('review');
+  const [selectedTop1, setSelectedTop1] = useState<TabId>('review');
+
   const [sortType, setSortType] = useState<'latest' | 'recommend'>('latest');
   const [page, setPage] = useState(0);
 
@@ -21,29 +22,11 @@ export default function Board() {
 
   const { data, isLoading, isError, isFetched } = useTeamProducts(page);
 
-  const mappedReviews = useMemo(() => {
-    return (
-      (reviews as TReviewItem[] | undefined)?.map((item) => ({
-        id: item.review.id,
-        imageUrl: '',
-        name: item.review.nickname,
-        date: item.review.createDate,
-        star: item.review.rating,
-        likeCount: item.review.likeCount,
-        product: item.review.option || '',
-        review: item.review.content,
-        images: item.imageUrls,
-      })) ?? []
-    );
+  const reviewItems = useMemo(() => {
+    return (reviews as TReviewItem[] | undefined) ?? [];
   }, [reviews]);
 
   const teamList = data || [];
-
-  //  const canPrevReviews = page > 0;
-  //  const canNextReviews =
-  //    !!reviewPage?.hasNextPage ||
-  //    ((reviewPage?.totalElements ?? 0) >
-  //      ((reviewPage?.currentPage ?? page) + 1) * REVIEW_PAGE_SIZE);
 
   const TEAM_PAGE_SIZE = 5;
   const canPrevTeam = page > 0;
@@ -79,21 +62,14 @@ export default function Board() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="px-3">
+      <header>
         <Header />
-        <PageButton
-          items={['review', 'team']}
-          selected={selectedTop2}
-          onSelect={(tab) => {
-            setSelectedTop2(tab as 'review' | 'team');
-            setPage(0);
-          }}
-        />
       </header>
+      <PageButton items={['review', 'team']} selected={selectedTop1} onSelect={setSelectedTop1} />
 
       <div className="relative flex-1 overflow-y-auto">
-        <ul key={selectedTop2 + sortType + page} className="absolute inset-0 bg-white px-4 py-3 flex flex-col gap-3">
-          {selectedTop2 === 'review' ? (
+        <ul key={selectedTop1 + sortType + page} className="absolute inset-0 bg-white px-4 py-3 flex flex-col gap-3">
+          {selectedTop1 === 'review' ? (
             <>
               <div className="flex justify-end text-body-regular text-black-4 mb-1">
                 {[
@@ -113,10 +89,10 @@ export default function Board() {
                 <p className="text-center text-black-3">리뷰 로딩 중...</p>
               ) : isErrorReviews ? (
                 <p className="text-center text-error-3">리뷰 로드 실패</p>
-              ) : mappedReviews.length === 0 ? (
+              ) : reviewItems.length === 0 ? (
                 <p className="text-center text-black-3">리뷰가 없습니다.</p>
               ) : (
-                mappedReviews.map((r) => <ReviewCard key={r.id} data={r} />)
+                reviewItems.map((r) => <ReviewCard key={r.review.id} review={r.review} isLike={r.isLike} imageUrls={r.imageUrls} />)
               )}
 
               {(() => {

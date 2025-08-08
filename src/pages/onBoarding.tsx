@@ -5,17 +5,19 @@ import { CATEGORIES } from '@/constants/onBoarding/categoryList';
 
 import Storage from '@/utils/storage';
 
+import useCategory from '@/hooks/onBoarding/useCategory';
+
 import { Button } from '@/components/common/button';
 
 import Logo from '@/assets/sizeLogo.svg?react';
 
 export default function OnBoarding() {
+  const { mutate } = useCategory();
   const navigate = useNavigate();
   const [category, setCategory] = useState(0);
   const handleSubmit = () => {
-    const categoryName = CATEGORIES.find((cat) => cat.id === Number(category));
-    categoryName?.name === '기타' || !categoryName ? '다른' : categoryName?.name;
-    Storage.setCategory(categoryName!.name);
+    Storage.setCategory(category);
+    mutate({ businessCategoryId: category });
     navigate('/home');
   };
   return (

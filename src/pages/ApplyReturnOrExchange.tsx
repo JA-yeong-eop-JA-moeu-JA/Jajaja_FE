@@ -1,8 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import type { TOptionBase } from '@/types/optionApply'; // reasonOptions 타입
+import type { TOption } from '@/types/product/option';
+
 import { Button, SelectButton } from '@/components/common/button';
 import PageHeader from '@/components/head_bottom/PageHeader';
+import ApplyDropDown from '@/components/modal/applyDropDown';
 import ConfirmModal from '@/components/modal/confirmModal';
 import RefundInfo from '@/components/orderDetail/returnInfo';
 import OrderItem from '@/components/review/orderItem';
@@ -29,13 +33,39 @@ export default function ApplyReturnOrExchange() {
     address: '서울특별시 강서구 낙성서로12번길 3-12',
   };
 
+  const RETURN_REASONS = [
+    { id: 1, name: '고객 단순 변심' },
+    { id: 2, name: '상품 불량' },
+    { id: 3, name: '상품 파손' },
+    { id: 4, name: '상품 구성품 누락' },
+    { id: 5, name: '상품이 설명과 다름' },
+    { id: 6, name: '상품 오배송' },
+  ];
+
+  const EXCHANGE_REASONS = [
+    { id: 2, name: '상품 불량' },
+    { id: 3, name: '상품 파손' },
+    { id: 4, name: '상품 구성품 누락' },
+    { id: 5, name: '상품이 설명과 다름' },
+    { id: 6, name: '상품 오배송' },
+  ];
+
+  const DELIVERY_REQUEST_OPTIONS = [
+    { id: 1, name: '문 앞에 놔주세요' },
+    { id: 2, name: '직접 전달해주세요' },
+    { id: 3, name: '경비실에 맡겨주세요' },
+    { id: 4, name: '전화 후 전달해주세요' },
+  ];
+
   const navigate = useNavigate();
   const [selectedType, setSelectedType] = useState<'교환' | '반품' | null>(null);
   const [selectedReason, setSelectedReason] = useState('');
-  const [deliveryRequest, setDeliveryRequest] = useState('');
+  const [, setDeliveryRequest] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [dropdownKey, setDropdownKey] = useState(0);
 
   const isFormValid = selectedType !== null && selectedReason !== '';
+  const reasonOptions: TOptionBase[] = selectedType === '반품' ? RETURN_REASONS : EXCHANGE_REASONS;
 
   const handleSubmit = async (): Promise<boolean> => {
     try {
@@ -91,37 +121,31 @@ export default function ApplyReturnOrExchange() {
               rightText="반품"
               leftVariant={selectedType === '교환' ? 'outline-orange' : 'outline-gray'}
               rightVariant={selectedType === '반품' ? 'outline-orange' : 'outline-gray'}
-              onLeftClick={() => setSelectedType('교환')}
-              onRightClick={() => setSelectedType('반품')}
+              onLeftClick={() => {
+                setSelectedType('교환');
+                setDropdownKey((prev) => prev + 1);
+              }}
+              onRightClick={() => {
+                setSelectedType('반품');
+                setDropdownKey((prev) => prev + 1);
+              }}
             />
           </div>
         </section>
 
-        {/* (임시) 사유 선택 - 나중에 채채님 컴포넌트로 대체 예정*/}
         <section className="flex flex-col gap-2 px-4 pb-8 border-b border-b-black-1 border-b-4">
           <h2 className="text-subtitle-medium pb-2">사유</h2>
-          <select value={selectedReason} onChange={(e) => setSelectedReason(e.target.value)} className="border border-black-3 rounded-md p-2 text-body-regular">
-            <option value="">옵션 선택</option>
-            {selectedType === '반품' && (
-              <>
-                <option value="고객 단순 변심">고객 단순 변심</option>
-                <option value="상품 불량">상품 불량</option>
-                <option value="상품 파손">상품 파손</option>
-                <option value="상품 구성품 누락">상품 구성품 누락</option>
-                <option value="상품이 설명과 다름">상품이 설명과 다름</option>
-                <option value="상품 오배송">상품 오배송</option>
-              </>
-            )}
-            {selectedType === '교환' && (
-              <>
-                <option value="상품 불량">상품 불량</option>
-                <option value="상품 파손">상품 파손</option>
-                <option value="상품 구성품 누락">상품 구성품 누락</option>
-                <option value="상품이 설명과 다름">상품이 설명과 다름</option>
-                <option value="상품 오배송">상품 오배송</option>
-              </>
-            )}
-          </select>
+          <ApplyDropDown
+            key={dropdownKey}
+            options={reasonOptions as TOption[]}
+            onChange={({ id }) => {
+              const selected = reasonOptions.find((reason) => reason.id === id);
+              if (selected) {
+                setSelectedReason(selected.name);
+              }
+            }}
+            // defaultLabel="사유 선택"
+          />
         </section>
 
         {/* 회수지 정보 - 항상 표시 + 변경하기 버튼 */}
@@ -136,17 +160,14 @@ export default function ApplyReturnOrExchange() {
             <p>{dummyDeliveryData.phone}</p>
             <p>{dummyDeliveryData.address}</p>
           </div>
-          <select
-            value={deliveryRequest}
-            onChange={(e) => setDeliveryRequest(e.target.value)}
-            className="border border-black-3 rounded p-2 text-black-4 text-small-medium"
-          >
-            <option value="">배송 요청사항을 선택해주세요</option>
-            <option value="문 앞에 놔주세요">문 앞에 놔주세요</option>
-            <option value="직접 전달해주세요">직접 전달해주세요</option>
-            <option value="경비실에 맡겨주세요">경비실에 맡겨주세요</option>
-            <option value="전화 후 전달해주세요">전화 후 전달해주세요</option>
-          </select>
+          <ApplyDropDown
+            options={DELIVERY_REQUEST_OPTIONS as TOption[]}
+            onChange={({ id }) => {
+              const selected = DELIVERY_REQUEST_OPTIONS.find((option) => option.id === id);
+              setDeliveryRequest(selected?.id === 0 ? '' : (selected?.name ?? ''));
+            }}
+            // defaultLabel="배송 요청사항을 선택해주세요"
+          />
         </section>
 
         {/* 환불 정보 - 반품일 때만 표시 */}
@@ -154,7 +175,7 @@ export default function ApplyReturnOrExchange() {
       </main>
 
       {/* 하단 고정 접수 버튼 */}
-      <div className="px-4 fixed bottom-0 left-0 right-0 z-10 bg-white max-w-screen-sm mx-auto w-full">
+      <div className="fixed bottom-0 left-0 right-0 z-10 bg-white max-w-screen-sm mx-auto w-full">
         <Button
           kind="basic"
           variant="solid-orange"

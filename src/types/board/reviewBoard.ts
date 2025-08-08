@@ -2,9 +2,10 @@ export type TReviewItem = {
   review: {
     id: number;
     nickname: string;
+    profileUrl: string;
     createDate: string;
     rating: number;
-    option: string | null;
+    option: string;
     content: string;
     likeCount: number;
     imagesCount: number;

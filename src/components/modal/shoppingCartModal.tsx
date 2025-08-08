@@ -1,13 +1,11 @@
 import { useState } from 'react';
 
-import { OPTIONS } from '@/constants/product/options';
-
+// import { OPTIONS } from '@/constants/product/options';
 import { useModalStore } from '@/stores/modalStore';
 
 import { SelectButton } from '@/components/common/button/selectButton';
 
-import DropDown from './dropDown';
-
+// import DropDown from './dropDown';
 import Minus from '@/assets/icons/minus.svg?react';
 import Plus from '@/assets/icons/plus.svg?react';
 import type { ICartItem } from '@/pages/shoppingCart';
@@ -25,16 +23,16 @@ export default function CartModal({ item, onUpdate }: ICartModalProps) {
     quantity: item.quantity || 1,
   });
 
-  const handleSelect = (selectedId: number) => {
-    const found = OPTIONS.find(({ id }) => id === selectedId);
-    if (!found) return;
+  // const handleSelect = (selectedId: number) => {
+  //   const found = OPTIONS.find(({ id }) => id === selectedId);
+  //   if (!found) return;
 
-    setSelectedItem({
-      ...selectedItem,
-      name: found.name,
-      price: found.price,
-    });
-  };
+  //   setSelectedItem({
+  //     ...selectedItem,
+  //     name: found.name,
+  //     price: found.price,
+  //   });
+  // };
 
   const handleCalculate = (offset: number) => {
     setSelectedItem((prev) => ({
@@ -51,7 +49,7 @@ export default function CartModal({ item, onUpdate }: ICartModalProps) {
   return (
     <div className="h-full pb-2 flex flex-col gap-4 select-none">
       <div className="flex px-4 flex-col gap-2">
-        <DropDown options={OPTIONS} onChange={({ id }) => handleSelect(id)} />
+        {/* <DropDown options={OPTIONS} onChange={({ id }) => handleSelect(id)} /> */}
 
         <div className="flex flex-col gap-3">
           <div className="rounded-sm w-full min-h-22 bg-black-0 px-4 pt-5 pb-4 relative flex flex-col gap-3">
