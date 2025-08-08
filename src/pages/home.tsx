@@ -62,9 +62,13 @@ export default function Home() {
         </section>
 
         <section className="w-full px-4 py-7 flex flex-col items-center gap-26">
-          <Recommand data={data?.result.recommendProducts} />
-          <Popular data={data?.result.popularProducts} />
-          <New data={data?.result.newProducts} />
+          {data?.result && (
+            <>
+              <Recommand data={data.result.recommendProducts} />
+              <Popular data={data.result.popularProducts} />
+              <New data={data.result.newProducts} />
+            </>
+          )}
         </section>
         <footer className="pb-20 px-4 pt-5 bg-black-0 flex flex-col gap-4">
           <div className="flex items-center px-1 gap-2 text-small-regular">

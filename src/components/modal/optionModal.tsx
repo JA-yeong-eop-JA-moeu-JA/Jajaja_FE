@@ -61,7 +61,7 @@ export default function OptionModal({ type }: { type?: string }) {
                 <Close className="w-2 h-2 absolute top-2 right-2 cursor-pointer" onClick={() => handleRemove(id)} />
                 <p className="text-body-regular">{name}</p>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center w-21 h-6 border border-black-2">
+                  <div className="flex items-center w-21 h-6 border border-black-2 bg-white">
                     <div className="flex items-center justify-center w-6 h-full cursor-pointer" onClick={() => handleCalculate(id, -1)}>
                       <Minus />
                     </div>
@@ -89,8 +89,16 @@ export default function OptionModal({ type }: { type?: string }) {
           </div>
         )}
       </div>
-      <div className="flex items-center gap-4">
-        <Cart onClick={() => navigate('/shoppingcart')} />
+      <div className="flex items-center gap-2">
+        <div
+          className="min-w-16 h-12 flex items-center justify-center rounded-sm border border-black-4"
+          onClick={() => {
+            closeModal();
+            navigate('/shoppingcart');
+          }}
+        >
+          <Cart />
+        </div>
         {isTeam ? (
           <button className="w-full h-12 flex justify-center items-center rounded-sm text-body-medium text-white bg-black" onClick={() => closeModal()}>
             1인 구매하기

@@ -46,8 +46,8 @@ export default function Product() {
         </div>
         <div>
           {data?.result?.discountRate && (
-            <div className="flex items-center gap-2 text-body-regular text-black-4">
-              <p className="line-through">{data?.result.originPrice}</p>
+            <div className="flex items-center gap-1 text-body-regular text-black-4">
+              <p className="line-through">{data?.result.originPrice.toLocaleString()}</p>
               <p>원</p>
             </div>
           )}
@@ -55,7 +55,7 @@ export default function Product() {
             {data?.result?.discountRate && <p className="text-error-3">{data?.result?.discountRate}%</p>}
             <p>{data?.result?.salePrice.toLocaleString()} 원</p>
           </div>
-          <div className="flex items-center gap-2 text-body-regular">
+          <div className="flex items-center gap-1 text-body-regular">
             <StarRating star={data?.result?.rating || 0} />
             <p className="text-[#ffc800]">{data?.result?.rating || 0}</p>
             <p className="text-black-4">· {data?.result?.reviewCount || 0} 건 리뷰</p>
@@ -97,7 +97,7 @@ export default function Product() {
             </div>
           ))}
           {data?.result.teams.length === 0 && (
-            <div className="flex flex-col items-center justify-center text-body-regular text-black-4">
+            <div className="flex flex-col items-center justify-center pb-5.5 text-body-regular text-black-4">
               <p>모집 중인 팀이 없어요.</p>
               <p>직접 팀을 생성해보세요!</p>
             </div>
