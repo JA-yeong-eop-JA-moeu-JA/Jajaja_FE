@@ -8,6 +8,6 @@ import { useCoreQuery } from '@/hooks/customQuery';
 
 export default function useGetProductDetail() {
   const { id } = useParams<{ id: string }>();
-  const { data } = useCoreQuery(QUERY_KEYS.GET_PRODUCT_DETAIL, () => getProductDetail({ productId: Number(id) }));
+  const { data } = useCoreQuery([QUERY_KEYS.GET_PRODUCT_DETAIL, id], () => getProductDetail({ productId: Number(id) }));
   return { data };
 }
