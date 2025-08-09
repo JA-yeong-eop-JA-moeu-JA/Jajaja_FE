@@ -11,7 +11,7 @@ export type TReviewResponse = TCommonResponse<{
 }>;
 export type TReviewInfiniteRequest = {
   productId: number;
-  sort: 'NEW' | 'LATEST' | 'RECOMMEND';
+  sort: 'LATEST' | 'RECOMMEND';
   page: number;
   size: number;
 };

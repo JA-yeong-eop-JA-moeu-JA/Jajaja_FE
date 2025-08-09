@@ -10,4 +10,5 @@ export const QUERY_KEYS = {
   GET_NOTI_UNREAD: ['getNotiUnread'],
   GET_PRODUCT_REVIEW: ['getProductReview'],
   GET_RECENT_SEARCH: ['getRecentSearch'],
+  GET_PHOTO: ['getPhoto'],
 };
