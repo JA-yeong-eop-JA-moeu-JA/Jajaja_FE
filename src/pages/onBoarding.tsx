@@ -18,9 +18,14 @@ export default function OnBoarding() {
     mutate({ businessCategoryId: category });
     navigate('/home');
   };
+  const handleSkip = () => {
+    Storage.setCategory(1);
+    mutate({ businessCategoryId: 1 });
+    navigate('/home');
+  };
   return (
     <div className="w-full h-screen flex flex-col justify-center items-center relative px-4">
-      <button className="text-body-regular text-black-4 absolute top-0 right-4 py-3.5 underline underline-offset-2" onClick={() => navigate('/home')}>
+      <button className="text-body-regular text-black-4 absolute top-0 right-4 py-3.5 underline underline-offset-2" onClick={handleSkip}>
         건너뛰기
       </button>
       <div className="w-full flex flex-col items-center justify-center gap-11">

@@ -16,7 +16,7 @@ export default function PhotoReview() {
   const { data } = useGetReviewDetail();
   const { openModal } = useModalStore();
   const imageList = [...(data?.result.imageUrls ?? [])];
-  const [selected, setSelected] = useState<'NEW' | 'RECOMMEND'>('NEW');
+  const [selected, setSelected] = useState<'LATEST' | 'RECOMMEND'>('LATEST');
 
   const { data: reviewDetail, fetchNextPage, hasNextPage } = useGetInfinite(selected);
   const allReviews = reviewDetail?.pages.flatMap((page) => page.result.reviews) ?? [];
@@ -58,7 +58,7 @@ export default function PhotoReview() {
         ))}
       </section>
       <section className="flex items-center justify-self-end gap-3 text-body-regular mt-6 mb-3 mr-3">
-        <button onClick={() => setSelected('NEW')} className={`px-1 ${selected === 'NEW' ? 'text-body-medium' : 'text-black-4'}`}>
+        <button onClick={() => setSelected('LATEST')} className={`px-1 ${selected === 'LATEST' ? 'text-body-medium' : 'text-black-4'}`}>
           최신순
         </button>
 
@@ -83,8 +83,8 @@ export default function PhotoReview() {
             </div>
           )}
         </div>
-        <div ref={bottomRef} className="h-1" />
       </section>
+      <div ref={bottomRef} className="h-1" />
     </div>
   );
 }
