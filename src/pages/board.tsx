@@ -6,7 +6,6 @@ import { useReviews } from '@/hooks/board/useReviews';
 import { useTeamProducts } from '@/hooks/board/useTeamProducts';
 import useUserInfo from '@/hooks/myPage/useUserInfo';
 
-
 import HorizontalProductCard from '@/components/board/HorizontalProductCard';
 import { PageButton, type TabId } from '@/components/common/button';
 import BottomBar from '@/components/head_bottom/BottomBar';
@@ -73,7 +72,6 @@ export default function Board() {
           {selectedTop1 === 'review' ? (
             <>
               <div className="flex justify-end text-body-regular text-black-4 mb-1">
-
                 {[
                   { label: '최신순', value: 'latest' },
                   { label: '추천순', value: 'recommend' },
@@ -158,7 +156,6 @@ export default function Board() {
                 </button>
               </div>
             </>
-
           )}
         </ul>
       </div>

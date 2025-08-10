@@ -8,7 +8,6 @@ import { Timer } from '@/utils/timer';
 
 import { useModalStore } from '@/stores/modalStore';
 import useGetProductDetail from '@/hooks/product/useGetProductDetail';
-
 import useJoinTeam from '@/hooks/product/useJoinTeam';
 
 import { Button } from '@/components/common/button';
@@ -48,7 +47,6 @@ export default function Product() {
         </div>
         <div>
           {data?.result?.discountRate && (
-
             <div className="flex items-center gap-1 text-body-regular text-black-4">
               <p className="line-through">{data?.result.originPrice.toLocaleString()}</p>
               <p>원</p>

@@ -11,11 +11,7 @@ export type TReviewResponse = TCommonResponse<{
 }>;
 export type TReviewInfiniteRequest = {
   productId: number;
-<<<<<<< HEAD
-  sort: 'NEW' | 'LATEST' | 'RECOMMEND';
-=======
   sort: 'LATEST' | 'RECOMMEND';
->>>>>>> 35d2fa690a1b38639e4024b3c18395c5cfd32560
   page: number;
   size: number;
 };

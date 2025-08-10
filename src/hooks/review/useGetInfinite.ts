@@ -5,11 +5,7 @@ import { QUERY_KEYS } from '@/constants/querykeys/queryKeys';
 
 import { getReviewInfinite } from '@/apis/review/review';
 
-<<<<<<< HEAD
-export default function useGetInfinite(sort: 'NEW' | 'LATEST' | 'RECOMMEND') {
-=======
 export default function useGetInfinite(sort: 'LATEST' | 'RECOMMEND') {
->>>>>>> 35d2fa690a1b38639e4024b3c18395c5cfd32560
   const { id } = useParams<{ id: string }>();
   const productId = Number(id);
 
