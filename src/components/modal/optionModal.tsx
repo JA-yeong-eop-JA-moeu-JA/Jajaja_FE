@@ -89,6 +89,7 @@ export default function OptionModal({ type }: { type?: string }) {
           </div>
         )}
       </div>
+
       <div className="flex items-center gap-2">
         <div
           className="min-w-16 h-12 flex items-center justify-center rounded-sm border border-black-4"

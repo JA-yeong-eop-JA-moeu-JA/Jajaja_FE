@@ -16,11 +16,13 @@ export default function OnBoarding() {
   const handleSubmit = () => {
     Storage.setCategory(category);
     mutate({ businessCategoryId: category });
+
     navigate('/home');
   };
   const handleSkip = () => {
     Storage.setCategory(1);
     mutate({ businessCategoryId: 1 });
+
     navigate('/home');
   };
   return (

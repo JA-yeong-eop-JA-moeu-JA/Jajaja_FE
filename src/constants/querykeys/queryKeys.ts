@@ -1,5 +1,7 @@
 export const QUERY_KEYS = {
   GET_USER_INFO: ['getUserInfo'],
+  GET_TEAM_PRODUCTS: ['getTeamProducts'],
+  GET_REVIEWS: ['getReviews'],
   GET_HOME_PRODUCT: ['getHomeProduct'],
   GET_SEARCH_KEYWORD: ['getSearchKeyword'],
   GET_CATEGORY_PRODUCTS: ['CATEGORY_PRODUCTS'],
