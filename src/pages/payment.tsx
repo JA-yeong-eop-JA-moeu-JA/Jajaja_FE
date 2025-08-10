@@ -1,7 +1,9 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useCallback, useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useModalStore } from '@/stores/modalStore';
+import { usePaymentConfirm, usePaymentPrepare } from '@/hooks/payment/usePaymentPrepare';
+import { useTossPayments } from '@/hooks/payment/useTossPayments';
 
 import { Button } from '@/components/common/button';
 import PageHeader from '@/components/head_bottom/PageHeader';
@@ -26,23 +28,127 @@ interface IPaymentSummaryProps {
   finalAmount: number;
 }
 
+const TOSS_CLIENT_KEY = import.meta.env.VITE_TOSS_CLIENT_KEY;
+
 export default function Payment() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { openModal } = useModalStore();
+  const { requestNaverPay, requestKakaoPay } = useTossPayments();
+
+  const paymentPrepareMutation = usePaymentPrepare();
+  const paymentConfirmMutation = usePaymentConfirm();
+
   const currentOrderItems = orderData[0].items;
   const [selectedPayment, setSelectedPayment] = useState<'naver' | 'kakao' | null>(null);
   const [selectedDeliveryRequest, setSelectedDeliveryRequest] = useState<string>('');
   const [usedPoints, setUsedPoints] = useState<number>(0);
   const [userPoints] = useState<number>(1382);
+
+  // 결제 승인
+  const handlePaymentConfirm = useCallback(
+    async (paymentKey: string, orderId: string, paidAmount: number) => {
+      try {
+        const confirmData = {
+          orderId,
+          paymentKey,
+          paidAmount,
+        };
+
+        const response = await paymentConfirmMutation.mutateAsync(confirmData);
+
+        if (response.isSuccess && response.result.status === 'PAYMENT_COMPLETED') {
+          navigate('/payment/success', {
+            state: {
+              paymentData: response.result,
+            },
+          });
+        } else {
+          navigate('/payment/fail');
+        }
+      } catch (error) {
+        console.error('결제 실패:', error);
+        navigate('/payment/fail');
+      }
+    },
+    [paymentConfirmMutation, navigate],
+  );
+
+  // 결제 실행
+  const handlePaymentExecution = useCallback(
+    async (preparedData: any) => {
+      try {
+        const currentUserId = localStorage.getItem('userId') || null;
+
+        const paymentOptions = {
+          clientKey: TOSS_CLIENT_KEY!,
+          amount: preparedData.finalAmount,
+          orderId: String(preparedData.orderId),
+          orderName: preparedData.orderName,
+          successUrl: `${window.location.origin}/payment?success=true`,
+          failUrl: `${window.location.origin}/payment?success=false`,
+          customerKey: currentUserId ? `user-${currentUserId}` : undefined,
+        };
+
+        switch (selectedPayment) {
+          case 'naver':
+            await requestNaverPay(paymentOptions);
+            break;
+          case 'kakao':
+            await requestKakaoPay(paymentOptions);
+            break;
+        }
+      } catch (error) {
+        console.error('결제 실행 실패:', error);
+      }
+    },
+    [selectedPayment, requestNaverPay, requestKakaoPay],
+  );
+
+  // 결제 준비
+  const handlePaymentPrepare = useCallback(async () => {
+    try {
+      const prepareData = {
+        items: currentOrderItems.map((item) => item.productId),
+        addressId: 1,
+        deliveryRequest: selectedDeliveryRequest,
+        appliedCouponId: undefined, // Todo: 쿠폰 추가
+        point: usedPoints,
+      };
+
+      const response = await paymentPrepareMutation.mutateAsync(prepareData);
+
+      if (response.isSuccess) {
+        await handlePaymentExecution(response.data);
+      }
+    } catch (error) {
+      console.error('결제 준비 실패:', error);
+    }
+  }, [selectedPayment, currentOrderItems, selectedDeliveryRequest, usedPoints, paymentPrepareMutation, handlePaymentExecution]);
+
+  // URL 파라미터 처리 (결제 성공 / 실패 후 리디렉션)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const paymentKey = urlParams.get('paymentKey');
+    const orderId = urlParams.get('orderId');
+    const amount = urlParams.get('amount');
+
+    if (paymentKey && orderId && amount) {
+      // 결제 성공 후 승인 요청
+      handlePaymentConfirm(paymentKey, orderId, Number(amount));
+    }
+  }, [location.search, handlePaymentConfirm]);
+
   const handlePointsChange = (value: number) => {
     if (value > userPoints) {
-      setUsedPoints(userPoints); // 보유 포인트보다 크면 전체 사용하도록
+      setUsedPoints(userPoints);
     } else if (value < 0) {
       setUsedPoints(0);
     } else {
       setUsedPoints(value);
     }
   };
+
   const handleDeliveryRequestClick = () => {
     openModal('delivery', {
       onSelect: (text: string) => setSelectedDeliveryRequest(text),
@@ -54,7 +160,7 @@ export default function Payment() {
       <section className="p-4">
         <div className="flex justify-between items-center mb-2">
           <p className="text-subtitle-medium">배송지</p>
-          <button className="text-orange text-small-medium" onClick={() => navigate('/addresschange')}>
+          <button className="text-orange text-small-medium" onClick={() => navigate('/address/change')}>
             변경하기
           </button>
         </div>
@@ -114,6 +220,19 @@ export default function Payment() {
     );
   }
 
+  const calculateSummary = () => {
+    const total = 123122;
+    const discount = 1239;
+    const pointsUsed = usedPoints;
+    const shippingFee = 0;
+    const finalAmount = total - discount - pointsUsed + shippingFee;
+
+    return { total, discount, pointsUsed, shippingFee, finalAmount };
+  };
+
+  const summary = calculateSummary();
+  const isPaymentDisabled = !selectedPayment || paymentPrepareMutation.isPending || paymentConfirmMutation.isPending;
+
   return (
     <>
       <PageHeader title="주문 결제" />
@@ -165,7 +284,7 @@ export default function Payment() {
         </div>
 
         <div className="flex justify-end">
-          <p className="text-small-medium text-black-4">보유 포인트: 1,382 원</p>
+          <p className="text-small-medium text-black-4">보유 포인트: {userPoints.toLocaleString()} 원</p>
         </div>
       </section>
 
@@ -193,12 +312,13 @@ export default function Payment() {
         </div>
       </section>
 
-      <PaymentSummarySection total={123122} discount={1239} pointsUsed={324} shippingFee={0} finalAmount={82233} />
+      <PaymentSummarySection {...summary} />
 
       <AgreementNoticeSection />
+
       <div className="fixed bottom-14 left-0 right-0 w-full max-w-[600px] mx-auto">
-        <Button kind="basic" variant="solid-orange" /*disabled={주소지 추가 안했을 경우로 수정}*/ onClick={() => navigate('/결제')} className="w-full">
-          0원 결제하기
+        <Button kind="basic" variant="solid-orange" disabled={isPaymentDisabled} onClick={handlePaymentPrepare} className="w-full">
+          {paymentPrepareMutation.isPending || paymentConfirmMutation.isPending ? '결제 처리 중...' : `${summary.finalAmount.toLocaleString()}원 결제하기`}
         </Button>
       </div>
     </>
