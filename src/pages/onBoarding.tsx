@@ -7,22 +7,27 @@ import Storage from '@/utils/storage';
 
 import useCategory from '@/hooks/onBoarding/useCategory';
 
-import { Button } from '@/components/common/button';
-
 import Logo from '@/assets/sizeLogo.svg?react';
 
 export default function OnBoarding() {
   const { mutate } = useCategory();
   const navigate = useNavigate();
-  const [category, setCategory] = useState(0);
+  const [category, setCategory] = useState(1);
   const handleSubmit = () => {
     Storage.setCategory(category);
     mutate({ businessCategoryId: category });
+
+    navigate('/home');
+  };
+  const handleSkip = () => {
+    Storage.setCategory(1);
+    mutate({ businessCategoryId: 1 });
+
     navigate('/home');
   };
   return (
     <div className="w-full h-screen flex flex-col justify-center items-center relative px-4">
-      <button className="text-body-regular text-black-4 absolute top-0 right-4 py-3.5 underline underline-offset-2" onClick={() => navigate('/home')}>
+      <button className="text-body-regular text-black-4 absolute top-0 right-4 py-3.5 underline underline-offset-2" onClick={handleSkip}>
         건너뛰기
       </button>
       <div className="w-full flex flex-col items-center justify-center gap-11">
@@ -39,16 +44,16 @@ export default function OnBoarding() {
             <button
               onClick={() => setCategory(id)}
               key={id}
-              className={`${category === id ? 'border-orange' : 'border-black-1'} text-body-regular w-full px-4 py-3.5 rounded-sm bg-white border text-black `}
+              className={`${category === id ? 'border-orange' : 'border-black-1 text-black-3'} text-body-regular w-full px-4 py-3.5 rounded-sm bg-white border text-black `}
             >
               {name}
             </button>
           ))}
         </div>
         <div className="w-full">
-          <Button kind="basic" variant="solid-orange" onClick={handleSubmit}>
+          <button className="w-full h-12 bg-orange rounded-sm text-white text-body-medium" onClick={handleSubmit}>
             선택 완료
-          </Button>
+          </button>
         </div>
       </div>
     </div>

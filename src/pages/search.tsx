@@ -158,7 +158,7 @@ export default function Search() {
         <SearchInput value={inputValue} autoFocus onEnter={handleFilter} onChange={handleValue} onClick={handleFilter} />
       </header>
       {!change && (
-        <section className="py-3 px-5 flex flex-col gap-7">
+        <section className="py-3 pl-5 flex flex-col gap-7">
           <section>
             <p className="text-subtitle-medium mb-2">최근 검색</p>
             <ScrollContainer className="flex w-full gap-2 overflow-x-auto cursor-grab" vertical={false}>
@@ -170,7 +170,7 @@ export default function Search() {
               ))}
             </ScrollContainer>
           </section>
-          <section>
+          <section className="pr-5">
             <div className="flex items-center justify-between mb-4">
               <p className="text-subtitle-medium">인기 검색어</p>
               <p className="text-small-medium text-black-4">{formatKoreanDateLabel(data?.result.baseTime)}</p>

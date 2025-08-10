@@ -9,7 +9,7 @@ interface IModalProviderProps {
 }
 
 export default function ModalProvider({ children }: IModalProviderProps) {
-  const { isModalOpen, modalContent, type, options } = useModalStore();
+  const { isModalOpen, modalContent, type, options, closeModal } = useModalStore();
   const drawerRef = useRef<HTMLDivElement>(null);
 
   const baseHeight = 152;
@@ -89,16 +89,17 @@ export default function ModalProvider({ children }: IModalProviderProps) {
       {children}
 
       {(type === 'bottom-drawer' || type == 'bottom-drawer-team' || type === 'cart-option') && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center">
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center" onClick={closeModal}>
           <div
             ref={drawerRef}
+            onClick={(e) => e.stopPropagation()}
             className="w-full max-w-150 bg-white rounded-t-lg transition-all duration-300 overflow-hidden"
             style={{ minHeight: currentHeight }}
             onMouseDown={(e) => onStart(e.clientY)}
             onTouchStart={(e) => onStart(e.touches[0].clientY)}
           >
             <div className="flex flex-col">
-              <div className="w-full flex justify-center cursor-grab active:cursor-grabbing my-5">
+              <div className="w-full flex justify-center cursor-grab active:cursor-grabbing mt-3 mb-5">
                 <Bar />
               </div>
               {createElement(modalContent)}
@@ -108,20 +109,30 @@ export default function ModalProvider({ children }: IModalProviderProps) {
       )}
 
       {type === 'bottom-sheet' && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center">
-          <div className="h-fit min-h-20 max-w-150 w-full bg-white rounded-t-lg">{createElement(modalContent)}</div>
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center" onClick={closeModal}>
+          <div className="h-fit min-h-20 max-w-150 w-full bg-white rounded-t-lg" onClick={(e) => e.stopPropagation()}>
+            {createElement(modalContent)}
+          </div>
         </div>
       )}
 
       {(type === 'alert' || type === 'confirm') && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
-          <div className="bg-white min-h-10 rounded-lg shadow-md max-w-76 w-full">{createElement(modalContent)}</div>
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center" onClick={closeModal}>
+          <div className="bg-white min-h-10 rounded-lg shadow-md max-w-76 w-full" onClick={(e) => e.stopPropagation()}>
+            {createElement(modalContent)}
+          </div>
         </div>
       )}
-      {type === 'image' && <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center">{createElement(modalContent, options)}</div>}
+      {type === 'image' && (
+        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center" onClick={closeModal}>
+          <div onClick={(e) => e.stopPropagation()}>{createElement(modalContent, options)}</div>
+        </div>
+      )}
       {type === 'delivery' && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center">
-          <div className="h-fit min-h-20 max-w-150 w-full bg-white rounded-t-lg">{createElement(modalContent)}</div>
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center" onClick={closeModal}>
+          <div className="h-fit min-h-20 max-w-150 w-full bg-white rounded-t-lg" onClick={(e) => e.stopPropagation()}>
+            {createElement(modalContent)}
+          </div>
         </div>
       )}
     </>
