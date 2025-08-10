@@ -9,6 +9,8 @@ export const axiosInstance = axios.create({
 
 let hasHandledLogout = false;
 
+//let isRefreshing = false;
+
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {

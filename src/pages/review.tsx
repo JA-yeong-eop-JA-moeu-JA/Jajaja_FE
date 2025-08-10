@@ -83,6 +83,7 @@ export default function PhotoReview() {
             </div>
           )}
         </div>
+        <div ref={bottomRef} className="h-1" />
       </section>
       <div ref={bottomRef} className="h-1" />
     </div>

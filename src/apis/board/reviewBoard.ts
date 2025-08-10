@@ -1,0 +1,16 @@
+import type { TGetReviewsResponse, TReviewSort } from '@/types/board/reviewBoard';
+
+import { axiosInstance } from '@/apis/axiosInstance';
+
+type TParams = {
+  sort?: TReviewSort;
+  page?: number;
+  size?: number;
+};
+
+export const getReviews = async ({ sort = 'latest', page = 0, size = 5 }: TParams) => {
+  const { data } = await axiosInstance.get<TGetReviewsResponse>('/api/reviews', {
+    params: { sort, page, size },
+  });
+  return data;
+};

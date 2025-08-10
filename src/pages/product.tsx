@@ -20,6 +20,7 @@ import Share from '@/assets/icons/share.svg?react';
 
 export default function Product() {
   const navigate = useNavigate();
+
   const { mutate } = useJoinTeam();
   const { data } = useGetProductDetail();
   const { id } = useParams<{ id: string }>();
@@ -55,6 +56,7 @@ export default function Product() {
             {data?.result?.discountRate && <p className="text-error-3">{data?.result?.discountRate}%</p>}
             <p>{data?.result?.salePrice.toLocaleString()} 원</p>
           </div>
+
           <div className="flex items-center gap-1 text-body-regular">
             <StarRating star={data?.result?.rating || 0} />
             <p className="text-[#ffc800]">{data?.result?.rating || 0}</p>
