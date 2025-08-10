@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import type { TOptionBase } from '@/types/optionApply'; // reasonOptions 타입
 import type { TOption } from '@/types/product/option';
@@ -11,103 +11,166 @@ import ConfirmModal from '@/components/modal/confirmModal';
 import RefundInfo from '@/components/orderDetail/returnInfo';
 import OrderItem from '@/components/review/orderItem';
 
-import { orderData } from '@/mocks/orderData';
+import useOrderDetailPersonal from '@/hooks/order/useOrderDetailPersonal';
+import type { IOrderItem } from '@/types/order/orderItem';
+
+//import { axiosInstance } from '@/apis/axiosInstance';
+import { useQueryClient } from '@tanstack/react-query';
+//import { useCoreMutation } from '@/hooks/customQuery';
+import { QUERY_KEYS } from '@/constants/querykeys/queryKeys';
+
+type TApplyType = '교환' | '반품';
+
+const RETURN_REASONS = [
+  { id: 1, name: '고객 단순 변심' },
+  { id: 2, name: '상품 불량' },
+  { id: 3, name: '상품 파손' },
+  { id: 4, name: '상품 구성품 누락' },
+  { id: 5, name: '상품이 설명과 다름' },
+  { id: 6, name: '상품 오배송' },
+];
+
+const EXCHANGE_REASONS = [
+  { id: 2, name: '상품 불량' },
+  { id: 3, name: '상품 파손' },
+  { id: 4, name: '상품 구성품 누락' },
+  { id: 5, name: '상품이 설명과 다름' },
+  { id: 6, name: '상품 오배송' },
+];
+
+const DELIVERY_REQUEST_OPTIONS = [
+  { id: 1, name: '문 앞에 놔주세요' },
+  { id: 2, name: '직접 전달해주세요' },
+  { id: 3, name: '경비실에 맡겨주세요' },
+  { id: 4, name: '전화 후 전달해주세요' },
+];
+
+type TOrderStatus = '배송 중' | '결제 완료' | '결제 취소' | '반품 접수' | '교환 접수';
+const toOrderStatusLabel = (items: Array<{ status?: string }>): TOrderStatus => {
+  const codes = items.map((i) => (i.status ?? '').toUpperCase());
+  if (codes.some((c) => c === 'CANCELED' || c === 'CANCELLED' || c === 'PAYMENT_CANCELED')) return '결제 취소';
+  if (codes.some((c) => c === 'RETURN_REQUESTED' || c === 'RETURNING' || c === 'REFUND_REQUESTED')) return '반품 접수';
+  if (codes.some((c) => c === 'EXCHANGE_REQUESTED' || c === 'EXCHANGING')) return '교환 접수';
+  if (codes.some((c) => c === 'SHIPPING' || c === 'IN_DELIVERY' || c === 'DELIVERING' || c === 'DELIVERED')) return '배송 중';
+  return '결제 완료';
+};
 
 export default function ApplyReturnOrExchange() {
-  const order = orderData[0];
-  const item = order.items[0];
-
-  const dummyDeliveryData = {
-    recipient: '이한비',
-    phone: '010-2812-1241',
-    address: '서울특별시 강서구 낙성서로12번길 3-12',
-  };
-
-  const dummyRefundInfo = {
-    amount: 23920,
-    discount: 1239,
-    pointsUsed: 324,
-    deliveryFee: 0,
-    method: '카카오페이',
-    reason: '고객 단순 변심',
-    address: '서울특별시 강서구 낙성서로12번길 3-12',
-  };
-
-  const RETURN_REASONS = [
-    { id: 1, name: '고객 단순 변심' },
-    { id: 2, name: '상품 불량' },
-    { id: 3, name: '상품 파손' },
-    { id: 4, name: '상품 구성품 누락' },
-    { id: 5, name: '상품이 설명과 다름' },
-    { id: 6, name: '상품 오배송' },
-  ];
-
-  const EXCHANGE_REASONS = [
-    { id: 2, name: '상품 불량' },
-    { id: 3, name: '상품 파손' },
-    { id: 4, name: '상품 구성품 누락' },
-    { id: 5, name: '상품이 설명과 다름' },
-    { id: 6, name: '상품 오배송' },
-  ];
-
-  const DELIVERY_REQUEST_OPTIONS = [
-    { id: 1, name: '문 앞에 놔주세요' },
-    { id: 2, name: '직접 전달해주세요' },
-    { id: 3, name: '경비실에 맡겨주세요' },
-    { id: 4, name: '전화 후 전달해주세요' },
-  ];
+  const { orderId, orderProductId } = useParams<{ orderId: string; orderProductId?: string }>();
+  const id = Number(orderId);
 
   const navigate = useNavigate();
-  const [selectedType, setSelectedType] = useState<'교환' | '반품' | null>(null);
+  const queryClient = useQueryClient();
+
+  const [selectedType, setSelectedType] = useState<TApplyType | null>(null);
   const [selectedReason, setSelectedReason] = useState('');
-  const [, setDeliveryRequest] = useState('');
+  const [ , setDeliveryRequest] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [dropdownKey, setDropdownKey] = useState(0);
 
-  const isFormValid = selectedType !== null && selectedReason !== '';
+  // 주문 상세 API
+  const { data } = useOrderDetailPersonal(id);
+
+  // 유효성/로딩
+  if (!orderId || Number.isNaN(id)) return <p className="p-4 text-error-3">유효하지 않은 주문입니다.</p>;
+  if (!data) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col">
+        <PageHeader title="교환/반품 신청" />
+        <p className="p-4 text-black-3">주문정보를 불러오는 중입니다...</p>
+      </div>
+    );
+  }
+
+  const { items, delivery, payment, orderNumber, date } = data;
+
+  // API → OrderItem 카드용으로 매핑
+  const mappedItems: IOrderItem[] = items.map((it) => ({
+    orderId: it.orderProductId,
+    productId: it.product.id,
+    name: it.product.name,
+    company: it.product.store,
+    option: it.product.option,
+    quantity: it.product.quantity,
+    image: it.product.image,
+    price: it.price,
+    reviewed: false,
+  }));
+
+  // 특정 주문상품(파라미터 우선)
+  const selectedOrderItem =
+    mappedItems.find((m) => String(m.orderId) === orderProductId) ?? mappedItems[0];
+
+  // 상단 결제/주문 상태 라벨
+  const orderStatus: TOrderStatus = toOrderStatusLabel(items);
+
+  const isFormValid = selectedType !== null && selectedReason !== '' && !!selectedOrderItem;
   const reasonOptions: TOptionBase[] = selectedType === '반품' ? RETURN_REASONS : EXCHANGE_REASONS;
 
-  const handleSubmit = async (): Promise<boolean> => {
-    try {
-      console.log(`${selectedType} 신청 완료`);
-      // TODO: 실제 API 요청이 들어간다면 이곳에 작성
-      return true;
-    } catch (err) {
-      console.error('신청 실패', err);
-      return false;
-    }
-  };
-  {
-    /** Api 연동 시
-      import axios from 'axios';
-
-  const handleSubmit = async (): Promise<boolean> => {
-    try {
-      const response = await axios.post('/api/exchange-or-return', {
-        type: selectedType,
-        // 다른 필요한 데이터들 함께 전송
-      });
-
-      return response.status === 200;
-    } catch (err) {
-      console.error('신청 실패', err);
-      return false;
-    }
+  // 환불 정보(반품 시 표시)
+  const refundInfo = {
+    amount: selectedOrderItem?.price ?? payment.finalAmount,
+    discount: payment.discount,
+    pointsUsed: payment.pointUsed,
+    deliveryFee: payment.shippingFee,
+    method: payment.method === 'KAKAO' ? '카카오페이' : payment.method,
+    reason: selectedReason || '',
+    address: delivery.address,
   };
 
-    */
-  }
+  // 캐시 타입 (암시적 any 방지)
+  type OrderDetailResult = NonNullable<typeof data>;
+
+  // ✅ API 호출 없이 캐시만 갱신하고 완료 페이지로 이동
+  const handleSubmit = (): boolean => {
+    if (!selectedType || !selectedOrderItem) return false;
+
+    // 1) 상세 캐시 낙관적 업데이트 (접수 상태 + 팀 매칭 라벨 비우기)
+    queryClient.setQueryData<OrderDetailResult>(
+      QUERY_KEYS.GET_ORDER_DETAIL_PERSONAL,
+      (current: OrderDetailResult | undefined) => {
+        if (!current) return current;
+
+        const nextItems = current.items.map((it) =>
+          it.orderProductId === selectedOrderItem.orderId
+            ? {
+                ...it,
+                status: selectedType === '반품' ? 'RETURN_REQUESTED' : 'EXCHANGE_REQUESTED',
+                teamStatus: '', // 매칭 상태 숨김 (CSS 자리 유지용)
+              }
+            : it
+        );
+
+        return { ...current, items: nextItems };
+      }
+    );
+
+    // 2) 완료 페이지 이동 (네가 준 라우트에 맞춤)
+    if (selectedType === '반품') {
+      navigate('/mypage/order/return/complete');
+    } else {
+      navigate('/mypage/order/exchange/complete');
+    }
+    return true;
+  };
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <PageHeader title="교환/반품 신청" />
 
       <main className="flex flex-col gap-6 pb-24">
+        {/* 헤더(주문일/번호/상태) */}
+        <section className="px-4 pt-2">
+          <p className="text-small text-black-4">
+            {new Date(date).toLocaleString('ko-KR')} · 주문번호 {orderNumber} · {orderStatus}
+          </p>
+        </section>
+
         {/* 상품 정보 */}
         <section className="flex flex-col gap-2 py-6 border-b-black-1 border-b-4">
           <div className="px-4">
             <h2 className="text-subtitle-medium pb-4">상품 정보</h2>
-            <OrderItem item={item} show={false} />
+            {selectedOrderItem && <OrderItem item={selectedOrderItem} show={false} />}
           </div>
         </section>
 
@@ -133,45 +196,41 @@ export default function ApplyReturnOrExchange() {
           </div>
         </section>
 
+        {/* 사유 */}
         <section className="flex flex-col gap-2 px-4 pb-8 border-b border-b-black-1 border-b-4">
           <h2 className="text-subtitle-medium pb-2">사유</h2>
           <ApplyDropDown
             key={dropdownKey}
             options={reasonOptions as TOption[]}
             onChange={({ id }) => {
-              const selected = reasonOptions.find((reason) => reason.id === id);
-              if (selected) {
-                setSelectedReason(selected.name);
-              }
+              const selected = reasonOptions.find((r) => r.id === id);
+              if (selected) setSelectedReason(selected.name);
             }}
-            // defaultLabel="사유 선택"
           />
         </section>
 
-        {/* 회수지 정보 - 항상 표시 + 변경하기 버튼 */}
+        {/* 회수지 정보 + 요청사항 */}
         <section className="flex flex-col gap-2 px-4">
           <div className="flex justify-between items-center">
             <h2 className="text-subtitle-medium">회수지 정보</h2>
-
             <button className="text-small-medium h-[16px] text-orange">변경하기</button>
           </div>
           <div className="flex flex-col gap-[2px] text-body-regular text-black">
-            <p>{dummyDeliveryData.recipient}</p>
-            <p>{dummyDeliveryData.phone}</p>
-            <p>{dummyDeliveryData.address}</p>
+            <p>{delivery.name}</p>
+            <p>{delivery.phone}</p>
+            <p>{delivery.address}</p>
           </div>
           <ApplyDropDown
             options={DELIVERY_REQUEST_OPTIONS as TOption[]}
             onChange={({ id }) => {
-              const selected = DELIVERY_REQUEST_OPTIONS.find((option) => option.id === id);
+              const selected = DELIVERY_REQUEST_OPTIONS.find((o) => o.id === id);
               setDeliveryRequest(selected?.id === 0 ? '' : (selected?.name ?? ''));
             }}
-            // defaultLabel="배송 요청사항을 선택해주세요"
           />
         </section>
 
         {/* 환불 정보 - 반품일 때만 표시 */}
-        {selectedType === '반품' && <RefundInfo refundInfo={dummyRefundInfo} />}
+        {selectedType === '반품' && <RefundInfo refundInfo={refundInfo} />}
       </main>
 
       {/* 하단 고정 접수 버튼 */}
@@ -180,32 +239,21 @@ export default function ApplyReturnOrExchange() {
           kind="basic"
           variant="solid-orange"
           disabled={!isFormValid}
-          onClick={() => {
-            setIsModalOpen(true);
-          }}
+          onClick={() => setIsModalOpen(true)}
         >
           접수
         </Button>
       </div>
 
+      {/* 확인 모달 */}
       <ConfirmModal
         open={isModalOpen}
-        message={`${selectedType} 신청하시겠어요?`}
+        message={`${selectedType ?? ''} 신청하시겠어요?`}
         onCancel={() => setIsModalOpen(false)}
-        onConfirm={async () => {
-          const isSuccess = await handleSubmit();
+        onConfirm={() => {
+          const ok = handleSubmit();
           setIsModalOpen(false);
-
-          if (!isSuccess) {
-            navigate('/not-found');
-            return;
-          }
-
-          if (selectedType === '교환') {
-            navigate('/exchange/complete');
-          } else if (selectedType === '반품') {
-            navigate('/return/complete');
-          }
+          if (!ok) navigate('/not-found');
         }}
       />
     </div>
