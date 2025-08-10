@@ -1,20 +1,16 @@
 import { useState } from 'react';
 
+import type { TOption } from '@/types/product/option';
+
 import Down from '@/assets/icons/down.svg?react';
 
-type TOption = {
-  id: number;
-  name: string;
-  price?: number;
-};
-
 type TProps = {
-  options: TOption[];
+  options?: TOption[];
   onChange?: (selected: { id: number }) => void;
 };
 
 export default function DropDown({ options, onChange }: TProps) {
-  const optionList = [{ id: 0, name: '옵션 선택' }, ...options];
+  const optionList = [{ id: 0, name: '옵션 선택' }, ...(options ?? [])];
   const [isOpen, setIsOpen] = useState(false);
   const [list, setList] = useState(optionList.slice(0, 1));
 
@@ -37,7 +33,7 @@ export default function DropDown({ options, onChange }: TProps) {
         return (
           <div
             key={id}
-            onClick={() => handleSelect(id)}
+            onClick={() => handleSelect(idx)}
             className={`w-full h-10 px-4 flex justify-between items-center text-body-regular ${isFirst ? 'text-black-4' : ''} ${!isLast ? 'border-b border-black-3' : ''}`}
           >
             <p>{name}</p>
