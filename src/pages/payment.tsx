@@ -119,7 +119,7 @@ export default function Payment() {
       const response = await paymentPrepareMutation.mutateAsync(prepareData);
 
       if (response.isSuccess) {
-        await handlePaymentExecution(response.data);
+        await handlePaymentExecution(response.result);
       }
     } catch (error) {
       console.error('결제 준비 실패:', error);
