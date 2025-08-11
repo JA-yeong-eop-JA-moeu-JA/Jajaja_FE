@@ -27,11 +27,14 @@ export default function OrderItem({ item, show, showPrice = true }: IOrderDataPr
             {item.optionName}
             <span> / {item.quantity}개</span>
           </p>
-          {showPrice && <p className="text-black text-small-medium">{item.price.toLocaleString('ko-KR')} 원</p>}
+          {showPrice && <p className="text-black text-small-medium">{(item.price ?? 0).toLocaleString('ko-KR')} 원</p>}
         </div>
       </div>
       {show && (
-        <button className="w-full h-10 border border-orange text-black my-3 rounded flex items-center justify-center text-body-medium" onClick={writeReview}>
+        <button
+          className="w-full h-10 border border-orange text-black py-1 mt-3 mb-7 rounded flex items-center justify-center text-body-medium"
+          onClick={writeReview}
+        >
           리뷰 작성
         </button>
       )}

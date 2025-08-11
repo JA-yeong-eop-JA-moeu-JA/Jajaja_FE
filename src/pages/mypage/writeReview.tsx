@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import type { TReviewableOrderItem } from '@/types/review/myReview';
 import type { TUrlSet } from '@/types/s3/TPostUpload';
 
+import { useReviewImageStore } from '@/stores/reviewImageStore';
 import usePostReview from '@/hooks/review/usePostReview';
 import usePostUploadList from '@/hooks/s3/usePostUploadList';
 import usePutUpload from '@/hooks/s3/usePutUpload';
@@ -15,7 +16,8 @@ import OrderItem from '@/components/review/orderItem';
 import ReviewStarRating from '@/components/review/reviewStarRating';
 
 export default function WriteReview() {
-  const item: TReviewableOrderItem = useLocation().state;
+  const location = useLocation();
+  const item = (location.state as { item: TReviewableOrderItem })?.item;
   const { mutate } = usePostReview();
   const { mutateAsync: requestPresignedUrl } = usePostUploadList();
   const { mutateAsync: putUpload } = usePutUpload();
@@ -26,17 +28,21 @@ export default function WriteReview() {
       navigate(-1);
     }
   }, [item, navigate]);
-
   const [comment, setComment] = useState('');
   const [star, setStar] = useState(0);
   const handleRatingChange = (score: number) => {
     setStar(score);
   };
 
-  const [files, setFiles] = useState<File[]>([]);
-  const handleFilesChange = (nextFiles: File[]) => {
-    setFiles(nextFiles);
-  };
+  const files = useReviewImageStore((s) => s.files);
+  const resetFiles = useReviewImageStore((s) => s.reset);
+
+  useEffect(() => {
+    return () => {
+      // 페이지 떠날 때 파일 초기화(선택)
+      resetFiles();
+    };
+  }, [resetFiles]);
 
   const handleSubmit = async () => {
     try {
@@ -88,7 +94,7 @@ export default function WriteReview() {
           </div>
           <div className="w-full border border-black-1 rounded-lg mt-4 mb-6 px-4 pt-3">
             <textarea
-              className="w-full text-black text-body-regular resize-none"
+              className="w-full text-black text-[16px] resize-none"
               placeholder="내용을 입력해주세요."
               value={comment}
               onChange={(e) => setComment(e.target.value)}
@@ -99,7 +105,7 @@ export default function WriteReview() {
           </div>
 
           <div>
-            <ReviewImageUploader onFilesChange={handleFilesChange} />
+            <ReviewImageUploader />
           </div>
         </div>
       </div>
