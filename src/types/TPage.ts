@@ -8,3 +8,8 @@ export type TPage = {
   hasPreviousPage: boolean;
   isLast: boolean;
 };
+
+export type TInfiniteRequest = {
+  page: number;
+  size: number;
+};

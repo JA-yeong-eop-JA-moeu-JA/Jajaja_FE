@@ -2,8 +2,6 @@ import { useNavigate } from 'react-router-dom';
 
 import { MATCH_STATUS_COLOR_MAP, ORDER_STATUS_COLOR_MAP } from '@/constants/product/statusColorMap';
 
-import OrderItem from '@/components/review/orderItem';
-
 import ChevronRight from '@/assets/ChevronRight2.svg'; // ✅ 화살표 다시 포함
 
 import type { IOrder } from '@/mocks/orderData';
@@ -43,9 +41,9 @@ export default function OrderList({ orders }: IOrderProps) {
                   {item.matchStatus && <span className={MATCH_STATUS_COLOR_MAP[item.matchStatus]}>{item.matchStatus}</span>}
                 </div>
               )}
-
               {/* 상품 카드 */}
-              <OrderItem item={item} show={false} />
+              {/*               <OrderItem item={item} show={false} />
+               */}
             </div>
           ))}
         </section>

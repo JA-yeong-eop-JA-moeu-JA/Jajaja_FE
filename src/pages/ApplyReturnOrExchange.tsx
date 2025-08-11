@@ -1,8 +1,16 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+//import { axiosInstance } from '@/apis/axiosInstance';
+import { useQueryClient } from '@tanstack/react-query';
 
 import type { TOptionBase } from '@/types/optionApply'; // reasonOptions 타입
+import type { IOrderItem } from '@/types/order/orderItem';
 import type { TOption } from '@/types/product/option';
+import type { TReviewableOrderItem } from '@/types/review/myReview';
+//import { useCoreMutation } from '@/hooks/customQuery';
+import { QUERY_KEYS } from '@/constants/querykeys/queryKeys';
+
+import useOrderDetailPersonal from '@/hooks/order/useOrderDetailPersonal';
 
 import { Button, SelectButton } from '@/components/common/button';
 import PageHeader from '@/components/head_bottom/PageHeader';
@@ -10,14 +18,6 @@ import ApplyDropDown from '@/components/modal/applyDropDown';
 import ConfirmModal from '@/components/modal/confirmModal';
 import RefundInfo from '@/components/orderDetail/returnInfo';
 import OrderItem from '@/components/review/orderItem';
-
-import useOrderDetailPersonal from '@/hooks/order/useOrderDetailPersonal';
-import type { IOrderItem } from '@/types/order/orderItem';
-
-//import { axiosInstance } from '@/apis/axiosInstance';
-import { useQueryClient } from '@tanstack/react-query';
-//import { useCoreMutation } from '@/hooks/customQuery';
-import { QUERY_KEYS } from '@/constants/querykeys/queryKeys';
 
 type TApplyType = '교환' | '반품';
 
@@ -64,7 +64,7 @@ export default function ApplyReturnOrExchange() {
 
   const [selectedType, setSelectedType] = useState<TApplyType | null>(null);
   const [selectedReason, setSelectedReason] = useState('');
-  const [ , setDeliveryRequest] = useState('');
+  const [, setDeliveryRequest] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [dropdownKey, setDropdownKey] = useState(0);
 
@@ -98,8 +98,7 @@ export default function ApplyReturnOrExchange() {
   }));
 
   // 특정 주문상품(파라미터 우선)
-  const selectedOrderItem =
-    mappedItems.find((m) => String(m.orderId) === orderProductId) ?? mappedItems[0];
+  const selectedOrderItem = mappedItems.find((m) => String(m.orderId) === orderProductId) ?? mappedItems[0];
 
   // 상단 결제/주문 상태 라벨
   const orderStatus: TOrderStatus = toOrderStatusLabel(items);
@@ -117,32 +116,42 @@ export default function ApplyReturnOrExchange() {
     reason: selectedReason || '',
     address: delivery.address,
   };
+  const toReviewable = (it: IOrderItem, orderDate?: string): TReviewableOrderItem => ({
+    orderId: it.orderId,
+    orderDate: orderDate ?? (it as any).orderDate ?? '',
+    orderProductId: (it as any).orderProductId ?? 0,
+    productId: it.productId,
+    productName: it.name,
+    store: it.company,
+    optionName: it.option,
+    imageUrl: it.image,
+    price: it.price,
+    quantity: it.quantity,
+    isReviewWritten: it.reviewed,
+  });
 
   // 캐시 타입 (암시적 any 방지)
-  type OrderDetailResult = NonNullable<typeof data>;
+  type TOrderDetailResult = NonNullable<typeof data>;
 
   const handleSubmit = (): boolean => {
     if (!selectedType || !selectedOrderItem) return false;
 
     // 1) 상세 캐시 낙관적 업데이트 (접수 상태 + 팀 매칭 라벨 비우기)
-    queryClient.setQueryData<OrderDetailResult>(
-      QUERY_KEYS.GET_ORDER_DETAIL_PERSONAL,
-      (current: OrderDetailResult | undefined) => {
-        if (!current) return current;
+    queryClient.setQueryData<TOrderDetailResult>(QUERY_KEYS.GET_ORDER_DETAIL_PERSONAL, (current: TOrderDetailResult | undefined) => {
+      if (!current) return current;
 
-        const nextItems = current.items.map((it) =>
-          it.orderProductId === selectedOrderItem.orderId
-            ? {
-                ...it,
-                status: selectedType === '반품' ? 'RETURN_REQUESTED' : 'EXCHANGE_REQUESTED',
-                teamStatus: '', // 매칭 상태 숨김 (CSS 자리 유지용)
-              }
-            : it
-        );
+      const nextItems = current.items.map((it) =>
+        it.orderProductId === selectedOrderItem.orderId
+          ? {
+              ...it,
+              status: selectedType === '반품' ? 'RETURN_REQUESTED' : 'EXCHANGE_REQUESTED',
+              teamStatus: '', // 매칭 상태 숨김 (CSS 자리 유지용)
+            }
+          : it,
+      );
 
-        return { ...current, items: nextItems };
-      }
-    );
+      return { ...current, items: nextItems };
+    });
 
     // 2) 완료 페이지 이동 (네가 준 라우트에 맞춤)
     if (selectedType === '반품') {
@@ -169,7 +178,7 @@ export default function ApplyReturnOrExchange() {
         <section className="flex flex-col gap-2 py-6 border-b-black-1 border-b-4">
           <div className="px-4">
             <h2 className="text-subtitle-medium pb-4">상품 정보</h2>
-            {selectedOrderItem && <OrderItem item={selectedOrderItem} show={false} />}
+            {selectedOrderItem && <OrderItem item={toReviewable(selectedOrderItem)} show={false} />}
           </div>
         </section>
 
@@ -201,8 +210,8 @@ export default function ApplyReturnOrExchange() {
           <ApplyDropDown
             key={dropdownKey}
             options={reasonOptions as TOption[]}
-            onChange={({ id }) => {
-              const selected = reasonOptions.find((r) => r.id === id);
+            onChange={({ id: reasonId }) => {
+              const selected = reasonOptions.find((r) => r.id === reasonId);
               if (selected) setSelectedReason(selected.name);
             }}
           />
@@ -221,8 +230,8 @@ export default function ApplyReturnOrExchange() {
           </div>
           <ApplyDropDown
             options={DELIVERY_REQUEST_OPTIONS as TOption[]}
-            onChange={({ id }) => {
-              const selected = DELIVERY_REQUEST_OPTIONS.find((o) => o.id === id);
+            onChange={({ id: requestId }) => {
+              const selected = DELIVERY_REQUEST_OPTIONS.find((o) => o.id === requestId);
               setDeliveryRequest(selected?.id === 0 ? '' : (selected?.name ?? ''));
             }}
           />
@@ -234,12 +243,7 @@ export default function ApplyReturnOrExchange() {
 
       {/* 하단 고정 접수 버튼 */}
       <div className="fixed bottom-0 left-0 right-0 z-10 bg-white max-w-screen-sm mx-auto w-full">
-        <Button
-          kind="basic"
-          variant="solid-orange"
-          disabled={!isFormValid}
-          onClick={() => setIsModalOpen(true)}
-        >
+        <Button kind="basic" variant="solid-orange" disabled={!isFormValid} onClick={() => setIsModalOpen(true)}>
           접수
         </Button>
       </div>

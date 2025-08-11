@@ -1,8 +1,9 @@
 // src/apis/orders/detailPersonal.ts
-import { axiosInstance } from '@/apis/axiosInstance';
-import type { TCommonResponse, OrderDetailPersonalResult, OrderProduct } from '@/types/order/detailPersonal';
+import type { ICommonResponse, IOrderDetailPersonalResult, IOrderProduct } from '@/types/order/detailPersonal';
 
-function normalizeItems(items: any[]): OrderProduct[] {
+import { axiosInstance } from '@/apis/axiosInstance';
+
+function normalizeItems(items: any[]): IOrderProduct[] {
   return items.map((it) => ({
     orderProductId: it.orderProductId,
     status: it.status,
@@ -20,9 +21,7 @@ function normalizeItems(items: any[]): OrderProduct[] {
 }
 
 export const getOrderDetailPersonal = async (orderId: number) => {
-  const { data } = await axiosInstance.get<TCommonResponse<OrderDetailPersonalResult>>(
-    `/api/orders/${orderId}`
-  );
+  const { data } = await axiosInstance.get<ICommonResponse<IOrderDetailPersonalResult>>(`/api/orders/${orderId}`);
   if (data?.result?.items) {
     (data.result as any).items = normalizeItems((data.result as any).items);
   }

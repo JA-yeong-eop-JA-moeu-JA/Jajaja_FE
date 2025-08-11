@@ -1,12 +1,13 @@
 // src/pages/OrderDetailTeam.tsx
-import PageHeader from '@/components/head_bottom/PageHeader';
-import OrderProductList from '@/components/orderDetail/orderProductList';
-import PaymentInfo from '@/components/orderDetail/paymentInfo';
 import { useParams } from 'react-router-dom';
+
+import type { IOrderItem } from '@/types/order/orderItem';
 
 import useOrderDetailPersonal from '@/hooks/order/useOrderDetailPersonal';
 
-import type { IOrderItem } from '@/types/order/orderItem';
+import PageHeader from '@/components/head_bottom/PageHeader';
+import OrderProductList from '@/components/orderDetail/orderProductList';
+import PaymentInfo from '@/components/orderDetail/paymentInfo';
 
 type TMatchStatus = '매칭 중' | '매칭 완료' | '매칭 실패';
 type TOrderStatus = '배송 중' | '결제 완료' | '결제 취소' | '반품 접수' | '교환 접수';
@@ -77,13 +78,9 @@ export default function OrderDetailTeam() {
   }));
 
   const orderStatus: TOrderStatus = toOrderStatusLabel(items);
-  const hasAfterSales = items.some(({ status }) =>
-    ['RETURN_REQUESTED', 'EXCHANGE_REQUESTED'].includes((status ?? '').toUpperCase())
-  );
+  const hasAfterSales = items.some(({ status }) => ['RETURN_REQUESTED', 'EXCHANGE_REQUESTED'].includes((status ?? '').toUpperCase()));
 
-  const matchStatus: TMatchStatus | undefined = hasAfterSales
-    ? undefined
-    : toMatchStatusLabel(items);
+  const matchStatus: TMatchStatus | undefined = hasAfterSales ? undefined : toMatchStatusLabel(items);
 
   // PaymentInfo 컴포넌트 prop에 맞게 매핑
   const paymentInfo = {
@@ -101,9 +98,7 @@ export default function OrderDetailTeam() {
 
       <main className="flex flex-col pt-0 gap-4 text-body-regular text-black">
         <div className="border-b-black-1 border-b-4 pb-4 px-4">
-          <p className="text-subtitle-medium">
-            {new Date(date).toLocaleString('ko-KR')}
-          </p>
+          <p className="text-subtitle-medium">{new Date(date).toLocaleString('ko-KR')}</p>
           <p className="text-small text-black-4">주문 번호 {orderNumber}</p>
         </div>
 

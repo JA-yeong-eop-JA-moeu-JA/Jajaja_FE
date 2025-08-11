@@ -1,17 +1,17 @@
-export interface TCommonResponse<T> {
+export interface ICommonResponse<T> {
   isSuccess: boolean;
   code: string;
   message: string;
   result: T;
 }
 
-export type OrderStatus = 'PAYED' | 'PREPARING' | 'SHIPPING' | 'DELIVERED' | 'CANCELED' | string;
-export type TeamStatus = 'MATCHED' | 'MATCHING' | 'FAILED' | string;
+export type TOrderStatus = 'PAYED' | 'PREPARING' | 'SHIPPING' | 'DELIVERED' | 'CANCELED' | string;
+export type TTeamStatus = 'MATCHED' | 'MATCHING' | 'FAILED' | string;
 
-export interface OrderProduct {
+export interface IOrderProduct {
   orderProductId: number;
-  status: OrderStatus;
-  teamStatus?: TeamStatus;
+  status: TOrderStatus;
+  teamStatus?: TTeamStatus;
   matchStatus?: '매칭 중' | '매칭 완료' | '매칭 실패';
   product: {
     id: number;
@@ -24,13 +24,13 @@ export interface OrderProduct {
   price: number;
 }
 
-export interface DeliveryInfo {
+export interface IDeliveryInfo {
   name: string;
   phone: string;
   address: string;
 }
 
-export interface PaymentInfo {
+export interface IPaymentInfo {
   method: string;
   amount: number;
   discount: number;
@@ -39,10 +39,10 @@ export interface PaymentInfo {
   finalAmount: number;
 }
 
-export interface OrderDetailPersonalResult {
+export interface IOrderDetailPersonalResult {
   date: string;
   orderNumber: string;
-  items: OrderProduct[];
-  delivery: DeliveryInfo;
-  payment: PaymentInfo;
+  items: IOrderProduct[];
+  delivery: IDeliveryInfo;
+  payment: IPaymentInfo;
 }

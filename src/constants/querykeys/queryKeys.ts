@@ -16,5 +16,8 @@ export const QUERY_KEYS = {
   GET_POINTS: ['getPoints'],
   GET_ORDER_DETAIL_PERSONAL: ['getOrderDetailPersonal'],
   GET_MY_ORDERS: ['getMyOrders'],
-
+  GET_REVIEWABLE: ['getReviewable'],
+  GET_MY_REVIEW: ['getMyReview'],
+  GET_ADDRESSES: ['getAddresses'],
+  GET_ADDRESS: (id: number) => ['getAddress', id],
 };

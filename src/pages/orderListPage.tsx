@@ -1,6 +1,7 @@
+import { useMyOrders } from '@/hooks/order/orderLists';
+
 import PageHeader from '@/components/head_bottom/PageHeader';
 import OrderList from '@/components/orderDetail/OrderList';
-import { useMyOrders } from '@/hooks/order/orderLists';
 
 export default function OrderListPage() {
   const { data: orders = [], isLoading, isError } = useMyOrders();
@@ -25,4 +26,3 @@ export default function OrderListPage() {
     </div>
   );
 }
-

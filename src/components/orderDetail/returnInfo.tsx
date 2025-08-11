@@ -4,7 +4,7 @@ type TRefundInfoProps = {
     discount: number;
     pointsUsed: number;
     deliveryFee: number; // +면 고객 부담, 0이면 무료
-    method: string;      // 'KAKAO' | 'CARD' 등
+    method: string; // 'KAKAO' | 'CARD' 등
     reason: string;
     address: string;
   };
@@ -55,11 +55,9 @@ export default function RefundInfo({ refundInfo }: TRefundInfoProps) {
   const returnFee = calculateReturnFee(region, refundInfo.reason);
 
   // 총 환불 예상 금액 = 상품금액 - 할인 - 포인트 ± 반품/회수 비용
-  const total =
-    refundInfo.amount - refundInfo.discount - refundInfo.pointsUsed + returnFee;
+  const total = refundInfo.amount - refundInfo.discount - refundInfo.pointsUsed + returnFee;
 
-  const deliveryFeeText =
-    refundInfo.deliveryFee > 0 ? `+${formatKRW(refundInfo.deliveryFee)}` : '무료 배송';
+  const deliveryFeeText = refundInfo.deliveryFee > 0 ? `+${formatKRW(refundInfo.deliveryFee)}` : '무료 배송';
 
   const methodLabel = METHOD_LABEL[refundInfo.method] ?? refundInfo.method;
 

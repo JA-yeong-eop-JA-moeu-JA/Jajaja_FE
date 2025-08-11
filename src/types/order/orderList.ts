@@ -1,27 +1,35 @@
 export type TOrderItemProduct = {
   id: number;
-  image: string;
-  store: string;
-  name: string;
-  option: string;
-  quantity: number;
+  image: string | null;
+  store: string | null;
+  name: string | null;
+  option: string | null;
+  quantity: number | null;
 };
-
-export type TOrderItemStatus = 'SHIPPING' | 'DELIVERED' | 'CANCELLED' | 'PENDING' | string;
-export type TTeamStatus = 'MATCHED' | 'MATCHING' | 'FAILED' | string;
 
 export type TOrderItem = {
   orderProductId: number;
-  status: TOrderItemStatus;
-  teamStatus: TTeamStatus;
+  status: string | null;
+  teamStatus: string | null;
   product: TOrderItemProduct;
-  price: number;
+  price: number | null;
 };
 
 export type TOrder = {
   id: number;
-  date: string; // ISO string
-  items: TOrderItem[];
+  date: string | null;
+  items: TOrderItem[] | null;
+};
+
+export type TPage = {
+  size: number;
+  totalElements: number;
+  currentElements: number;
+  totalPages: number;
+  currentPage: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+  isLast: boolean;
 };
 
 export type TGetMyOrdersResponse = {
@@ -29,11 +37,12 @@ export type TGetMyOrdersResponse = {
   code: string;
   message: string;
   result?: {
+    page?: TPage;
     orders: TOrder[];
   };
 };
 
-// UI에서 사용하는 정규화 타입
+// ---- UI 정규화 타입
 export interface IOrderItem {
   orderId: number;
   productId: number;
@@ -48,6 +57,6 @@ export interface IOrderItem {
 
 export interface IOrder {
   id: number;
-  createdAt: string;      // 주문일자
-  items: IOrderItem[];    // 주문 내 아이템 리스트
+  createdAt: string; // 주문일자
+  items: IOrderItem[]; // 주문 내 아이템 리스트
 }
