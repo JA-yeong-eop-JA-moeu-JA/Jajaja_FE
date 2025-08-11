@@ -38,9 +38,9 @@ export default function MyReview() {
       <PageHeader title="리뷰" />
       <PageButton items={['writeReview', 'myReview']} selected={selectedTop1} onSelect={setSelectedTop1} />
       {selectedTop1 === 'writeReview' ? (
-        <div className="flex flex-1 items-center justify-center">
+        <div className="w-full flex flex-1 items-center justify-center">
           {orderData.length > 0 ? (
-            <div>
+            <div className="w-full">
               <OrderReviewList orders={orderData} />
               <div ref={ref} className="h-2" />
               {isFetchingNextPage1 && <p className="text-center py-4 text-gray-500">더 불러오는 중...</p>}
