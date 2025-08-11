@@ -13,6 +13,8 @@ export type TReviewableOrderItem = {
   orderProductId: number;
   productId: number;
   productName: string;
+  store: string;
+  optionName: string;
   imageUrl: string;
   price: number;
   quantity: number;
@@ -26,7 +28,7 @@ export type TGetReviewable = TCommonResponse<{
 
 export type TPostReviewRequest = {
   productId: number;
-  rating: string;
+  rating: number;
   content: string;
   imageKeys: string[];
 };

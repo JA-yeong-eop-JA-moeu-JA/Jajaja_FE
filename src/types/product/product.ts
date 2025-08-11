@@ -11,6 +11,7 @@ export type TGetReviews = {
     profileUrl: string;
     createDate: string;
     rating: number;
+    productName: string;
     option: string;
     content: string;
     likeCount: number;

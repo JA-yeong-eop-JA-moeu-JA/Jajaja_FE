@@ -21,10 +21,10 @@ export default function OrderItem({ item, show, showPrice = true }: IOrderDataPr
       <div className="w-full flex items-center justify-center">
         <img src={item.imageUrl} alt={item.productName} className="w-21 h-21" />
         <div className="ml-3 flex-1">
-          <p className="text-black-4 text-small-medium pb-2">{item.productName}</p>
+          <p className="text-black-4 text-small-medium pb-2">{item.store}</p>
           <p className="text-black text-small-medium pb-1">{item.productName}</p>
           <p className="text-black-4 text-small-regular pb-2">
-            {item.productName}
+            {item.optionName}
             <span> / {item.quantity}개</span>
           </p>
           {showPrice && <p className="text-black text-small-medium">{item.price.toLocaleString('ko-KR')} 원</p>}
