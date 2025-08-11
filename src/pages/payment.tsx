@@ -2,9 +2,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import type { IAddress } from '@/types/address/TAddress';
+import type { TCoupons } from '@/types/coupon/TGetCoupons';
 
 import { useModalStore } from '@/stores/modalStore';
 import { useGetAddresses } from '@/hooks/address/useAddress';
+import { useAppliedCoupon, useCancelCoupon } from '@/hooks/coupon/useCoupons';
 
 import { Button } from '@/components/common/button';
 import PageHeader from '@/components/head_bottom/PageHeader';
@@ -38,23 +40,46 @@ export default function Payment() {
   const { data: addressesResponse, isLoading: addressesLoading } = useGetAddresses();
   const addresses = (addressesResponse as any)?.data?.result || [];
 
+  const { getAppliedCoupon, calculateDiscount, isApplicable, isExpired, clearAppliedCoupon } = useAppliedCoupon();
+  const { mutate: cancelCoupon } = useCancelCoupon();
+
   const [selectedAddress, setSelectedAddress] = useState<IAddress | null>(null);
+  const [appliedCoupon, setAppliedCoupon] = useState<TCoupons | null>(null);
+  const [selectedPayment, setSelectedPayment] = useState<'naver' | 'kakao' | null>(null);
+  const [selectedDeliveryRequest, setSelectedDeliveryRequest] = useState<string>('');
+  const [usedPoints, setUsedPoints] = useState<number>(0);
+  const [userPoints] = useState<number>(1382);
+
+  // 기본 주문 금액 (Todo: 장바구니 연동 후 수정)
+  const baseOrderAmount = 123122;
 
   useEffect(() => {
     if (location.state?.selectedAddress) {
       setSelectedAddress(location.state.selectedAddress);
     } else if (addresses.length > 0 && !selectedAddress) {
-      // 기본 배송지 또는 첫 번째 배송지 자동 선택
       const defaultAddr = addresses.find((addr: IAddress) => addr.isDefault) || addresses[0];
       setSelectedAddress(defaultAddr);
     }
   }, [addresses, location.state, selectedAddress]);
 
+  useEffect(() => {
+    const coupon = getAppliedCoupon();
+    setAppliedCoupon(coupon);
+  }, []);
+
   const currentOrderItems = orderData[0].items;
-  const [selectedPayment, setSelectedPayment] = useState<'naver' | 'kakao' | null>(null);
-  const [selectedDeliveryRequest, setSelectedDeliveryRequest] = useState<string>('');
-  const [usedPoints, setUsedPoints] = useState<number>(0);
-  const [userPoints] = useState<number>(1382);
+
+  // 쿠폰 할인 금액 계산
+  const couponDiscount = useMemo(() => {
+    if (!appliedCoupon) return 0;
+    return calculateDiscount(baseOrderAmount, appliedCoupon);
+  }, [appliedCoupon, baseOrderAmount, calculateDiscount]);
+
+  // 쿠폰 적용 가능 여부
+  const isCouponApplicable = useMemo(() => {
+    if (!appliedCoupon) return true;
+    return isApplicable(baseOrderAmount, appliedCoupon) && !isExpired(appliedCoupon);
+  }, [appliedCoupon, baseOrderAmount, isApplicable, isExpired]);
 
   const handlePointsChange = (value: number) => {
     if (value > userPoints) {
@@ -70,6 +95,28 @@ export default function Payment() {
     openModal('delivery', {
       onSelect: (text: string) => setSelectedDeliveryRequest(text),
     });
+  };
+
+  const handleCouponClick = () => {
+    navigate('/coupon');
+  };
+
+  const handleRemoveCoupon = () => {
+    if (!appliedCoupon) return;
+
+    cancelCoupon(
+      { id: appliedCoupon.couponId },
+      {
+        onSuccess: () => {
+          setAppliedCoupon(null);
+          clearAppliedCoupon();
+        },
+        onError: (err) => {
+          console.error('쿠폰 해제 실패:', err);
+          alert('쿠폰 해제에 실패했습니다. 다시 시도해주세요.');
+        },
+      },
+    );
   };
 
   const canProceedPayment = useMemo(() => {
@@ -138,7 +185,7 @@ export default function Payment() {
           <p>{total.toLocaleString()} 원</p>
         </div>
         <div className="flex justify-between text-small-medium mb-2">
-          <p>할인 금액</p>
+          <p>쿠폰 할인</p>
           <p className="text-green">-{discount.toLocaleString()} 원</p>
         </div>
         <div className="flex justify-between text-small-medium mb-2">
@@ -171,13 +218,12 @@ export default function Payment() {
     );
   }
 
-  // 결제 연동 시 수정
+  // 최종 결제 금액 계산
   const calculatedFinalAmount = useMemo(() => {
-    const baseAmount = 123122;
-    const discount = 1239;
     const shippingFee = 0;
-    return baseAmount - discount - usedPoints + shippingFee;
-  }, [usedPoints]);
+    const actualCouponDiscount = isCouponApplicable ? couponDiscount : 0;
+    return baseOrderAmount - actualCouponDiscount - usedPoints + shippingFee;
+  }, [baseOrderAmount, couponDiscount, isCouponApplicable, usedPoints]);
 
   return (
     <>
@@ -206,13 +252,39 @@ export default function Payment() {
 
       <section className="p-4 mt-3 border-b-4 border-black-1">
         <p className="text-subtitle-medium mb-4">할인 혜택</p>
-        <div className="flex justify-between items-center border-1 border-black-3 rounded px-4 py-3 mb-3" onClick={() => navigate('/coupon')}>
-          <p className="text-body-medium">쿠폰</p>
-          <div className="flex items-center gap-3">
-            <p className="text-body-regular">사용 가능 2장</p>
-            <Down className="w-4 h-2 mr-1" />
+
+        <div className="mb-3">
+          <div className="flex justify-between items-center border-1 border-black-3 rounded px-4 py-3 mb-2" onClick={handleCouponClick}>
+            <p className="text-body-medium">쿠폰</p>
+            <div className="flex items-center gap-3">
+              <Down className="w-4 h-2 mr-1" />
+            </div>
           </div>
+
+          {appliedCoupon && (
+            <div className={`border rounded-lg p-3 mb-2 ${!isCouponApplicable ? 'border-red-500 bg-red-50' : 'border-green bg-green-50'}`}>
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-body-medium text-black font-semibold">{appliedCoupon.couponName}</p>
+                  <p className="text-body-small text-black-4">
+                    {appliedCoupon.discountType === 'PERCENTAGE'
+                      ? `${appliedCoupon.discountValue}% 할인`
+                      : `${appliedCoupon.discountValue.toLocaleString()}원 할인`}
+                  </p>
+                  <p className="text-body-small text-black-4">할인 금액: {isCouponApplicable ? couponDiscount.toLocaleString() : 0}원</p>
+                </div>
+                <button onClick={handleRemoveCoupon} className="text-body-small text-red-500 underline">
+                  해제
+                </button>
+              </div>
+
+              {!isCouponApplicable && (
+                <p className="text-body-small text-error-3 mt-2">{isExpired(appliedCoupon) ? '만료된 쿠폰입니다.' : '최소 주문 금액을 충족하지 않습니다.'}</p>
+              )}
+            </div>
+          )}
         </div>
+
         <div className="flex gap-2 mb-2">
           <div className="flex-1 flex justify-between items-center border-1 border-black-3 rounded px-4 py-3">
             <p className="text-body-medium">포인트</p>
@@ -262,7 +334,13 @@ export default function Payment() {
         </div>
       </section>
 
-      <PaymentSummarySection total={123122} discount={1239} pointsUsed={usedPoints} shippingFee={0} finalAmount={calculatedFinalAmount} />
+      <PaymentSummarySection
+        total={baseOrderAmount}
+        discount={isCouponApplicable ? couponDiscount : 0}
+        pointsUsed={usedPoints}
+        shippingFee={0}
+        finalAmount={calculatedFinalAmount}
+      />
 
       <AgreementNoticeSection />
 

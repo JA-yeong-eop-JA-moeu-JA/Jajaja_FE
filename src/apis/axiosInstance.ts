@@ -3,7 +3,8 @@ import axios from 'axios';
 import { reissue } from './auth/auth';
 
 export const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  // 프록시 사용 시 baseURL을 빈 문자열로 설정 (또는 조건부 설정)
+  baseURL: import.meta.env.DEV ? '' : import.meta.env.VITE_API_BASE_URL,
   withCredentials: true,
 });
 

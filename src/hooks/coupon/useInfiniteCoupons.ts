@@ -4,10 +4,10 @@ import { QUERY_KEYS } from '@/constants/querykeys/queryKeys';
 
 import { getCoupons } from '@/apis/coupon/getCoupons';
 
-export default function useInfiniteCoupons(size: number = 4) {
+export default function useInfiniteCoupons() {
   return useInfiniteQuery({
-    queryKey: [QUERY_KEYS.GET_COUPONS, size],
-    queryFn: ({ pageParam = 0 }) => getCoupons(pageParam, size),
+    queryKey: [QUERY_KEYS.GET_COUPONS],
+    queryFn: () => getCoupons(), // 매개변수 제거
     initialPageParam: 0,
     getNextPageParam: (lastPage) => {
       const page = lastPage.result.page;
