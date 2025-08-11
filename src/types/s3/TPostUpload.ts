@@ -4,7 +4,17 @@ export type TPostUploadRequest = {
   fileName: string;
 };
 
-export type TPostUploadResponse = TCommonResponse<{
+export type TUrlSet = {
   url: string;
   keyName: string;
+};
+
+export type TPostUploadResponse = TCommonResponse<TUrlSet>;
+
+export type TPostUploadListRequest = {
+  fileName: string[];
+};
+
+export type TPostUploadListResponse = TCommonResponse<{
+  presignedUrlUploadResponses: TUrlSet[];
 }>;

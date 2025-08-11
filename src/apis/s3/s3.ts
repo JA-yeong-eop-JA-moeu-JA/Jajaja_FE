@@ -1,9 +1,14 @@
-import type { TPostUploadRequest, TPostUploadResponse } from '@/types/s3/TPostUpload';
+import type { TPostUploadListRequest, TPostUploadListResponse, TPostUploadRequest, TPostUploadResponse } from '@/types/s3/TPostUpload';
 
 import { axiosInstance } from '../axiosInstance';
 
 export const postUpload = async (file: TPostUploadRequest): Promise<TPostUploadResponse> => {
   const { data } = await axiosInstance.post(`/api/s3/presigned/upload`, file);
+  return data;
+};
+
+export const postUploadList = async ({ fileName }: TPostUploadListRequest): Promise<TPostUploadListResponse> => {
+  const { data } = await axiosInstance.post(`/api/s3/presigned/upload/list`, fileName);
   return data;
 };
 

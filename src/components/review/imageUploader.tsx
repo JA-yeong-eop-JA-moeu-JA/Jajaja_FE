@@ -1,10 +1,19 @@
-import { useImageUploader } from '@/hooks/myPage/useImageUploader';
+import { useEffect } from 'react';
+
+import { useImageUploader } from '@/hooks/s3/useImageUploader';
 
 import Close from '@/assets/myPage/review/close.svg?react';
 import Plus from '@/assets/myPage/review/plus.svg?react';
 
-export default function ReviewImageUploader() {
-  const { inputRef, images, openFileDialog, handleFileChange, deleteImage } = useImageUploader(5);
+type TFileProps = {
+  onFilesChange?: (files: File[]) => void;
+};
+
+export default function ReviewImageUploader({ onFilesChange }: TFileProps) {
+  const { inputRef, images, openFileDialog, handleFileChange, deleteImage, files } = useImageUploader(5);
+  useEffect(() => {
+    onFilesChange?.(files);
+  }, [files, onFilesChange]);
 
   return (
     <div className="flex flex-col w-full items-start">
