@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 
 import type { TPaymentRequestData } from '@/types/toss/tossPayments';
 
-import { calculateFinalAmount, formatPhoneNumber, generateCustomerKey, generateOrderId } from '@/utils/paymentUtils';
+import { calculateFinalAmount, formatPhoneNumber, generateCustomerKey } from '@/utils/paymentUtils';
 
 import { useModalStore } from '@/stores/modalStore';
+import { usePaymentPrepare } from '@/hooks/payment/usePaymentPrepare';
 import { usePaymentWidget } from '@/hooks/payment/usePaymentWidget';
 
 import { Button } from '@/components/common/button';
@@ -34,10 +35,12 @@ export default function Payment() {
   const { openModal } = useModalStore();
   const currentOrderItems = orderData[0].items;
 
-  // 결제 관련 상태
   const [selectedDeliveryRequest, setSelectedDeliveryRequest] = useState<string>('');
   const [usedPoints, setUsedPoints] = useState<number>(0);
   const [userPoints] = useState<number>(1382);
+  const [isProcessingPayment, setIsProcessingPayment] = useState<boolean>(false);
+
+  const paymentPrepareMutation = usePaymentPrepare();
 
   // 결제 금액 계산
   const originalAmount = 123122;
@@ -46,13 +49,12 @@ export default function Payment() {
   const finalAmount = calculateFinalAmount(originalAmount, discount, usedPoints, shippingFee);
 
   // 고객키 생성 (실제로는 로그인한 사용자 ID를 사용)
-  const customerKey = generateCustomerKey('user123'); // 실제 사용자 ID로 변경
+  const customerKey = generateCustomerKey('user123');
 
-  // 결제위젯 훅 사용
+  // 결제위젯 훅 사용 (Todo: 임시 금액으로 초기화, 나중에 준비 API에서 받은 실제 금액으로 업데이트)
   const {
     paymentWidget,
     isLoading: widgetLoading,
-    error: widgetError,
     renderPaymentMethods,
     renderAgreement,
     requestPayment,
@@ -64,29 +66,22 @@ export default function Payment() {
   // 결제위젯 렌더링
   useEffect(() => {
     if (!widgetLoading && paymentWidget) {
-      // DOM이 준비된 후 약간의 지연을 두고 렌더링
       const timer = setTimeout(() => {
-        console.log('🎨 결제위젯 렌더링 시작...');
-
-        // 결제 수단 렌더링
         const paymentMethodsElement = document.querySelector('#payment-methods');
         const agreementElement = document.querySelector('#payment-agreement');
-
-        console.log('📍 결제 수단 요소:', paymentMethodsElement);
-        console.log('📍 약관 요소:', agreementElement);
 
         if (paymentMethodsElement) {
           renderPaymentMethods('#payment-methods');
         } else {
-          console.error('❌ #payment-methods 요소를 찾을 수 없습니다.');
+          console.error('#payment-methods 요소를 찾을 수 없습니다.');
         }
 
         if (agreementElement) {
           renderAgreement('#payment-agreement');
         } else {
-          console.error('❌ #payment-agreement 요소를 찾을 수 없습니다.');
+          console.error('#payment-agreement 요소를 찾을 수 없습니다.');
         }
-      }, 100); // 100ms 지연
+      }, 100);
 
       return () => clearTimeout(timer);
     }
@@ -119,22 +114,74 @@ export default function Payment() {
       return;
     }
 
+    if (isProcessingPayment) {
+      return; // 중복 클릭 방지
+    }
+
+    setIsProcessingPayment(true);
+
     try {
-      const orderId = generateOrderId();
+      console.log('1단계: 결제 준비 API 호출');
+
+      const prepareData = {
+        // 임시
+        items: [1, 2, 3],
+        addressId: 1,
+        deliveryRequest: selectedDeliveryRequest || '현관문 앞에 놓아주세요.',
+        appliedCouponId: 5,
+        point: usedPoints > 0 ? usedPoints : 1000,
+      };
+
+      console.log('📤 결제 준비 요청 데이터:', prepareData);
+
+      const prepareResult = await paymentPrepareMutation.mutateAsync(prepareData);
+
+      if (!prepareResult.isSuccess) {
+        throw new Error(prepareResult.message || '결제 준비에 실패했습니다.');
+      }
+
+      const { orderId, orderName, finalAmount: preparedAmount } = prepareResult.data;
+
+      await paymentWidget.setAmount({
+        currency: 'KRW',
+        value: preparedAmount,
+      });
+
       const baseUrl = window.location.origin;
 
       await requestPayment({
-        orderId,
-        orderName: `${currentOrderItems[0]?.productName || '상품'} 외 ${currentOrderItems.length - 1}건`,
-        customerEmail: 'customer@example.com', // 실제 고객 이메일로 변경
-        customerName: '이한비', // 실제 고객명으로 변경
-        customerMobilePhone: formatPhoneNumber('010-2812-1241'), // 실제 휴대폰 번호로 변경
+        orderId: orderId.toString(),
+        orderName,
+        customerEmail: 'customer@example.com', //임시
+        customerName: '이한비', //임시
+        customerMobilePhone: formatPhoneNumber('010-2812-1241'), //임시
         successUrl: `${baseUrl}/payment/success`,
         failUrl: `${baseUrl}/payment/fail`,
       } as TPaymentRequestData);
     } catch (error) {
-      console.error('결제 요청 실패:', error);
-      alert('결제 요청 중 오류가 발생했습니다. 다시 시도해주세요.');
+      console.error('결제 처리 실패:', error);
+
+      let errorMessage = '결제 처리 중 오류가 발생했습니다.';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as any;
+        console.log('에러 상세:', {
+          status: axiosError.response?.status,
+          data: axiosError.response?.data,
+          message: axiosError.message,
+        });
+
+        if (axiosError.response?.data?.message) {
+          errorMessage = axiosError.response.data.message;
+        }
+      }
+
+      alert(errorMessage + ' 다시 시도해주세요.');
+    } finally {
+      setIsProcessingPayment(false);
     }
   };
 
@@ -189,32 +236,7 @@ export default function Payment() {
     );
   }
 
-  // 로딩 상태 표시
-  if (widgetLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange mx-auto mb-4" />
-          <p className="text-body-regular">결제 시스템을 초기화하고 있습니다...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // 에러 상태 표시
-  if (widgetError) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center p-4">
-          <p className="text-red-500 mb-4">결제 시스템 초기화 중 오류가 발생했습니다.</p>
-          <p className="text-small-regular text-gray-600 mb-4">{widgetError}</p>
-          <Button kind="basic" variant="solid-orange" onClick={() => window.location.reload()}>
-            새로고침
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  // Todo: 로딩 페이지 추가
 
   return (
     <>
@@ -272,23 +294,25 @@ export default function Payment() {
       {/* 토스페이먼츠 결제 수단 위젯 */}
       <section className="p-4 border-b-4 border-black-1">
         <p className="text-subtitle-medium py-3 mb-4">결제 수단</p>
-        <div id="payment-methods" className="min-h-[200px]">
-          {/* 토스페이먼츠 결제위젯이 여기에 렌더링됩니다 */}
-        </div>
+        <div id="payment-methods" className="min-h-[200px]" />
       </section>
 
       <PaymentSummarySection total={originalAmount} discount={discount} pointsUsed={usedPoints} shippingFee={shippingFee} finalAmount={finalAmount} />
 
       {/* 토스페이먼츠 약관 위젯 */}
       <section className="p-4 bg-black-0">
-        <div id="payment-agreement" className="min-h-[100px]">
-          {/* 토스페이먼츠 약관위젯이 여기에 렌더링됩니다 */}
-        </div>
+        <div id="payment-agreement" className="min-h-[100px]" />
       </section>
 
       <div className="fixed bottom-14 left-0 right-0 w-full max-w-[600px] mx-auto">
-        <Button kind="basic" variant="solid-orange" disabled={finalAmount <= 0} onClick={handlePayment} className="w-full">
-          {finalAmount.toLocaleString()}원 결제하기
+        <Button
+          kind="basic"
+          variant="solid-orange"
+          disabled={finalAmount <= 0 || isProcessingPayment || paymentPrepareMutation.isPending}
+          onClick={handlePayment}
+          className="w-full"
+        >
+          {isProcessingPayment || paymentPrepareMutation.isPending ? '결제 처리 중...' : `${finalAmount.toLocaleString()}원 결제하기`}
         </Button>
       </div>
     </>

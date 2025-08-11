@@ -25,6 +25,31 @@ export interface ITPaymentConfirmResponse {
   };
 }
 
+export interface ITPaymentPrepareRequest {
+  items: number[];
+  addressId: number;
+  deliveryRequest?: string;
+  appliedCouponId?: number;
+  point?: number;
+}
+
+export interface ITPaymentPrepareData {
+  orderId: number;
+  orderName: string;
+  totalAmount: number;
+  discountAmount: number;
+  pointDiscount: number;
+  shippingFee: number;
+  finalAmount: number;
+}
+
+export interface ITPaymentPrepareResponse {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  data: ITPaymentPrepareData;
+}
+
 export interface ITOrderItem {
   productId: string;
   productName: string;

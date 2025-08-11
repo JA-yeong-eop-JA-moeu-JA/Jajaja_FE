@@ -1,8 +1,7 @@
-// PaymentStatusWrapper를 확장한 컴포넌트
 import { useParams } from 'react-router-dom';
 
 import PaymentStatusPage from './paymentStatus';
-import { usePaymentConfirm } from './PaymentStatusHandler';
+import { usePaymentStatus } from './PaymentStatusHandler';
 
 interface IPaymentStatusWrapper {
   // 결제 성공 시 추가 정보 표시
@@ -15,13 +14,12 @@ interface IPaymentStatusWrapper {
 
 export default function PaymentStatusWrapper() {
   const { status } = useParams<{ status: 'success' | 'fail' }>();
-  const { isConfirming, confirmResult, error } = usePaymentConfirm();
+  const { isConfirming, confirmResult, error } = usePaymentStatus();
 
   if (status !== 'success' && status !== 'fail') {
     return <div>잘못된 접근입니다.</div>;
   }
 
-  // 성공 페이지에서 결제 승인 진행 중
   if (status === 'success' && isConfirming) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -33,11 +31,9 @@ export default function PaymentStatusWrapper() {
     );
   }
 
-  // 결제 승인 실패 시 실패 페이지로 처리
   if (status === 'success' && error) {
     return <PaymentStatusPage status="fail" />;
   }
 
-  // 정상적인 결제 완료
   return <PaymentStatusPage status={status} />;
 }

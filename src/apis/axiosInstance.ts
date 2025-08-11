@@ -2,6 +2,15 @@ import axios from 'axios';
 
 import { reissue } from './auth/auth';
 
+const getCookieValue = (name: string): string | null => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) {
+    return parts.pop()?.split(';').shift() || null;
+  }
+  return null;
+};
+
 export const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   withCredentials: true,
@@ -10,6 +19,25 @@ export const axiosInstance = axios.create({
 let hasHandledLogout = false;
 
 //let isRefreshing = false;
+
+// 결제 준비용 - Authorization 헤더 자동 설정
+axiosInstance.interceptors.request.use(
+  (config) => {
+    // 쿠키에서 accessToken 가져오기 (삭제X)
+    const accessToken = getCookieValue('accessToken');
+
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    } else {
+      console.warn('액세스 토큰이 쿠키에 없습니다.');
+    }
+
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  },
+);
 
 axiosInstance.interceptors.response.use(
   (response) => response,

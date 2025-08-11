@@ -1,14 +1,3 @@
-// UUID 패키지 대신 crypto API 사용 (브라우저 내장)
-
-/**
- * 고유한 주문번호 생성 (6-64자, 영문 대소문자, 숫자, -, _, = 만 허용)
- */
-export const generateOrderId = (): string => {
-  const timestamp = Date.now().toString();
-  const random = Math.random().toString(36).substring(2, 8);
-  return `order_${timestamp}_${random}`;
-};
-
 /**
  * 고유한 고객키 생성 (crypto API 기반)
  */

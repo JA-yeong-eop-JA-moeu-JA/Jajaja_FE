@@ -1,10 +1,7 @@
-// PaymentStatusWrapper에서 사용할 결제 승인 로직
-
 import { useEffect, useState } from 'react';
-// eslint-disable-next-line import/no-duplicates
 import { useSearchParams } from 'react-router-dom';
 
-import { axiosInstance } from '@/apis/axiosInstance';
+import { usePaymentConfirm } from '@/hooks/payment/usePaymentConfirm';
 
 interface IPaymentConfirmResponse {
   isSuccess: boolean;
@@ -17,19 +14,20 @@ interface IPaymentConfirmResponse {
   };
 }
 
-interface IUsePaymentConfirmReturn {
+interface IUsePaymentStatusReturn {
   isConfirming: boolean;
   confirmResult: IPaymentConfirmResponse | null;
   error: string | null;
 }
 
-export const usePaymentConfirm = (): IUsePaymentConfirmReturn => {
+export const usePaymentStatus = (): IUsePaymentStatusReturn => {
   const [searchParams] = useSearchParams();
   const [isConfirming, setIsConfirming] = useState(true);
   const [confirmResult, setConfirmResult] = useState<IPaymentConfirmResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // URL 파라미터에서 결제 정보 추출
+  const paymentConfirmMutation = usePaymentConfirm();
+
   const paymentKey = searchParams.get('paymentKey');
   const orderId = searchParams.get('orderId');
   const amount = searchParams.get('amount');
@@ -43,17 +41,19 @@ export const usePaymentConfirm = (): IUsePaymentConfirmReturn => {
       }
 
       try {
-        // 백엔드에 결제 승인 요청
-        const response = await axiosInstance.post<IPaymentConfirmResponse>('/api/orders/confirm', {
+        console.log('결제 확인 요청:', { orderId, paymentKey, amount });
+
+        const response = await paymentConfirmMutation.mutateAsync({
           orderId,
           paymentKey,
           paidAmount: Number(amount),
         });
 
-        if (response.data.isSuccess) {
-          setConfirmResult(response.data);
+        if (response.isSuccess) {
+          setConfirmResult(response);
+          console.log('결제 확인 완료:', response);
         } else {
-          setError(response.data.message || '결제 승인에 실패했습니다.');
+          setError(response.message || '결제 승인에 실패했습니다.');
         }
       } catch (err) {
         console.error('결제 승인 요청 실패:', err);
@@ -64,7 +64,11 @@ export const usePaymentConfirm = (): IUsePaymentConfirmReturn => {
     };
 
     confirmPayment();
-  }, [paymentKey, orderId, amount]);
+  }, [paymentKey, orderId, amount, paymentConfirmMutation]);
 
-  return { isConfirming, confirmResult, error };
+  return {
+    isConfirming: isConfirming || paymentConfirmMutation.isPending,
+    confirmResult,
+    error,
+  };
 };
