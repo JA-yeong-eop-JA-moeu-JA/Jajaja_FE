@@ -15,11 +15,11 @@ export default function AddressChange() {
   const { data: addressesResponse, isLoading, error, refetch } = useGetAddresses();
   const { mutate: deleteAddress } = useDeleteAddress();
 
-  const addresses = addressesResponse?.data?.result || [];
+  const addresses = (addressesResponse as any)?.data?.result || [];
 
   useEffect(() => {
     if (addresses.length > 0 && !selectedAddress) {
-      const defaultAddress = addresses.find((addr) => addr.isDefault);
+      const defaultAddress = addresses.find((addr: IAddress) => addr.isDefault);
       if (defaultAddress) {
         setSelectedAddress(defaultAddress);
       }
@@ -48,7 +48,9 @@ export default function AddressChange() {
       { addressId: id, request: { id } },
       {
         onSuccess: () => {},
-        onError: (error) => {},
+        onError: (deleteError) => {
+          console.error('주소 삭제 실패:', deleteError);
+        },
       },
     );
   };
@@ -89,7 +91,7 @@ export default function AddressChange() {
         </div>
       ) : (
         <>
-          {addresses.map((addr) => {
+          {addresses.map((addr: IAddress) => {
             const isSelected = selectedAddress?.id === addr.id;
 
             return <AddressCard key={addr.id} address={addr} onDelete={handleDelete} onSelect={handleSelectAddress} isSelected={isSelected} mode="select" />;

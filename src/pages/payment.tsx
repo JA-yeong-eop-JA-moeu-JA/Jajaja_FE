@@ -36,7 +36,7 @@ export default function Payment() {
   const { openModal } = useModalStore();
 
   const { data: addressesResponse, isLoading: addressesLoading } = useGetAddresses();
-  const addresses = addressesResponse?.data?.result || [];
+  const addresses = (addressesResponse as any)?.data?.result || [];
 
   const [selectedAddress, setSelectedAddress] = useState<IAddress | null>(null);
 
@@ -45,7 +45,7 @@ export default function Payment() {
       setSelectedAddress(location.state.selectedAddress);
     } else if (addresses.length > 0 && !selectedAddress) {
       // 기본 배송지 또는 첫 번째 배송지 자동 선택
-      const defaultAddr = addresses.find((addr) => addr.isDefault) || addresses[0];
+      const defaultAddr = addresses.find((addr: IAddress) => addr.isDefault) || addresses[0];
       setSelectedAddress(defaultAddr);
     }
   }, [addresses, location.state, selectedAddress]);
@@ -72,13 +72,6 @@ export default function Payment() {
     });
   };
 
-  const handleChangeAddress = () => {
-    navigate('/address/change', {
-      state: { from: 'payment' },
-    });
-  };
-
-  // 결제 가능 여부 체크
   const canProceedPayment = useMemo(() => {
     return selectedAddress && selectedPayment;
   }, [selectedAddress, selectedPayment]);

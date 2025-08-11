@@ -44,17 +44,11 @@ export type TCommonResponse<T = void> = {
   result?: T;
 };
 
-export type TGetAddressesResponse = TCommonResponse<{
-  data: TAddress[];
-  totalCount: number;
-}>;
+// 수정: 실제 API 응답에 맞게 타입 정의 변경
+export type TGetAddressesResponse = TCommonResponse<TAddress[]>;
 
-export type TAddAddressResponse = TCommonResponse<{
-  data: TAddress;
-}>;
+export type TAddAddressResponse = TCommonResponse<TAddress>;
 
-export type TUpdateAddressResponse = TCommonResponse<{
-  data: TAddress;
-}>;
+export type TUpdateAddressResponse = TCommonResponse<TAddress>;
 
 export type TDeleteAddressResponse = TCommonResponse;
