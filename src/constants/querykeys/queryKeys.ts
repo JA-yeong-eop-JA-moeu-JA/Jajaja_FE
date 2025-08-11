@@ -15,4 +15,6 @@ export const QUERY_KEYS = {
   GET_PHOTO: ['getPhoto'],
   GET_POINTS: ['getPoints'],
   GET_ORDER_DETAIL_PERSONAL: ['getOrderDetailPersonal'],
+  GET_MY_ORDERS: ['getMyOrders'],
+
 };

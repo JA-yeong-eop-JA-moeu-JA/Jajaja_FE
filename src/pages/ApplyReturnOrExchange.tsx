@@ -121,7 +121,6 @@ export default function ApplyReturnOrExchange() {
   // 캐시 타입 (암시적 any 방지)
   type OrderDetailResult = NonNullable<typeof data>;
 
-  // ✅ API 호출 없이 캐시만 갱신하고 완료 페이지로 이동
   const handleSubmit = (): boolean => {
     if (!selectedType || !selectedOrderItem) return false;
 
