@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import type { IAddress } from '@/constants/address/address';
+import type { IAddress } from '@/types/address/TAddress';
 import { DEFAULT_ADDRESS_TAG } from '@/constants/address/address';
 
 import { useModalStore } from '@/stores/modalStore';
@@ -11,9 +11,10 @@ import DeleteIcon from '../assets/icons/delete.svg?react';
 interface IAddressCardProps {
   address: IAddress;
   onDelete: (id: number) => void;
+  isDeleting?: boolean;
 }
 
-function AddressCard({ address, onDelete }: IAddressCardProps) {
+function AddressCard({ address, onDelete, isDeleting }: IAddressCardProps) {
   const { openModal } = useModalStore();
   const navigate = useNavigate();
 
@@ -30,8 +31,13 @@ function AddressCard({ address, onDelete }: IAddressCardProps) {
 
   return (
     <div className="px-4 mb-2">
-      <div className={`relative border-1 border-black-1 rounded-md p-4 mb-3 cursor-pointer hover:bg-gray-50 transition-colors`} onClick={handleCardClick}>
-        {!address.isDefault && (
+      <div
+        className={`relative border-1 border-black-1 rounded-md p-4 mb-3 cursor-pointer hover:bg-gray-50 transition-colors ${
+          isDeleting ? 'opacity-50 pointer-events-none' : ''
+        }`}
+        onClick={handleCardClick}
+      >
+        {!address.default && (
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -41,6 +47,7 @@ function AddressCard({ address, onDelete }: IAddressCardProps) {
               });
             }}
             className="absolute top-2 right-2 z-10"
+            disabled={isDeleting}
           >
             <div className="p-3">
               <DeleteIcon className="w-3 h-3" />
@@ -50,7 +57,7 @@ function AddressCard({ address, onDelete }: IAddressCardProps) {
 
         <div className="flex items-center gap-2 mb-2">
           <p className="text-body-medium">{address.name}</p>
-          {address.isDefault && <span className="text-orange text-small-medium">{DEFAULT_ADDRESS_TAG}</span>}
+          {address.default && <span className="text-orange text-small-medium">{DEFAULT_ADDRESS_TAG}</span>}
         </div>
 
         <p className="text-body-regular">{address.phone}</p>
@@ -59,7 +66,7 @@ function AddressCard({ address, onDelete }: IAddressCardProps) {
           {address.address} {address.detailAddress}
         </p>
 
-        {address.gateCode && <p className="text-body-regular text-black-4">공동 현관 비밀번호: {address.gateCode}</p>}
+        {address.buildingPassword && <p className="text-body-regular text-black-4">공동 현관 비밀번호: {address.buildingPassword}</p>}
       </div>
     </div>
   );
