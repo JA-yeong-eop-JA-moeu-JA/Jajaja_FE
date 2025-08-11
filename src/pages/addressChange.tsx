@@ -47,7 +47,10 @@ export default function AddressChange() {
     deleteAddress(
       { addressId: id, request: { id } },
       {
-        onSuccess: () => {},
+        onSuccess: () => {
+          // 삭제 성공 시 캐시 무효화하여 목록 새로고침
+          refetch();
+        },
         onError: (deleteError) => {
           console.error('주소 삭제 실패:', deleteError);
         },
