@@ -9,14 +9,11 @@ import PageHeader from '@/components/head_bottom/PageHeader';
 import ApplyDropDown from '@/components/modal/applyDropDown';
 import ConfirmModal from '@/components/modal/confirmModal';
 import RefundInfo from '@/components/orderDetail/returnInfo';
-import OrderItem from '@/components/review/orderItem';
-
-import { orderData } from '@/mocks/orderData';
 
 export default function ApplyReturnOrExchange() {
-  const order = orderData[0];
+  /*   const order = orderData[0];
   const item = order.items[0];
-
+ */
   const dummyDeliveryData = {
     recipient: '이한비',
     phone: '010-2812-1241',
@@ -107,7 +104,8 @@ export default function ApplyReturnOrExchange() {
         <section className="flex flex-col gap-2 py-6 border-b-black-1 border-b-4">
           <div className="px-4">
             <h2 className="text-subtitle-medium pb-4">상품 정보</h2>
-            <OrderItem item={item} show={false} />
+            {/*             <OrderItem item={item} show={false} />
+             */}
           </div>
         </section>
 

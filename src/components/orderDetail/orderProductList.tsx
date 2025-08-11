@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { MATCH_STATUS_COLOR_MAP } from '@/constants/product/statusColorMap';
 
 import { SelectButton } from '@/components/common/button';
-import OrderItem from '@/components/review/orderItem';
 
 import type { IOrderItem } from '@/mocks/orderData';
 
@@ -25,7 +24,8 @@ export default function OrderProductList({ items, matchStatus }: IOrderProductLi
       {items.map((item) => (
         <div key={item.productId}>
           <div className="flex flex-col gap-2 mb-4 px-3">
-            <OrderItem item={item} show={false} />
+            {/*             <OrderItem item={item} show={false} />
+             */}
           </div>
           <div className="text-body-medium w-full md:flex-row justify-between">
             <SelectButton
