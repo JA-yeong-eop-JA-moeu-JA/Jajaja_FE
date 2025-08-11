@@ -3,21 +3,22 @@ import { createElement } from 'react';
 import { create } from 'zustand';
 
 import DeliveryRequestModal from '@/components/modal/deliveryModal';
-import ExampleModal from '@/components/modal/exampleModal';
 import HomeModal from '@/components/modal/homeModal';
 import ImageModal from '@/components/modal/imageModal';
+import LoginModal from '@/components/modal/LoginModal';
 import OptionModal from '@/components/modal/optionModal';
 import ReviewModal from '@/components/modal/reviewModal';
 import CartModal from '@/components/modal/shoppingCartModal';
+import TeamModal from '@/components/modal/TeamModal';
 
 import type { ICartItem } from '@/pages/shoppingCart';
 
-export type TModalType = 'alert' | 'confirm' | 'bottom-sheet' | 'bottom-drawer' | 'bottom-drawer-team' | 'image' | 'cart-option' | 'delivery';
+export type TModalType = 'alert' | 'confirm' | 'bottom-sheet' | 'bottom-drawer' | 'bottom-drawer-team' | 'image' | 'cart-option' | 'delivery' | 'login';
 
 type TComponentType = ComponentType<any>;
 
 const MODAL_COMPONENTS: Record<TModalType, TComponentType> = {
-  'confirm': ExampleModal,
+  'confirm': TeamModal,
   'alert': ReviewModal,
   'bottom-sheet': HomeModal,
   'bottom-drawer': () => OptionModal({ type: 'personal' }),
@@ -25,6 +26,7 @@ const MODAL_COMPONENTS: Record<TModalType, TComponentType> = {
   'image': ImageModal,
   'cart-option': CartModal,
   'delivery': DeliveryRequestModal,
+  'login': LoginModal,
 };
 
 interface IModalOptions {

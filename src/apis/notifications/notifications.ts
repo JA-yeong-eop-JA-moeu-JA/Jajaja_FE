@@ -1,6 +1,7 @@
 import type { TCommonResponse } from '@/types/common';
 import type { TGetNotiList } from '@/types/notifications/TGetNotiList';
 import type { TGetNotiUnread } from '@/types/notifications/TGetNotiUnread';
+import type { TInfiniteRequest } from '@/types/TPage';
 
 import axiosInstance from '../axiosInstance';
 
@@ -14,8 +15,8 @@ export const patchNotiReadAll = async (): Promise<TCommonResponse<{}>> => {
   return data;
 };
 
-export const getNotiList = async (): Promise<TGetNotiList> => {
-  const { data } = await axiosInstance.get(`/api/notifications`);
+export const getNotiList = async ({ page, size }: TInfiniteRequest): Promise<TGetNotiList> => {
+  const { data } = await axiosInstance.get(`/api/notifications`, { params: { page: page, size: size } });
   return data;
 };
 

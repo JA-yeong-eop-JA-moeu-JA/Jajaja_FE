@@ -7,7 +7,7 @@ import CouponCard from '@/components/coupon/CouponCard';
 import PageHeader from '@/components/head_bottom/PageHeader';
 
 export default function Coupons() {
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isPending, isError } = useInfiniteCoupons();
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteCoupons();
 
   const { ref, inView } = useInView({ threshold: 0 });
 
@@ -18,10 +18,6 @@ export default function Coupons() {
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const coupons = data?.pages.flatMap((page) => page.result.coupons) ?? [];
-
-  // 추후 스켈레톤 UI로 변경
-  if (isPending) return <p className="text-center py-10">로딩 중...</p>;
-  if (isError) return <p className="text-center py-10">Error</p>;
 
   return (
     <>

@@ -7,7 +7,7 @@ import PageHeader from '@/components/head_bottom/PageHeader';
 import PointCard from '@/components/pointCard';
 
 export default function Points() {
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isPending, isError } = useInfinitePoints();
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfinitePoints();
 
   const { ref, inView } = useInView({ threshold: 0 });
 
@@ -19,10 +19,6 @@ export default function Points() {
 
   const balance = data?.pages[0]?.result.pointBalance ?? 0;
   const points = data?.pages.flatMap((page) => page.result.pointHistories) ?? [];
-
-  // 추후 스켈레톤 UI로 변경
-  if (isPending) return <p className="text-center py-10">로딩 중...</p>;
-  if (isError) return <p className="text-center py-10">Error</p>;
 
   return (
     <div className="w-full h-screen">

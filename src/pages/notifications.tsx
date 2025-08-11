@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+import { useInView } from 'react-intersection-observer';
 import { differenceInCalendarDays } from 'date-fns';
 
 import type { TGetNoti } from '@/types/notifications/TGetNotiList';
@@ -23,10 +25,20 @@ export function getDateCategory(dateString?: string): string {
 }
 
 export default function Notifications() {
-  const { data } = useGetNotiList();
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useGetNotiList();
   const { mutate: readAll } = usePatchNotiReadAll();
   const { data: unread } = useGetNotiUnread();
-  const hasUnread = (unread?.result?.unreadCount ?? 0) > 0;
+  const hasUnread = (unread?.result.unreadCount ?? 0) > 0;
+
+  const { ref, inView } = useInView({ threshold: 0 });
+
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const notis = data?.pages.flatMap((page) => page.result.notifications) ?? [];
 
   const categories: Record<string, TGetNoti[]> = {
     '오늘': [],
@@ -35,7 +47,7 @@ export default function Notifications() {
     '이전': [],
   };
 
-  data?.result.forEach((noti: TGetNoti) => {
+  notis.forEach((noti: TGetNoti) => {
     const category = getDateCategory(noti.createdAt);
     categories[category].push(noti);
   });
@@ -65,6 +77,8 @@ export default function Notifications() {
                 {list.map((noti) => (
                   <NotiCard key={noti.id} {...noti} />
                 ))}
+                <div ref={ref} className="h-2" />
+                {isFetchingNextPage && <p className="text-center py-4 text-gray-500">더 불러오는 중...</p>}
               </div>
             ),
         )}
