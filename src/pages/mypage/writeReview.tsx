@@ -43,7 +43,7 @@ export default function WriteReview() {
       if (!files || files.length === 0) {
         mutate({
           productId: item.productId,
-          rating: '', // star
+          rating: star,
           content: comment,
           imageKeys: [],
         });
@@ -65,7 +65,7 @@ export default function WriteReview() {
 
       mutate({
         productId: item.productId,
-        rating: '', // star
+        rating: star,
         content: comment,
         imageKeys,
       });

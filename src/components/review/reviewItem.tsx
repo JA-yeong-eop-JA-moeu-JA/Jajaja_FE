@@ -60,7 +60,7 @@ export default function ReviewItem({ review, isLike, imageUrls }: TGetReviews) {
           <p className="text-body-medium text-[#FFC800]">{review.rating}</p>
         </div>
         <div className="text-black text-body-regular">
-          <p>{review.nickname}</p>
+          <p>{review.productName}</p>
           <p>옵션:{review.option}</p>
         </div>
         <div>
