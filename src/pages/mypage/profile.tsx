@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 
-import { useImageUploader } from '@/hooks/myPage/useImageUploader';
 import usePatchUserInfo from '@/hooks/myPage/usePatchUserInfo';
-import usePostUpload from '@/hooks/myPage/usePostUpload';
-import usePutUpload from '@/hooks/myPage/usePutUpload';
 import useUserInfo from '@/hooks/myPage/useUserInfo';
+import { useImageUploader } from '@/hooks/s3/useImageUploader';
+import usePostUpload from '@/hooks/s3/usePostUpload';
+import usePutUpload from '@/hooks/s3/usePutUpload';
 
 import { Button } from '@/components/common/button';
 import PageHeaderBar from '@/components/head_bottom/PageHeader';

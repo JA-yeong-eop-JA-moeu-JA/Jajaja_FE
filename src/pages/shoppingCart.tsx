@@ -8,7 +8,6 @@ import { Button } from '@/components/common/button';
 import BaseCheckbox from '@/components/common/checkbox';
 import BottomBar from '@/components/head_bottom/BottomBar';
 import PageHeaderBar from '@/components/head_bottom/PageHeader';
-import OrderItem from '@/components/review/orderItem';
 
 import EmptyCartImage from '@/assets/shoppingCart.svg';
 
@@ -100,7 +99,8 @@ export default function ShoppingCart() {
                 <div className="flex items-start gap-3">
                   <BaseCheckbox checked={checkedItems[product.productId] || false} onClick={() => toggle(product.productId.toString())} />
                   <div className="flex-1">
-                    <OrderItem item={product} show={false} showPrice={false} />
+                    {/*                     <OrderItem item={product} show={false} showPrice={false} />
+                     */}
                   </div>
                 </div>
 

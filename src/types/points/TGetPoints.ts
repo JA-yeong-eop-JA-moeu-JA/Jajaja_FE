@@ -23,11 +23,6 @@ export type TPointHistory = {
   createdAt: Date;
 };
 
-export type TGetPointsRequest = {
-  page: number;
-  size: number;
-};
-
 export type TGetPoints = TCommonResponse<{
   page: TPage;
   pointBalance: number;

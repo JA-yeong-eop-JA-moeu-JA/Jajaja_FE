@@ -1,5 +1,12 @@
-import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+
+import type { TReviewableOrderItem } from '@/types/review/myReview';
+import type { TUrlSet } from '@/types/s3/TPostUpload';
+
+import usePostReview from '@/hooks/review/usePostReview';
+import usePostUploadList from '@/hooks/s3/usePostUploadList';
+import usePutUpload from '@/hooks/s3/usePutUpload';
 
 import { Button } from '@/components/common/button';
 import PageHeader from '@/components/head_bottom/PageHeader';
@@ -7,23 +14,66 @@ import ReviewImageUploader from '@/components/review/imageUploader';
 import OrderItem from '@/components/review/orderItem';
 import ReviewStarRating from '@/components/review/reviewStarRating';
 
-import NotFoundPage from '../feedback/NotFoundPage';
-
-import { orderData } from '@/mocks/orderData';
-
 export default function WriteReview() {
-  const { orderId, productId } = useParams<{ orderId: string; productId: string }>();
-  const order = orderData.find((item) => item.id === Number(orderId));
-  const product = order?.items.find((item) => item.productId === Number(productId));
+  const item: TReviewableOrderItem = useLocation().state;
+  const { mutate } = usePostReview();
+  const { mutateAsync: requestPresignedUrl } = usePostUploadList();
+  const { mutateAsync: putUpload } = usePutUpload();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!item) {
+      alert('잘못된 접근입니다.');
+      navigate(-1);
+    }
+  }, [item, navigate]);
+
   const [comment, setComment] = useState('');
-  const [star, setStar] = useState(false);
+  const [star, setStar] = useState(0);
   const handleRatingChange = (score: number) => {
-    setStar(true);
-    console.log('선택한 별점:', score);
+    setStar(score);
   };
-  if (!order || !product) {
-    return <NotFoundPage />;
-  }
+
+  const [files, setFiles] = useState<File[]>([]);
+  const handleFilesChange = (nextFiles: File[]) => {
+    setFiles(nextFiles);
+  };
+
+  const handleSubmit = async () => {
+    try {
+      if (!files || files.length === 0) {
+        mutate({
+          productId: item.productId,
+          rating: '', // star
+          content: comment,
+          imageKeys: [],
+        });
+        return;
+      }
+
+      const fileNames = files.map((f) => f.name);
+      const { result } = await requestPresignedUrl({ fileName: fileNames });
+
+      const urlSets: TUrlSet[] = result.presignedUrlUploadResponses;
+
+      if (!Array.isArray(urlSets) || urlSets.length !== files.length) {
+        alert('업로드 URL 생성에 실패했습니다. 다시 시도해 주세요.');
+        return;
+      }
+
+      await Promise.all(urlSets.map((set, i) => putUpload({ url: set.url, file: files[i] })));
+      const imageKeys = urlSets.map((s) => s.keyName);
+
+      mutate({
+        productId: item.productId,
+        rating: '', // star
+        content: comment,
+        imageKeys,
+      });
+    } catch (error) {
+      console.error(error);
+      alert('이미지 업로드에 실패했습니다. 다시 시도해 주세요.');
+    }
+  };
 
   return (
     <div className="w-full h-screen flex flex-col justify-between">
@@ -31,7 +81,7 @@ export default function WriteReview() {
         <PageHeader title="리뷰 작성" />
         <div className="w-full px-4">
           <div className="py-2">
-            <OrderItem item={product} show={false} />
+            <OrderItem item={item} show={false} />
           </div>
           <div className="w-full">
             <ReviewStarRating initialRating={0} onChange={handleRatingChange} />
@@ -49,11 +99,11 @@ export default function WriteReview() {
           </div>
 
           <div>
-            <ReviewImageUploader />
+            <ReviewImageUploader onFilesChange={handleFilesChange} />
           </div>
         </div>
       </div>
-      <Button kind="basic" variant="solid-orange" onClick={() => {}} disabled={comment.trim().length == 0 || star === false}>
+      <Button kind="basic" variant="solid-orange" onClick={handleSubmit} disabled={comment.trim().length == 0 || star === 0}>
         리뷰 등록
       </Button>
     </div>

@@ -14,4 +14,6 @@ export const QUERY_KEYS = {
   GET_RECENT_SEARCH: ['getRecentSearch'],
   GET_PHOTO: ['getPhoto'],
   GET_POINTS: ['getPoints'],
+  GET_REVIEWABLE: ['getReviewable'],
+  GET_MY_REVIEW: ['getMyReview'],
 };

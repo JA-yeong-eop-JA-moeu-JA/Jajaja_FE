@@ -5,7 +5,6 @@ import { useModalStore } from '@/stores/modalStore';
 
 import { Button } from '@/components/common/button';
 import PageHeader from '@/components/head_bottom/PageHeader';
-import OrderItem from '@/components/review/orderItem';
 
 import Down from '@/assets/icons/down.svg?react';
 import KakaoPayIcon from '@/assets/icons/kakaopay.svg?react';
@@ -128,7 +127,8 @@ export default function Payment() {
         <p className="text-subtitle-medium mb-4">주문 상품 {currentOrderItems.length}개</p>
         {currentOrderItems.map((item) => (
           <div key={item.productId} className="mb-5">
-            <OrderItem item={item} show={false} />
+            {/*             <OrderItem item={item} show={false} />
+             */}
           </div>
         ))}
       </section>
