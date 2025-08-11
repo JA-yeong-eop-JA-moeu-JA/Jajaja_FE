@@ -3,10 +3,10 @@ export interface IAddress {
   name: string;
   phone: string;
   address: string;
-  detailAddress: string;
-  zipcode?: string;
+  addressDetail: string;
+  zipcode: string;
   buildingPassword?: string;
-  default: boolean;
+  isDefault: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -18,13 +18,13 @@ export interface IAddAddressRequest {
   phone: string;
   address: string;
   addressDetail: string;
-  zipcode?: string;
+  zipcode: string;
   buildingPassword?: string;
   isDefault: boolean;
 }
 
 export interface IUpdateAddressRequest {
-  recipientName: string;
+  recipientName: string; // 주소지 수정(PATCH)용
   phone: string;
   address: string;
   detailAddress: string;

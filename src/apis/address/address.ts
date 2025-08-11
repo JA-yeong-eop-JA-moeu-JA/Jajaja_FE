@@ -10,22 +10,53 @@ import type {
 
 import { axiosInstance } from '@/apis/axiosInstance';
 
-// 배송지 목록 조회
 export const getAddresses = (): Promise<TGetAddressesResponse> => {
   return axiosInstance.get('/api/addresses');
 };
 
-// 배송지 추가
 export const addAddress = (request: IAddAddressRequest): Promise<TAddAddressResponse> => {
-  return axiosInstance.post('/api/addresses', request);
+  const params = new URLSearchParams();
+  params.append('name', request.name);
+  params.append('phone', request.phone);
+  params.append('address', request.address);
+  params.append('addressDetail', request.addressDetail);
+  params.append('zipcode', request.zipcode);
+  if (request.buildingPassword) {
+    params.append('buildingPassword', request.buildingPassword);
+  }
+  params.append('isDefault', String(request.isDefault));
+
+  return axiosInstance.post(
+    `/api/addresses?${params.toString()}`,
+    {},
+    {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    },
+  );
 };
 
-// 배송지 수정
 export const updateAddress = (addressId: number, request: IUpdateAddressRequest): Promise<TUpdateAddressResponse> => {
-  return axiosInstance.put(`/api/addresses/${addressId}`, request);
+  const params = new URLSearchParams();
+
+  params.append('deliveryId', String(addressId));
+  params.append('name', request.recipientName);
+  params.append('phone', request.phone);
+  params.append('address', request.address);
+  params.append('addressDetail', request.detailAddress);
+  params.append('zipcode', request.zipCode || '');
+  if (request.buildingPassword) {
+    params.append('buildingPassword', request.buildingPassword);
+  }
+  params.append('isDefault', String(request.isDefault));
+
+  return axiosInstance.patch(`/api/addresses/${addressId}?${params.toString()}`, {});
 };
 
-// 배송지 삭제
 export const deleteAddress = (addressId: number, request: IDeleteAddressRequest): Promise<TDeleteAddressResponse> => {
-  return axiosInstance.delete(`/api/addresses/${addressId}`, { data: request });
+  const params = new URLSearchParams();
+  params.append('deliveryId', String(request.id));
+
+  return axiosInstance.delete(`/api/addresses/${addressId}?${params.toString()}`);
 };

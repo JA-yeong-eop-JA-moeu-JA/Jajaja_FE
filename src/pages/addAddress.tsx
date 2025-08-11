@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
 
 import type { IAddAddressRequest } from '@/types/address/TAddress';
+import type { IDaumPostcodeData } from '@/types/daum';
 import { QUERY_KEYS } from '@/constants/querykeys/queryKeys';
 
 import { useAddAddress } from '@/hooks/address/useAddress';
@@ -27,8 +28,17 @@ export default function AddAddress() {
   const queryClient = useQueryClient();
   const { mutate: addAddress, isPending } = useAddAddress();
 
-  const isValidPhone = /^\d{3}-\d{3,4}-\d{4}$/.test(phone);
-  const isFormValid = name !== '' && isValidPhone && address !== '' && addressDetail !== '';
+  const isValidPhone = useMemo(() => {
+    return /^\d{3}-\d{3,4}-\d{4}$/.test(phone);
+  }, [phone]);
+
+  const isFormValid = useMemo(() => {
+    return name.trim() !== '' && isValidPhone && address.trim() !== '' && addressDetail.trim() !== '' && zipcode.trim() !== '';
+  }, [name, isValidPhone, address, addressDetail, zipcode]);
+
+  const displayAddress = useMemo(() => {
+    return address && zipcode ? `${address} (${zipcode})` : address;
+  }, [address, zipcode]);
 
   const handleSubmit = () => {
     if (!isFormValid) return;
@@ -38,14 +48,13 @@ export default function AddAddress() {
       phone,
       address,
       addressDetail,
-      zipcode: zipcode || undefined,
-      buildingPassword: gateCode || undefined,
-      isDefault: checked,
+      zipcode: zipcode || '', // 우편번호 (필수, 빈 문자열이라도)
+      buildingPassword: gateCode || undefined, // 공동현관 비밀번호
+      isDefault: checked, // 기본 배송지 여부
     };
 
     addAddress(request, {
       onSuccess: () => {
-        // 배송지 목록 캐시 무효화
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.GET_ADDRESSES });
         navigate(-1);
       },
@@ -56,12 +65,28 @@ export default function AddAddress() {
     });
   };
 
-  const handleAddressSearch = () => {
-    // TODO: 도로명 API (feat/#90)
-  };
+  const handleAddressSearch = useCallback(() => {
+    new (window as any).daum.Postcode({
+      oncomplete: (data: IDaumPostcodeData) => {
+        const fullAddress = data.roadAddress || data.jibunAddress;
+        setAddress(fullAddress);
+        setZipcode(data.zonecode);
+
+        // 상세 주소 입력 필드로 포커스 이동
+        setTimeout(() => {
+          const detailInput = document.querySelector('input[placeholder="상세 주소"]') as HTMLInputElement;
+          if (detailInput) {
+            detailInput.focus();
+          }
+        }, 100);
+      },
+      width: '100%',
+      height: '100%',
+    }).open();
+  }, []);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value.replace(/\D/g, '');
+    const raw = e.target.value.replace(/\D/g, ''); // 숫자만 허용
     let formatted = raw;
 
     if (raw.length < 4) {
@@ -103,7 +128,7 @@ export default function AddAddress() {
             <input
               type="text"
               placeholder="주소 찾기로 입력해주세요."
-              value={address}
+              value={displayAddress}
               onChange={(e) => setAddress(e.target.value)}
               className="flex-1 border border-black-0 rounded p-3 text-body-regular bg-black-1"
               readOnly
@@ -117,7 +142,11 @@ export default function AddAddress() {
               onChange={(e) => setAddressDetail(e.target.value)}
               className="flex-1 border border-black-1 rounded px-3 py-2.5 text-body-regular"
             />
-            <button type="button" className="px-4 border border-black-3 text-orange rounded text-body-regular" onClick={handleAddressSearch}>
+            <button
+              type="button"
+              className="px-4 border border-black-3 text-orange rounded text-body-regular transition-colors hover:bg-orange hover:text-white"
+              onClick={handleAddressSearch}
+            >
               주소 찾기
             </button>
           </div>
