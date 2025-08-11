@@ -18,7 +18,7 @@ export default function Profile() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [useDefaultImage, setUseDefaultImage] = useState(false);
-
+  const defaultImageUrl = 'https://jajaja-bucket.s3.ap-northeast-2.amazonaws.com/default-profile-image.png';
   const nameRegex = /^[가-힣]{2,4}$/;
   const phoneRegex = /^(\d{10}|\d{11}|\d{12})$/;
   const stripHyphen = (value: string) => value.replace(/-/g, '');
@@ -30,15 +30,20 @@ export default function Profile() {
   };
 
   useEffect(() => {
-    if (data?.result) {
+    if (data?.result.name) {
       setName(data.result.name);
+    }
+    if (data?.result.phone) {
       setPhone(formatPhone(data.result.phone));
+    }
+    if (data?.result.profileUrl === defaultImageUrl) {
+      setUseDefaultImage(true);
     }
   }, [data]);
 
   const { inputRef, images, openFileDialog, handleFileChange, resetImages, files } = useImageUploader(1, true);
 
-  const currentPreviewUrl = useDefaultImage ? undefined : images[0]?.url || data?.result.profileUrl;
+  const currentPreviewUrl = useDefaultImage ? defaultImageUrl : images[0]?.url || data?.result.profileUrl;
 
   const handleSetDefaultImage = () => {
     resetImages();
@@ -91,7 +96,7 @@ export default function Profile() {
       <div className="w-full">
         <PageHeaderBar title="프로필 수정" />
 
-        <div className="w-full flex flex-col items-center justify-center px-4 pt-2 pb-11">
+        <div className="w-full flex flex-col items-center justify-center px-4 pt-2">
           <img src={currentPreviewUrl} alt="프로필 이미지" className="w-30 h-30 rounded-full object-cover" />
           <div className="flex justify-center items-center gap-3 py-3.5">
             <input ref={inputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
