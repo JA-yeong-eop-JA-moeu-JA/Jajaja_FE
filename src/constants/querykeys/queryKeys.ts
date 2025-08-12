@@ -18,4 +18,5 @@ export const QUERY_KEYS = {
   GET_MY_REVIEW: ['getMyReview'],
   GET_ADDRESSES: ['getAddresses'],
   GET_ADDRESS: (id: number) => ['getAddress', id],
+  GET_CART: ['getCart'],
 };
