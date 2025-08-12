@@ -5,14 +5,17 @@ import OrderList from '@/components/orderDetail/OrderList';
 
 export default function OrderListPage() {
   const { data: orders = [], isLoading, isError } = useMyOrders();
-
+  if (import.meta.env.DEV) {
+    console.log('[OrderListPage] orders len:', orders.length, 'first:', orders[0]);
+  }
+  
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      <header className="mb-2">
+      <header>
         <PageHeader title="주문/배송" />
       </header>
 
-      <main className="flex-1 overflow-y-auto pb-24">
+      <main className="flex-1 overflow-y-auto p-1">
         {isLoading ? (
           <p className="text-center text-black-3">주문 불러오는 중...</p>
         ) : isError ? (
