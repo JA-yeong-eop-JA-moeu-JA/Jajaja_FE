@@ -2,7 +2,7 @@
 import { useParams, useSearchParams } from 'react-router-dom';
 
 // mocks 의존 피하려면 이렇게 쓰는 걸 추천 (없으면 기존 경로 유지해도 됨)
-import type { IOrderItem } from '@/types/order/orderItem';
+//import type { IOrderItem } from '@/types/order/orderItem';
 
 import useOrderDetailPersonal from '@/hooks/order/useOrderDetailPersonal';
 
@@ -11,7 +11,7 @@ import OrderProductList from '@/components/orderDetail/orderProductList';
 import PaymentInfo from '@/components/orderDetail/paymentInfo';
 
 type TOrderStatus = '배송 중' | '결제 완료' | '결제 취소' | '반품 접수' | '교환 접수';
-type TMatchStatus = '매칭 중' | '매칭 완료' | '매칭 실패'; // ✅ 팀과 동일하게 선언
+type TMatchStatus = '매칭 중' | '매칭 완료' | '매칭 실패'; 
 
 function formatPayMethod(method: string) {
   if (method === 'KAKAO') return '카카오페이';
@@ -66,27 +66,28 @@ export default function OrderDetailPersonal() {
   }
 
   const { date, orderNumber, items, delivery, payment } = data;
+  const mappedItems = items.map((it) => {
+    const isAfterSales = ['RETURN_REQUESTED', 'EXCHANGE_REQUESTED'].includes((it.status ?? '').toUpperCase());
 
-  const mappedItems: IOrderItem[] = items.map((it) => ({
-    orderId: it.orderProductId,
-    productId: it.product.id,
-    name: it.product.name,
-    company: it.product.store,
-    option: it.product.option,
-    quantity: it.product.quantity,
-    image: it.product.image,
-    price: it.price,
-    reviewed: false,
-  }));
+    return {
+      orderId: id,
+      orderProductId: it.orderProductId,
+      productId: it.product.id,
+      name: it.product.name,
+      company: it.product.store,
+      option: it.product.option,
+      quantity: it.product.quantity,
+      image: it.product.image,
+      price: it.price,
+      reviewed: false,
 
-  // 상단 라벨
-  const orderStatus: TOrderStatus = toOrderStatusLabel(items);
-  const hasAfterSales = items.some(({ status }) =>
-    ['RETURN_REQUESTED', 'EXCHANGE_REQUESTED'].includes((status ?? '').toUpperCase())
-  );
+      orderStatus: toOrderStatusLabel([it]),
+      matchStatus: isAfterSales ? undefined : toMatchStatusLabel([it]),
+    };
+  });
 
-  const matchStatus: TMatchStatus | undefined = hasAfterSales ? undefined : toMatchStatusLabel(items);
 
+ 
   const paymentInfo = {
     method: formatPayMethod(payment.method),
     amount: payment.amount,
@@ -109,7 +110,7 @@ export default function OrderDetailPersonal() {
         <h2 className="text-subtitle-medium px-5">주문 상품</h2>
 
         {/* 팀/개인 공용: 개인은 matchStatus가 표시되지 않음 */}
-        <OrderProductList items={mappedItems} orderStatus={orderStatus} matchStatus={matchStatus} />
+        <OrderProductList items={mappedItems} parentOrderId={id} />
 
         <section className="px-4 bg-white p-4 pt-0 pb-8 border-b-4 border-b-black-1">
           <h2 className="text-subtitle-medium mb-3">배송지 정보</h2>

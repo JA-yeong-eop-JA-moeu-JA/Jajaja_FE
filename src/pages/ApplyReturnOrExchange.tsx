@@ -1,13 +1,12 @@
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-//import { axiosInstance } from '@/apis/axiosInstance';
-import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { axiosInstance } from '@/apis/axiosInstance';
 
-import type { TOptionBase } from '@/types/optionApply'; // reasonOptions 타입
+import type { TOptionBase } from '@/types/optionApply';
 import type { IOrderItem } from '@/types/order/orderItem';
 import type { TOption } from '@/types/product/option';
 import type { TReviewableOrderItem } from '@/types/review/myReview';
-//import { useCoreMutation } from '@/hooks/customQuery';
 import { QUERY_KEYS } from '@/constants/querykeys/queryKeys';
 
 import useOrderDetailPersonal from '@/hooks/order/useOrderDetailPersonal';
@@ -55,9 +54,25 @@ const toOrderStatusLabel = (items: Array<{ status?: string }>): TOrderStatus => 
   return '결제 완료';
 };
 
+type MutationVars = {
+  orderId: number;
+  orderProductId: number;
+  type: TApplyType;
+  reason: string;
+};
+
+// ⚙️ 서버 호출 (엔드포인트는 팀 명세에 맞게 조정)
+async function submitAfterSales({ orderId, orderProductId, type, reason }: MutationVars) {
+  const path = type === '반품' ? 'returns' : 'exchanges';
+  return axiosInstance.post(`/api/orders/${orderId}/${path}`, { orderProductId, reason });
+}
+
 export default function ApplyReturnOrExchange() {
-  const { orderId, orderProductId } = useParams<{ orderId: string; orderProductId?: string }>();
-  const id = Number(orderId);
+  const params = useParams<{ orderId?: string; orderProductId?: string }>();
+  const [sp] = useSearchParams();
+  const orderIdStr = params.orderId ?? sp.get('orderId') ?? '';
+  const orderProductIdStr = params.orderProductId ?? sp.get('orderProductId') ?? '';
+  const id = Number(orderIdStr);
 
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -71,8 +86,9 @@ export default function ApplyReturnOrExchange() {
   // 주문 상세 API
   const { data } = useOrderDetailPersonal(id);
 
-  // 유효성/로딩
-  if (!orderId || Number.isNaN(id)) return <p className="p-4 text-error-3">유효하지 않은 주문입니다.</p>;
+  if (!Number.isFinite(id) || id <= 0) {
+    return <p className="p-4 text-error-3">유효하지 않은 주문입니다.</p>;
+  }
   if (!data) {
     return (
       <div className="min-h-screen bg-white flex flex-col">
@@ -84,9 +100,9 @@ export default function ApplyReturnOrExchange() {
 
   const { items, delivery, payment, orderNumber, date } = data;
 
-  // API → OrderItem 카드용으로 매핑
-  const mappedItems: IOrderItem[] = items.map((it) => ({
-    orderId: it.orderProductId,
+  const mappedItems: (IOrderItem & { orderProductId: number; orderId: number })[] = items.map((it) => ({
+    orderId: id,                         // 진짜 주문 ID
+    orderProductId: it.orderProductId,   // 주문상품 ID
     productId: it.product.id,
     name: it.product.name,
     company: it.product.store,
@@ -97,16 +113,14 @@ export default function ApplyReturnOrExchange() {
     reviewed: false,
   }));
 
-  // 특정 주문상품(파라미터 우선)
-  const selectedOrderItem = mappedItems.find((m) => String(m.orderId) === orderProductId) ?? mappedItems[0];
+  const selectedOrderItem =
+    mappedItems.find((m) => String(m.orderProductId) === orderProductIdStr) ?? mappedItems[0];
 
-  // 상단 결제/주문 상태 라벨
   const orderStatus: TOrderStatus = toOrderStatusLabel(items);
 
   const isFormValid = selectedType !== null && selectedReason !== '' && !!selectedOrderItem;
   const reasonOptions: TOptionBase[] = selectedType === '반품' ? RETURN_REASONS : EXCHANGE_REASONS;
 
-  // 환불 정보(반품 시 표시)
   const refundInfo = {
     amount: selectedOrderItem?.price ?? payment.finalAmount,
     discount: payment.discount,
@@ -116,6 +130,7 @@ export default function ApplyReturnOrExchange() {
     reason: selectedReason || '',
     address: delivery.address,
   };
+
   const toReviewable = (it: IOrderItem, orderDate?: string): TReviewableOrderItem => ({
     orderId: it.orderId,
     orderDate: orderDate ?? (it as any).orderDate ?? '',
@@ -130,52 +145,60 @@ export default function ApplyReturnOrExchange() {
     isReviewWritten: it.reviewed,
   });
 
-  // 캐시 타입 (암시적 any 방지)
-  type TOrderDetailResult = NonNullable<typeof data>;
+  // ✅ mutation: 낙관적 업데이트 + 롤백 + invalidate
+  const mutation = useMutation({
+    mutationFn: submitAfterSales,
+    onMutate: async (vars: MutationVars) => {
+      const key = [...QUERY_KEYS.GET_ORDER_DETAIL_PERSONAL, id] as const;
+      await queryClient.cancelQueries({ queryKey: key });
 
-  const handleSubmit = (): boolean => {
-    if (!selectedType || !selectedOrderItem) return false;
+      const prev = queryClient.getQueryData(key);
 
-    // 1) 상세 캐시 낙관적 업데이트 (접수 상태 + 팀 매칭 라벨 비우기)
-    queryClient.setQueryData<TOrderDetailResult>(QUERY_KEYS.GET_ORDER_DETAIL_PERSONAL, (current: TOrderDetailResult | undefined) => {
-      if (!current) return current;
+      // 낙관적 업데이트
+      queryClient.setQueryData(key, (current: any) => {
+        const base = current ?? data;
+        if (!base || !Array.isArray(base.items)) return base ?? current;
+        const nextItems = base.items.map((it: any) =>
+          it.orderProductId === vars.orderProductId
+            ? {
+                ...it,
+                status: vars.type === '반품' ? 'RETURN_REQUESTED' : 'EXCHANGE_REQUESTED',
+                teamStatus: '',
+              }
+            : it
+        );
+        return { ...base, items: nextItems };
+      });
 
-      const nextItems = current.items.map((it) =>
-        it.orderProductId === selectedOrderItem.orderId
-          ? {
-              ...it,
-              status: selectedType === '반품' ? 'RETURN_REQUESTED' : 'EXCHANGE_REQUESTED',
-              teamStatus: '', // 매칭 상태 숨김 (CSS 자리 유지용)
-            }
-          : it,
-      );
+      return { prev, key };
+    },
+    onError: (_err, _vars, ctx) => {
+      // 실패 시 롤백
+      if (ctx?.prev && ctx?.key) queryClient.setQueryData(ctx.key, ctx.prev);
+    },
+    onSuccess: () => {
+      // 성공 시 최신화
+      queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.GET_ORDER_DETAIL_PERSONAL, id] });
+      // 필요하면 주문 리스트도 invalidate
+      // queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.GET_ORDER_LIST] });
+    },
+  });
 
-      return { ...current, items: nextItems };
-    });
-
-    // 2) 완료 페이지 이동 (네가 준 라우트에 맞춤)
-    if (selectedType === '반품') {
-      navigate('/mypage/order/return/complete');
-    } else {
-      navigate('/mypage/order/exchange/complete');
-    }
-    return true;
+  // ✅ 경로만 계산 (네비는 onConfirm에서)
+  const handleSubmit = (): string | null => {
+    if (!selectedType || !selectedOrderItem) return null;
+    return selectedType === '반품'
+      ? '/mypage/order/return/complete'
+      : '/mypage/order/exchange/complete';
   };
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <PageHeader title="교환/반품 신청" />
+      <PageHeader title="교환/반품" />
 
       <main className="flex flex-col gap-6 pb-24">
-        {/* 헤더(주문일/번호/상태) */}
-        <section className="px-4 pt-2">
-          <p className="text-small text-black-4">
-            {new Date(date).toLocaleString('ko-KR')} · 주문번호 {orderNumber} · {orderStatus}
-          </p>
-        </section>
-
         {/* 상품 정보 */}
-        <section className="flex flex-col gap-2 py-6 border-b-black-1 border-b-4">
+        <section className="flex flex-col gap-2 py-4 border-b-black-1 border-b-4">
           <div className="px-4">
             <h2 className="text-subtitle-medium pb-4">상품 정보</h2>
             {selectedOrderItem && <OrderItem item={toReviewable(selectedOrderItem)} show={false} />}
@@ -207,14 +230,16 @@ export default function ApplyReturnOrExchange() {
         {/* 사유 */}
         <section className="flex flex-col gap-2 px-4 pb-8 border-b border-b-black-1 border-b-4">
           <h2 className="text-subtitle-medium pb-2">사유</h2>
-          <ApplyDropDown
-            key={dropdownKey}
-            options={reasonOptions as TOption[]}
-            onChange={({ id: reasonId }) => {
-              const selected = reasonOptions.find((r) => r.id === reasonId);
-              if (selected) setSelectedReason(selected.name);
-            }}
-          />
+          {selectedType && (
+            <ApplyDropDown
+              key={dropdownKey}
+              options={reasonOptions as TOption[]}
+              onChange={({ id: reasonId }) => {
+                const selected = reasonOptions.find((r) => r.id === reasonId);
+                if (selected) setSelectedReason(selected.name);
+              }}
+            />
+          )}
         </section>
 
         {/* 회수지 정보 + 요청사항 */}
@@ -248,17 +273,42 @@ export default function ApplyReturnOrExchange() {
         </Button>
       </div>
 
-      {/* 확인 모달 */}
       <ConfirmModal
         open={isModalOpen}
         message={`${selectedType ?? ''} 신청하시겠어요?`}
         onCancel={() => setIsModalOpen(false)}
-        onConfirm={() => {
-          const ok = handleSubmit();
-          setIsModalOpen(false);
-          if (!ok) navigate('/not-found');
+        onConfirm={async () => {
+          if (!selectedType || !selectedOrderItem) return;
+
+          const vars = {
+            orderId: id,
+            orderProductId: (selectedOrderItem as any).orderProductId,
+            type: selectedType,
+            reason: selectedReason,
+          };
+
+          try {
+            await mutation.mutateAsync(vars);            // ✅ 성공해야만 아래 실행
+            setIsModalOpen(false);
+            navigate(
+              selectedType === '반품'
+                ? '/mypage/order/return/complete'
+                : '/mypage/order/exchange/complete'
+            );
+          } catch (e: any) {
+            setIsModalOpen(false);
+            // 401 처리: 로그인으로 보낼지 토스트 띄울지 선택
+            if (e?.response?.status === 401) {
+              // 예) 로그인으로
+              // navigate('/login?next=' + encodeURIComponent(location.pathname + location.search));
+              console.error('인증 필요', e?.response?.data);
+            } else {
+              console.error('신청 실패', e);
+            }
+          }
         }}
       />
+
     </div>
   );
 }

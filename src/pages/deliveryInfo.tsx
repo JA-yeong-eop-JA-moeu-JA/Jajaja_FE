@@ -1,19 +1,65 @@
-import { useNavigate } from 'react-router-dom';
+// src/pages/DeliveryInfo.tsx
+import { useMemo } from 'react';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
-import { Button } from '@/components/common/button'; // 버튼 컴포넌트
+import { Button } from '@/components/common/button';
 import PageHeader from '@/components/head_bottom/PageHeader';
+import BoxIcon from '@/assets/icons/box.svg?react';
 
-import BoxIcon from '@/assets/icons/box.svg?react'; // 택배박스 SVG
+import useOrderDelivery from '@/hooks/order/useOrderDelivery';
+
+function getTrackingUrl(courier: string, invoice: string): string | null {
+  if (courier.includes('CJ')) {
+    return `https://trace.cjlogistics.com/next/tracking.html?wblNo=${encodeURIComponent(invoice)}`;
+  }
+  return null;
+}
 
 export default function DeliveryInfo() {
+  // ✅ 모든 훅은 최상단에서 "항상" 호출
   const navigate = useNavigate();
-  const dummyDeliveryData = {
-    invoiceNumber: '236801737204',
-    courier: 'CJ대한통운',
-    recipient: '이한비',
-    phone: '010-2812-1241',
-    address: '서울특별시 강서구 낙성서로12번길 3-12',
-  };
+  const params = useParams<{ orderProductId?: string }>();
+  const [sp] = useSearchParams();
+
+  // 파라미터/쿼리 둘 다 지원
+  const orderProductIdStr = params.orderProductId ?? sp.get('orderProductId') ?? '';
+  const orderProductId = Number(orderProductIdStr);
+
+  // ✅ 훅은 무조건 호출하고, 내부에서 enabled로 네트워크 여부 제어
+  const { data, isLoading, isError } = useOrderDelivery(orderProductId);
+
+  // ✅ useMemo도 훅이므로 항상 호출 (data 유무에 안전하게 접근)
+  const courier = data?.courier ?? '';
+  const invoiceNumber = data?.invoiceNumber ?? '';
+  const trackUrl = useMemo(
+    () => (courier && invoiceNumber ? getTrackingUrl(courier, invoiceNumber) : null),
+    [courier, invoiceNumber]
+  );
+
+  // ⬇️ 여기서부터 분기/리턴 (훅 호출 이후)
+  if (!Number.isFinite(orderProductId) || orderProductId <= 0) {
+    return <p className="p-4 text-error-3">유효하지 않은 주문상품입니다.</p>;
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-white">
+        <PageHeader title="배송 조회" />
+        <p className="p-4 text-black-3">배송 정보를 불러오는 중입니다...</p>
+      </div>
+    );
+  }
+
+  if (isError || !data) {
+    return (
+      <div className="min-h-screen flex flex-col bg-white">
+        <PageHeader title="배송 조회" />
+        <p className="p-4 text-error-3">배송 정보를 불러오지 못했습니다.</p>
+      </div>
+    );
+  }
+
+  const { delivery } = data;
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -33,15 +79,16 @@ export default function DeliveryInfo() {
             </div>
             <div className="flex flex-col gap-2 text-black text-body-regular">
               <div className="flex items-center gap-2">
-                <span>{dummyDeliveryData.invoiceNumber}</span>
+                <span>{invoiceNumber}</span>
                 <button
-                  onClick={() => navigator.clipboard.writeText(dummyDeliveryData.invoiceNumber)}
-                  className="text-body-regular leading-5 underline underline-offset-2 text-green hover:text-green-hover "
+                  type="button"
+                  onClick={() => navigator.clipboard.writeText(invoiceNumber)}
+                  className="text-body-regular leading-5 underline underline-offset-2 text-green hover:text-green-hover"
                 >
                   복사하기
                 </button>
               </div>
-              <span>{dummyDeliveryData.courier}</span>
+              <span>{courier}</span>
             </div>
           </div>
         </section>
@@ -52,13 +99,13 @@ export default function DeliveryInfo() {
           <div className="flex">
             <div className="flex flex-col gap-2 text-black-4 text-body-regular w-18">
               <span>받는 분</span>
-              <span>주소</span>
               <span>연락처</span>
+              <span>주소</span>
             </div>
             <div className="flex flex-col gap-2 text-black text-body-regular">
-              <span>{dummyDeliveryData.recipient}</span>
-              <span>{dummyDeliveryData.phone}</span>
-              <span>{dummyDeliveryData.address}</span>
+              <span>{delivery.name}</span>
+              <span>{delivery.phone}</span>
+              <span>{delivery.address}</span>
             </div>
           </div>
         </section>
@@ -78,8 +125,18 @@ export default function DeliveryInfo() {
 
       {/* 하단 버튼 - 고정 */}
       <div className="px-2 pb-0 pt-2 bg-white">
-        <Button kind="basic" variant="outline-orange" className="w-full" onClick={() => navigate('/home')}>
-          {/** 배송 현황 확인은 나중에 구현 */}
+        <Button
+          kind="basic"
+          variant="outline-orange"
+          className="w-full"
+          onClick={() => {
+            if (trackUrl) {
+              window.open(trackUrl, '_blank', 'noopener,noreferrer');
+            } else {
+              navigate('/home');
+            }
+          }}
+        >
           배송 현황 확인
         </Button>
       </div>

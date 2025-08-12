@@ -15,6 +15,7 @@ export const QUERY_KEYS = {
   GET_PHOTO: ['getPhoto'],
   GET_POINTS: ['getPoints'],
   GET_ORDER_DETAIL_PERSONAL: ['getOrderDetailPersonal'],
+  GET_ORDER_PRODUCT_DELIVERY: ['getOrderProductDelivery'],
   GET_MY_ORDERS: ['getMyOrders'],
   GET_REVIEWABLE: ['getReviewable'],
   GET_MY_REVIEW: ['getMyReview'],

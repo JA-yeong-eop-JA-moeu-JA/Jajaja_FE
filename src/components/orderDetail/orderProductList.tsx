@@ -7,20 +7,30 @@ import { MATCH_STATUS_COLOR_MAP, ORDER_STATUS_COLOR_MAP } from '@/constants/prod
 import { SelectButton } from '@/components/common/button';
 import OrderItem from '@/components/review/orderItem';
 
+// 🔧 IOrderItem 확장해서 필요한 필드 추가
+type TOrderStatusKey = keyof typeof ORDER_STATUS_COLOR_MAP;
+type TMatchStatusKey = keyof typeof MATCH_STATUS_COLOR_MAP;
+
+type OrderListItem = IOrderItem & {
+  orderProductId: number;           // ← 필수
+  orderStatus?: TOrderStatusKey;    // ← per-item 상태 (옵션)
+  matchStatus?: TMatchStatusKey;    // ← per-item 상태 (옵션)
+  orderDate?: string;               // ← 있으면 카드에 넘김
+};
+
 interface IOrderProductListSectionProps {
-  items: IOrderItem[];
-  orderStatus?: keyof typeof ORDER_STATUS_COLOR_MAP;
-  matchStatus?: keyof typeof MATCH_STATUS_COLOR_MAP;
+  items: OrderListItem[];
+  parentOrderId?: number;           // ← 진짜 주문 ID(쿼리용)
   orderDate?: string;
 }
 
-export default function OrderProductList({ items, orderStatus, matchStatus, orderDate }: IOrderProductListSectionProps) {
+export default function OrderProductList({ items, parentOrderId, orderDate }: IOrderProductListSectionProps) {
   const navigate = useNavigate();
 
-  const toReviewable = (it: IOrderItem): TReviewableOrderItem => ({
-    orderId: it.orderId,
-    orderDate: orderDate ?? (it as any).orderDate ?? '', // 부모가 주면 우선 사용
-    orderProductId: (it as any).orderProductId ?? 0, // 없으면 0
+  const toReviewable = (it: OrderListItem): TReviewableOrderItem => ({
+    orderId: it.orderId,                               // 카드에 보여줄 주문 ID (페이지에서 세팅)
+    orderDate: orderDate ?? it.orderDate ?? '',
+    orderProductId: it.orderProductId,
     productId: it.productId,
     productName: it.name,
     store: it.company,
@@ -33,46 +43,44 @@ export default function OrderProductList({ items, orderStatus, matchStatus, orde
 
   return (
     <section className="px-2 pb-4 border-b border-b-4 border-b-black-1 flex flex-col gap-4">
-      {(orderStatus || matchStatus) && (
-        <div className="flex justify-between items-center px-4">
-          <span
-            className={`text-body-medium ${
-              ORDER_STATUS_COLOR_MAP[orderStatus || '결제 완료']
-            }`}
-          >
-            {orderStatus || '결제 완료'}
-          </span>
+      {items.map((item) => {
+        const itemOrderStatus = (item.orderStatus ?? '결제 완료') as TOrderStatusKey;
+        const itemMatchStatus = (item.matchStatus ?? '매칭 완료') as TMatchStatusKey;
 
-          <span
-            className={`text-body-medium ${
-              MATCH_STATUS_COLOR_MAP[matchStatus || '매칭 완료']
-            }`}
-          >
-            {matchStatus || '매칭 완료'}
-          </span>
-        </div>
+        return (
+          <div key={`${item.orderId}-${item.productId}`}>
+            {/* 상품별 상태 배지 */}
+            <div className="flex justify-between items-center px-4 pb-2">
+              <span className={`text-body-medium ${ORDER_STATUS_COLOR_MAP[itemOrderStatus]}`}>
+                {itemOrderStatus}
+              </span>
+              <span className={`text-body-medium ${MATCH_STATUS_COLOR_MAP[itemMatchStatus]}`}>
+                {itemMatchStatus}
+              </span>
+            </div>
 
-      )}
+            <div className="flex flex-col mb-4 px-4">
+              <OrderItem item={toReviewable(item)} show={false} />
+            </div>
 
-      {items.map((item) => (
-        <div key={`${item.orderId}-${item.productId}`}>
-          <div className="flex flex-col mb-4 px-4">
-            <OrderItem item={toReviewable(item)} show={false} />
+            <div className="text-body-medium w-full md:flex-row justify-between">
+              <SelectButton
+                kind="select-content"
+                leftText="교환/반품"
+                rightText="배송 조회"
+                leftVariant="outline-orange"
+                rightVariant="outline-orange"
+                onLeftClick={() =>
+                  navigate(`/mypage/apply?orderId=${parentOrderId ?? item.orderId}&orderProductId=${item.orderProductId}`)
+                }
+                onRightClick={() =>
+                  navigate(`/mypage/deliveryInfo?orderProductId=${item.orderProductId}`)
+                }
+              />
+            </div>
           </div>
-
-          <div className="text-body-medium w-full md:flex-row justify-between">
-            <SelectButton
-              kind="select-content"
-              leftText="교환/반품"
-              rightText="배송 조회"
-              leftVariant="outline-orange"
-              rightVariant="outline-orange"
-              onLeftClick={() => navigate('/mypage/apply')}
-              onRightClick={() => navigate('/mypage/deliveryInfo')}
-            />
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </section>
   );
 }
