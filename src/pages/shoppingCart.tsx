@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import type { TCartItem } from '@/types/cart/TCart';
+import type { TCartItem } from '@/types/cart/Tcart';
 
 import { useModalStore } from '@/stores/modalStore';
 import { useProductCheckboxStore } from '@/stores/productCheckboxStore';
