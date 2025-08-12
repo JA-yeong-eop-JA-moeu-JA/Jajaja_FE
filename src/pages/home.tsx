@@ -51,12 +51,12 @@ export default function Home() {
         <header className="px-3">
           <Header showSearch={false} />
         </header>
-        <header className="w-full px-4 pb-2.5 max-w-screen-sm mx-auto">
-          <SearchInput value={''} onFocus={() => navigate('/search')} />
-        </header>
       </div>
 
-      <div className="pt-[100px]">
+      <div className="pt-15">
+        <header className="w-full pb-2.5 max-w-screen-sm mx-auto">
+          <SearchInput value={''} onFocus={() => navigate('/search')} />
+        </header>
         <section className="w-full">
           <Banner />
         </section>
