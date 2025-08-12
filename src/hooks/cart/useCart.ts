@@ -1,47 +1,72 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 
 import type { TAddToCartRequest, TDeleteCartItemParams } from '@/types/cart/TCart';
 import { QUERY_KEYS } from '@/constants/querykeys/queryKeys';
 
 import { addToCart, deleteCartItem, getCart } from '@/apis/cart/cart';
 
-// 장바구니 조회 훅
+import { useCoreMutation, useCoreQuery } from '@/hooks/customQuery';
+
+// 장바구니 조회 훅 - 새로고침 시 401 오류 해결
 export const useCart = () => {
-  return useQuery({
-    queryKey: [QUERY_KEYS.GET_CART],
-    queryFn: getCart,
-    staleTime: 30 * 1000, // 30초 (장바구니는 자주 변경되므로 짧게 설정)
-  });
+  return useCoreQuery(
+    QUERY_KEYS.GET_CART, // 마이페이지와 동일한 패턴
+    getCart,
+    {
+      staleTime: 30 * 1000, // 30초
+      refetchOnMount: true,
+      refetchOnWindowFocus: true,
+      // 새로고침 시 토큰 문제 해결을 위한 설정
+      retry: (failureCount, error: any) => {
+        // 401 에러의 경우 토큰 재발급 후 한 번만 재시도
+        if (error?.response?.status === 401 && error?.response?.data?.code === 'AUTH4011') {
+          return failureCount < 1; // 첫 번째 401은 재시도, 두 번째는 중단
+        }
+        return failureCount < 3;
+      },
+      retryDelay: (attemptIndex, error: any) => {
+        // 401 에러의 경우 빠른 재시도 (토큰 재발급 대기)
+        if (error?.response?.status === 401) {
+          return 500; // 500ms 후 재시도
+        }
+        return Math.min(1000 * 2 ** attemptIndex, 30000);
+      },
+      // 네트워크 에러 시 무한 로딩 방지
+      networkMode: 'online',
+    },
+  );
 };
 
-// 장바구니 아이템 추가/수정 훅 (배열로 여러 상품 처리)
+// 장바구니 아이템 추가/수정 훅
 export const useAddToCart = () => {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: (requestData: TAddToCartRequest) => addToCart(requestData),
+  return useCoreMutation((requestData: TAddToCartRequest) => addToCart(requestData), {
     onSuccess: () => {
-      // 장바구니 쿼리 무효화하여 최신 데이터 다시 가져오기
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_CART] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('장바구니 추가 실패:', error);
+      if (error?.response?.status !== 401) {
+        alert('장바구니에 추가하는데 실패했습니다.');
+      }
     },
   });
 };
 
-// 장바구니 아이템 삭제 훅 (Query parameter 사용)
+// 장바구니 아이템 삭제 훅
 export const useDeleteCartItem = () => {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: (params: TDeleteCartItemParams) => deleteCartItem(params),
+  return useCoreMutation((params: TDeleteCartItemParams) => deleteCartItem(params), {
     onSuccess: () => {
-      // 장바구니 쿼리 무효화하여 최신 데이터 다시 가져오기
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_CART] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('장바구니 삭제 실패:', error);
+      if (error?.response?.status !== 401) {
+        alert('장바구니에서 삭제하는데 실패했습니다.');
+      }
     },
   });
 };

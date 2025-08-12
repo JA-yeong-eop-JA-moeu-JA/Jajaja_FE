@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import type { TCartItem } from '@/types/cart/TCart';
@@ -17,12 +17,27 @@ import EmptyCartImage from '@/assets/shoppingCart.svg';
 export default function ShoppingCart() {
   const navigate = useNavigate();
   const { openModal } = useModalStore();
+  const [hasAuthError, setHasAuthError] = useState(false);
 
   // 장바구니 API 연동
-  const { data: cartData, isLoading, error } = useCart();
+  const { data: cartData, isLoading, error, refetch } = useCart();
   const { mutate: deleteCartItem } = useDeleteCartItem();
 
-  const cartList = cartData?.result?.products || []; // data에서 products로 변경
+  // 인증 에러 감지 및 처리
+  useEffect(() => {
+    if (error?.response?.status === 401) {
+      setHasAuthError(true);
+      // 잠시 후 다시 시도 (토큰 재발급 후)
+      const timer = setTimeout(() => {
+        setHasAuthError(false);
+        refetch();
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [error, refetch]);
+
+  const cartList = cartData?.result?.products || [];
   const cartSummary = cartData?.result?.summary;
   const appliedCoupon = cartData?.result?.appliedCoupon;
 
@@ -52,7 +67,6 @@ export default function ShoppingCart() {
   const handleDeleteSelected = () => {
     const selectedItems = cartList.filter((item: TCartItem) => checkedItems[item.id]);
 
-    // 선택된 상품들을 하나씩 삭제 (productId와 optionId로)
     selectedItems.forEach((item) => {
       deleteCartItem(
         {
@@ -75,8 +89,6 @@ export default function ShoppingCart() {
   };
 
   const handleUpdateCartItem = (updatedItem: TCartItem) => {
-    // TODO: 장바구니 아이템 수정 API 호출
-    // 현재는 옵션 변경만 모달로 처리
     console.log('상품 옵션 변경:', updatedItem);
   };
 
@@ -95,6 +107,18 @@ export default function ShoppingCart() {
     navigate('/payment');
   };
 
+  // 인증 에러로 인한 재시도 중인 상태
+  if (hasAuthError && isLoading) {
+    return (
+      <>
+        <PageHeaderBar title="장바구니" />
+        <div className="w-full h-screen flex justify-center items-center">
+          <div className="text-body-regular text-black-4">인증 정보를 확인하는 중...</div>
+        </div>
+      </>
+    );
+  }
+
   // 로딩 상태
   if (isLoading) {
     return (
@@ -107,13 +131,17 @@ export default function ShoppingCart() {
     );
   }
 
-  // 에러 상태
-  if (error) {
+  // 에러 상태 (401 제외)
+  if (error && error?.response?.status !== 401) {
     return (
       <>
         <PageHeaderBar title="장바구니" />
-        <div className="w-full h-screen flex justify-center items-center">
-          <div className="text-body-regular text-error-3">장바구니를 불러오는데 실패했습니다.</div>
+        <div className="w-full h-screen flex flex-col justify-center items-center px-4">
+          <div className="text-body-regular text-error-3 mb-4 text-center">장바구니를 불러오는데 실패했습니다.</div>
+          <div className="text-small-regular text-black-4 mb-6 text-center">{error?.response?.data?.message || '네트워크 오류가 발생했습니다.'}</div>
+          <Button kind="basic" variant="outline-gray" onClick={() => refetch()} className="px-6 py-2">
+            다시 시도
+          </Button>
         </div>
       </>
     );
@@ -151,7 +179,6 @@ export default function ShoppingCart() {
               </button>
             </section>
 
-            {/* 적용된 쿠폰 표시 */}
             {appliedCoupon && (
               <section className="px-4 py-3 bg-green-50 border-b-4 border-black-0">
                 <div className="flex items-center justify-between">
@@ -169,7 +196,6 @@ export default function ShoppingCart() {
                 <div className="flex items-start gap-3">
                   <BaseCheckbox checked={checkedItems[item.id] || false} onClick={() => toggle(item.id.toString())} />
                   <div className="flex-1">
-                    {/* 상품 정보 표시 */}
                     <div className="flex gap-3">
                       <img src={item.productThumbnail} alt={item.productName} className="w-20 h-20 object-cover rounded" />
                       <div className="flex-1">
@@ -198,7 +224,6 @@ export default function ShoppingCart() {
               </section>
             ))}
 
-            {/* 주문 요약 정보 */}
             {cartSummary && (
               <section className="px-4 py-4 bg-gray-50">
                 <div className="space-y-2">

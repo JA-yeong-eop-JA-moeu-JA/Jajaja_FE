@@ -23,37 +23,9 @@ export default defineConfig({
         },
         host: true,
         port: 5173,
-        // 프록시 설정 추가
-        proxy: {
-          '/api': {
-            target: 'http://localhost:8080',
-            changeOrigin: true,
-            secure: false,
-            ws: true,
-          },
-          '/oauth2': {
-            target: 'http://localhost:8080',
-            changeOrigin: true,
-            secure: false,
-          },
-        },
       }
     : {
         host: true,
         port: 5173,
-        // 프록시 설정 추가
-        proxy: {
-          '/api': {
-            target: 'http://localhost:8080',
-            changeOrigin: true,
-            secure: false,
-            ws: true,
-          },
-          '/oauth2': {
-            target: 'http://localhost:8080',
-            changeOrigin: true,
-            secure: false,
-          },
-        },
       },
 });
