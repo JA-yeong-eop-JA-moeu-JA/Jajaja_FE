@@ -30,6 +30,7 @@ export default function Search() {
   const { data } = useGetKeyword();
   const [searchParams] = useSearchParams();
   const menuRef = useRef<HTMLDivElement>(null);
+  const [keywordParam, setKeyword] = useState<string | null>(null);
 
   const [sortOption, setSortOption] = useState('인기순');
   const [change, setChange] = useState(false);
@@ -40,7 +41,10 @@ export default function Search() {
   const { data: recent } = useGetRecent();
   const { mutate } = useDeleteRecent();
 
-  const keywordParam = searchParams.get('keyword');
+  useEffect(() => {
+    const keyword = new URLSearchParams(location.search).get('keyword');
+    setKeyword(keyword);
+  }, [location.search]);
 
   const COLUMN_COUNT = 2;
   const rowsPerColumn = data ? Math.ceil(data?.result.keywords.length / COLUMN_COUNT) : 0;
@@ -106,14 +110,13 @@ export default function Search() {
     }
     if (isCategoryMode) setChange(true);
   }, [keywordParam, isCategoryMode]);
-
   useEffect(() => {
     if (!isCategoryMode) return;
     const labelFromUrl = searchParams.get('keyword') || searchParams.get('subcategoryName');
     if (labelFromUrl) setValue(labelFromUrl);
   }, [isCategoryMode, searchParams]);
 
-  const handleDelete = (id: number) => mutate(id);
+  const handleDelete = async (id: number) => mutate(id);
 
   const handleValue = (e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value);
 
@@ -131,7 +134,6 @@ export default function Search() {
     qs.set('page', '0');
     window.history.replaceState(null, '', `/search?${qs.toString()}`);
   };
-
   const handleSortSelect = (value?: string) => {
     if (value) {
       setSortOption(value);
@@ -169,8 +171,8 @@ export default function Search() {
         <section className="py-3 pl-5 flex flex-col gap-7">
           <section>
             <p className="text-subtitle-medium mb-2">최근 검색</p>
-            <ScrollContainer className="flex w-full gap-2 overflow-x-auto cursor-grab" vertical={false}>
-              {!data?.result.keywords.length && <p className="text-body-regular text-black-4 py-2.5">최근 검색어가 없습니다.</p>}
+            <ScrollContainer className="flex w-full gap-2 overflow-x-auto cursor-grab pr-5" vertical={false}>
+              {recent?.result.length === 0 && <p className="text-body-regular text-black-4 py-2.5">최근 검색어가 없습니다.</p>}
               {recent?.result.map(({ id, keyword }) => (
                 <div key={id} className="shrink-0">
                   <Tag msg={keyword} onDelete={() => handleDelete(id)} />
@@ -180,7 +182,7 @@ export default function Search() {
           </section>
 
           <section>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4 pr-5">
               <p className="text-subtitle-medium">인기 검색어</p>
               <p className="text-small-medium text-black-4">{formatKoreanDateLabel(data?.result.baseTime)}</p>
             </div>
