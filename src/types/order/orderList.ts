@@ -1,4 +1,3 @@
-
 export type TOrderItemProduct = {
   id: number;
   image: string | null;
@@ -18,7 +17,7 @@ export type TOrderItem = {
 
 export type TOrder = {
   id: number;
-  date: string | null;           // ISO string
+  date: string | null; // ISO string
   items: TOrderItem[] | null;
 };
 
@@ -77,10 +76,8 @@ export interface IOrderItem {
   matchStatus?: string | null;
 }
 
-
 export interface IOrder {
   id: number;
   createdAt: string; // 화면용 날짜 포맷(예: '2025.08.12')
   items: IOrderItem[];
 }
-

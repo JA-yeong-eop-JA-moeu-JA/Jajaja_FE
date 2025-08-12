@@ -3,7 +3,6 @@ import { useParams, useSearchParams } from 'react-router-dom';
 
 // mocks 의존 피하려면 이렇게 쓰는 걸 추천 (없으면 기존 경로 유지해도 됨)
 //import type { IOrderItem } from '@/types/order/orderItem';
-
 import useOrderDetailPersonal from '@/hooks/order/useOrderDetailPersonal';
 
 import PageHeader from '@/components/head_bottom/PageHeader';
@@ -11,7 +10,7 @@ import OrderProductList from '@/components/orderDetail/orderProductList';
 import PaymentInfo from '@/components/orderDetail/paymentInfo';
 
 type TOrderStatus = '배송 중' | '결제 완료' | '결제 취소' | '반품 접수' | '교환 접수';
-type TMatchStatus = '매칭 중' | '매칭 완료' | '매칭 실패'; 
+type TMatchStatus = '매칭 중' | '매칭 완료' | '매칭 실패';
 
 function formatPayMethod(method: string) {
   if (method === 'KAKAO') return '카카오페이';
@@ -86,8 +85,6 @@ export default function OrderDetailPersonal() {
     };
   });
 
-
- 
   const paymentInfo = {
     method: formatPayMethod(payment.method),
     amount: payment.amount,

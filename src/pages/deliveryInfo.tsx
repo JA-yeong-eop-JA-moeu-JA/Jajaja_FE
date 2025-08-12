@@ -2,11 +2,12 @@
 import { useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
+import useOrderDelivery from '@/hooks/order/useOrderDelivery';
+
 import { Button } from '@/components/common/button';
 import PageHeader from '@/components/head_bottom/PageHeader';
-import BoxIcon from '@/assets/icons/box.svg?react';
 
-import useOrderDelivery from '@/hooks/order/useOrderDelivery';
+import BoxIcon from '@/assets/icons/box.svg?react';
 
 function getTrackingUrl(courier: string, invoice: string): string | null {
   if (courier.includes('CJ')) {
@@ -31,10 +32,7 @@ export default function DeliveryInfo() {
   // ✅ useMemo도 훅이므로 항상 호출 (data 유무에 안전하게 접근)
   const courier = data?.courier ?? '';
   const invoiceNumber = data?.invoiceNumber ?? '';
-  const trackUrl = useMemo(
-    () => (courier && invoiceNumber ? getTrackingUrl(courier, invoiceNumber) : null),
-    [courier, invoiceNumber]
-  );
+  const trackUrl = useMemo(() => (courier && invoiceNumber ? getTrackingUrl(courier, invoiceNumber) : null), [courier, invoiceNumber]);
 
   // ⬇️ 여기서부터 분기/리턴 (훅 호출 이후)
   if (!Number.isFinite(orderProductId) || orderProductId <= 0) {

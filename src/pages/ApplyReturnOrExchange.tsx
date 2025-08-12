@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { axiosInstance } from '@/apis/axiosInstance';
 
 import type { TOptionBase } from '@/types/optionApply';
 import type { IOrderItem } from '@/types/order/orderItem';
 import type { TOption } from '@/types/product/option';
 import type { TReviewableOrderItem } from '@/types/review/myReview';
 import { QUERY_KEYS } from '@/constants/querykeys/queryKeys';
+
+import { axiosInstance } from '@/apis/axiosInstance';
 
 import useOrderDetailPersonal from '@/hooks/order/useOrderDetailPersonal';
 
@@ -44,7 +45,8 @@ const DELIVERY_REQUEST_OPTIONS = [
   { id: 4, name: '전화 후 전달해주세요' },
 ];
 
-type TOrderStatus = '배송 중' | '결제 완료' | '결제 취소' | '반품 접수' | '교환 접수';
+//type TOrderStatus = '배송 중' | '결제 완료' | '결제 취소' | '반품 접수' | '교환 접수';
+/*
 const toOrderStatusLabel = (items: Array<{ status?: string }>): TOrderStatus => {
   const codes = items.map((i) => (i.status ?? '').toUpperCase());
   if (codes.some((c) => c === 'CANCELED' || c === 'CANCELLED' || c === 'PAYMENT_CANCELED')) return '결제 취소';
@@ -53,16 +55,16 @@ const toOrderStatusLabel = (items: Array<{ status?: string }>): TOrderStatus => 
   if (codes.some((c) => c === 'SHIPPING' || c === 'IN_DELIVERY' || c === 'DELIVERING' || c === 'DELIVERED')) return '배송 중';
   return '결제 완료';
 };
+*/
 
-type MutationVars = {
+type TMutationVars = {
   orderId: number;
   orderProductId: number;
   type: TApplyType;
   reason: string;
 };
 
-// ⚙️ 서버 호출 (엔드포인트는 팀 명세에 맞게 조정)
-async function submitAfterSales({ orderId, orderProductId, type, reason }: MutationVars) {
+async function submitAfterSales({ orderId, orderProductId, type, reason }: TMutationVars) {
   const path = type === '반품' ? 'returns' : 'exchanges';
   return axiosInstance.post(`/api/orders/${orderId}/${path}`, { orderProductId, reason });
 }
@@ -98,11 +100,11 @@ export default function ApplyReturnOrExchange() {
     );
   }
 
-  const { items, delivery, payment, orderNumber, date } = data;
+  const { items, delivery, payment } = data;
 
   const mappedItems: (IOrderItem & { orderProductId: number; orderId: number })[] = items.map((it) => ({
-    orderId: id,                         // 진짜 주문 ID
-    orderProductId: it.orderProductId,   // 주문상품 ID
+    orderId: id, // 진짜 주문 ID
+    orderProductId: it.orderProductId, // 주문상품 ID
     productId: it.product.id,
     name: it.product.name,
     company: it.product.store,
@@ -113,10 +115,7 @@ export default function ApplyReturnOrExchange() {
     reviewed: false,
   }));
 
-  const selectedOrderItem =
-    mappedItems.find((m) => String(m.orderProductId) === orderProductIdStr) ?? mappedItems[0];
-
-  const orderStatus: TOrderStatus = toOrderStatusLabel(items);
+  const selectedOrderItem = mappedItems.find((m) => String(m.orderProductId) === orderProductIdStr) ?? mappedItems[0];
 
   const isFormValid = selectedType !== null && selectedReason !== '' && !!selectedOrderItem;
   const reasonOptions: TOptionBase[] = selectedType === '반품' ? RETURN_REASONS : EXCHANGE_REASONS;
@@ -145,16 +144,14 @@ export default function ApplyReturnOrExchange() {
     isReviewWritten: it.reviewed,
   });
 
-  // ✅ mutation: 낙관적 업데이트 + 롤백 + invalidate
   const mutation = useMutation({
     mutationFn: submitAfterSales,
-    onMutate: async (vars: MutationVars) => {
+    onMutate: async (vars: TMutationVars) => {
       const key = [...QUERY_KEYS.GET_ORDER_DETAIL_PERSONAL, id] as const;
       await queryClient.cancelQueries({ queryKey: key });
 
       const prev = queryClient.getQueryData(key);
 
-      // 낙관적 업데이트
       queryClient.setQueryData(key, (current: any) => {
         const base = current ?? data;
         if (!base || !Array.isArray(base.items)) return base ?? current;
@@ -165,7 +162,7 @@ export default function ApplyReturnOrExchange() {
                 status: vars.type === '반품' ? 'RETURN_REQUESTED' : 'EXCHANGE_REQUESTED',
                 teamStatus: '',
               }
-            : it
+            : it,
         );
         return { ...base, items: nextItems };
       });
@@ -179,18 +176,16 @@ export default function ApplyReturnOrExchange() {
     onSuccess: () => {
       // 성공 시 최신화
       queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.GET_ORDER_DETAIL_PERSONAL, id] });
-      // 필요하면 주문 리스트도 invalidate
-      // queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.GET_ORDER_LIST] });
+      queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.GET_MY_ORDERS] });
     },
   });
 
-  // ✅ 경로만 계산 (네비는 onConfirm에서)
-  const handleSubmit = (): string | null => {
-    if (!selectedType || !selectedOrderItem) return null;
-    return selectedType === '반품'
-      ? '/mypage/order/return/complete'
-      : '/mypage/order/exchange/complete';
-  };
+  //const handleSubmit = (): string | null => {
+  //  if (!selectedType || !selectedOrderItem) return null;
+  //  return selectedType === '반품'
+  //    ? '/mypage/order/return/complete'
+  //    : '/mypage/order/exchange/complete';
+  //};
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -288,13 +283,9 @@ export default function ApplyReturnOrExchange() {
           };
 
           try {
-            await mutation.mutateAsync(vars);            // ✅ 성공해야만 아래 실행
+            await mutation.mutateAsync(vars); // ✅ 성공해야만 아래 실행
             setIsModalOpen(false);
-            navigate(
-              selectedType === '반품'
-                ? '/mypage/order/return/complete'
-                : '/mypage/order/exchange/complete'
-            );
+            navigate(selectedType === '반품' ? '/mypage/order/return/complete' : '/mypage/order/exchange/complete');
           } catch (e: any) {
             setIsModalOpen(false);
             // 401 처리: 로그인으로 보낼지 토스트 띄울지 선택
@@ -308,7 +299,6 @@ export default function ApplyReturnOrExchange() {
           }
         }}
       />
-
     </div>
   );
 }

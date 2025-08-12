@@ -8,7 +8,7 @@ export default function OrderListPage() {
   if (import.meta.env.DEV) {
     console.log('[OrderListPage] orders len:', orders.length, 'first:', orders[0]);
   }
-  
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <header>
