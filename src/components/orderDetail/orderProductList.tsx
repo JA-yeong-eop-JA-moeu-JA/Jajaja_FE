@@ -34,16 +34,29 @@ export default function OrderProductList({ items, orderStatus, matchStatus, orde
   return (
     <section className="px-2 pb-4 border-b border-b-4 border-b-black-1 flex flex-col gap-4">
       {(orderStatus || matchStatus) && (
-        <div className="flex justify-between items-center px-2">
-          {orderStatus ? <span className={`text-body-medium ${ORDER_STATUS_COLOR_MAP[orderStatus]}`}>{orderStatus}</span> : <span />}
-          {matchStatus && <span className={`text-body-medium ${MATCH_STATUS_COLOR_MAP[matchStatus]}`}>{matchStatus}</span>}
+        <div className="flex justify-between items-center px-4">
+          <span
+            className={`text-body-medium ${
+              ORDER_STATUS_COLOR_MAP[orderStatus || '결제 완료']
+            }`}
+          >
+            {orderStatus || '결제 완료'}
+          </span>
+
+          <span
+            className={`text-body-medium ${
+              MATCH_STATUS_COLOR_MAP[matchStatus || '매칭 완료']
+            }`}
+          >
+            {matchStatus || '매칭 완료'}
+          </span>
         </div>
+
       )}
 
       {items.map((item) => (
         <div key={`${item.orderId}-${item.productId}`}>
-          <div className="flex flex-col mb-4 px-2">
-            {/* 🔧 여기서 order 제거 */}
+          <div className="flex flex-col mb-4 px-4">
             <OrderItem item={toReviewable(item)} show={false} />
           </div>
 

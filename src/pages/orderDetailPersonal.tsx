@@ -1,5 +1,5 @@
 // src/pages/OrderDetailPersonal.tsx
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 
 // mocks 의존 피하려면 이렇게 쓰는 걸 추천 (없으면 기존 경로 유지해도 됨)
 import type { IOrderItem } from '@/types/order/orderItem';
@@ -44,11 +44,15 @@ const toMatchStatusLabel = (items: Array<{ teamStatus?: string; matchingStatus?:
 };
 
 export default function OrderDetailPersonal() {
-  const { orderId } = useParams<{ orderId: string }>();
-  const id = Number(orderId);
+  const params = useParams<{ orderId?: string }>();
+  const [searchParams] = useSearchParams();
+
+  const orderIdStr = params.orderId ?? searchParams.get('orderId') ?? '';
+  const id = Number(orderIdStr);
+
   const { data } = useOrderDetailPersonal(id);
 
-  if (!orderId || Number.isNaN(id)) {
+  if (!Number.isFinite(id) || id <= 0) {
     return <p className="p-4 text-error-3">유효하지 않은 주문입니다.</p>;
   }
 
@@ -63,7 +67,6 @@ export default function OrderDetailPersonal() {
 
   const { date, orderNumber, items, delivery, payment } = data;
 
-  // API → IOrderItem 변환
   const mappedItems: IOrderItem[] = items.map((it) => ({
     orderId: it.orderProductId,
     productId: it.product.id,
@@ -78,7 +81,9 @@ export default function OrderDetailPersonal() {
 
   // 상단 라벨
   const orderStatus: TOrderStatus = toOrderStatusLabel(items);
-  const hasAfterSales = items.some(({ status }) => ['RETURN_REQUESTED', 'EXCHANGE_REQUESTED'].includes((status ?? '').toUpperCase()));
+  const hasAfterSales = items.some(({ status }) =>
+    ['RETURN_REQUESTED', 'EXCHANGE_REQUESTED'].includes((status ?? '').toUpperCase())
+  );
 
   const matchStatus: TMatchStatus | undefined = hasAfterSales ? undefined : toMatchStatusLabel(items);
 
@@ -98,11 +103,10 @@ export default function OrderDetailPersonal() {
       <main className="flex flex-col gap-4 text-body-regular text-black">
         <div className="border-b-black-1 border-b-4 pb-4 px-4">
           <p className="text-subtitle-medium">{new Date(date).toLocaleString('ko-KR')}</p>
-          <p className="text-small text-black-4">주문 번호 {orderNumber}</p>
+          <p className="text-body-regular text-black-4">주문 번호 {orderNumber}</p>
         </div>
 
-        {/* 타이틀 유지 */}
-        <h2 className="text-subtitle-medium px-4">주문 상품</h2>
+        <h2 className="text-subtitle-medium px-5">주문 상품</h2>
 
         {/* 팀/개인 공용: 개인은 matchStatus가 표시되지 않음 */}
         <OrderProductList items={mappedItems} orderStatus={orderStatus} matchStatus={matchStatus} />
