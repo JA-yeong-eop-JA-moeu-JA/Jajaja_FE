@@ -1,54 +1,72 @@
+// src/apis/axiosInstance.ts
+
 import axios from 'axios';
 
-import { reissue } from './auth/auth';
-
 export const axiosInstance = axios.create({
-  // 프록시 사용 시 baseURL을 빈 문자열로 설정 (또는 조건부 설정)
-  baseURL: import.meta.env.DEV ? '' : import.meta.env.VITE_API_BASE_URL,
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080', // 🔥 fallback 추가
   withCredentials: true,
+  timeout: 10000, // 타임아웃 설정
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
-let hasHandledLogout = false;
-
-//let isRefreshing = false;
+let isRefreshing = false;
 
 axiosInstance.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // 디버깅용 로그 (개발 환경에서만)
+    if (import.meta.env.DEV) {
+      console.log('✅ API 응답:', {
+        status: response.status,
+        url: response.config.url,
+        data: response.data,
+      });
+    }
+    return response;
+  },
   async (error) => {
-    const status = error.response?.status;
-    const code = error.response?.data?.code;
     const originalRequest = error.config;
-    console.log(status, code);
+    const { status, data } = error.response || {};
 
-    if (status === 401 && code === 'AUTH4011' && !originalRequest._retry) {
+    // 토큰 갱신 로직
+    if (status === 401 && data?.code === 'AUTH4011') {
+      if (originalRequest._retry) {
+        return Promise.reject(error);
+      }
       originalRequest._retry = true;
-      try {
-        const { isSuccess } = await reissue();
-        if (isSuccess) {
+
+      if (!isRefreshing) {
+        isRefreshing = true;
+        try {
+          await axiosInstance.post('/api/auth/reissue');
           return axiosInstance(originalRequest);
-        } else {
-          throw new Error('토큰 재발급 실패');
-        }
-      } catch (e) {
-        if (!hasHandledLogout) {
-          hasHandledLogout = true;
-          alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
+        } catch (reissueError) {
+          alert('세션이 만료되었습니다. 다시 로그인 해주세요.');
           window.location.href = '/login';
+          return Promise.reject(reissueError);
+        } finally {
+          isRefreshing = false;
         }
-        return Promise.reject(e);
       }
-    }
-    if (status === 401 && code === 'AUTH4014') {
-      if (!hasHandledLogout) {
-        hasHandledLogout = true;
-        alert('로그인이 필요합니다.');
-        window.location.href = '/login';
-      }
-      return Promise.reject(error);
     }
 
-    if (status >= 500) {
-      alert('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+    // 500 에러 처리
+    if (status === 500) {
+      console.error('❌ 서버 에러:', {
+        url: error.config?.url,
+        status: status,
+        message: data?.message || '서버 에러가 발생했습니다.',
+        result: data?.result, // 상세 에러 정보
+      });
+
+      // 개발 환경에서는 상세 에러 표시
+      if (import.meta.env.DEV) {
+        console.error('서버 에러 상세:', data);
+        alert(`서버 에러: ${data?.message || '알 수 없는 오류'}\n상세: ${data?.result || ''}`);
+      } else {
+        alert('서버 에러가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      }
     }
 
     return Promise.reject(error);
