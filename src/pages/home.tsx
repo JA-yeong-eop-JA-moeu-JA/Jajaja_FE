@@ -12,7 +12,35 @@ import New from '@/components/home/new';
 import Popular from '@/components/home/popular';
 import Recommand from '@/components/home/recommand';
 
+import { useAuth } from '@/context/AuthContext';
+
 export default function Home() {
+  // 로그인 유무 테스트 코드
+  const { isLoggedIn, user /*refetch*/ } = useAuth();
+  // 로그인 유무 알고 싶을 때
+  console.log('isLoggedIn:', isLoggedIn);
+  // user 정보 알고 싶을 때
+  console.log('user:', user?.name);
+
+  /*  refetch 호출로 user 정보 재요청(useUserInfo를 강제 호출하여 로그인 유무 확인)
+  회원이어야만 작동하는 버튼 트리거에 넣으면 좋습니다
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const res = await refetch();
+      if (!mounted) return;
+      if (res.data?.result) {
+        console.log('User data fetched:', res.data.result.name);
+      }
+      if (res.error) {
+        console.error('Error fetching user data:', res.error);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [refetch]); */
+
   const [scrollDir, setScrollDir] = useState<'up' | 'down'>('up');
   const [lastY, setLastY] = useState(0);
   const { openModal } = useModalStore();

@@ -8,7 +8,6 @@ import { useCoreMutation } from '../customQuery';
 
 export default function usePatchNotiRead() {
   const queryClient = useQueryClient();
-
   const { mutate } = useCoreMutation(patchNotiRead, {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.GET_NOTI_LIST });

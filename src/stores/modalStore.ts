@@ -79,3 +79,9 @@ export const useModalStore = create<IModalStore>((set) => ({
       options: {},
     }),
 }));
+
+export const openLoginModal = (options?: IModalOptions) => {
+  const s = useModalStore.getState();
+  if (s.isModalOpen && s.type === 'login') return;
+  s.openModal('login', options);
+};

@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+import { openLoginModal } from '@/stores/modalStore';
+
 import { reissue } from './auth/auth';
 
 export const axiosInstance = axios.create({
@@ -8,43 +10,42 @@ export const axiosInstance = axios.create({
   withCredentials: true,
 });
 
-let hasHandledLogout = false;
-
-//let isRefreshing = false;
+axiosInstance.interceptors.request.use((config) => {
+  if (config.skipAuth) {
+    config.withCredentials = false;
+  }
+  return config;
+});
 
 axiosInstance.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    return response;
+  },
   async (error) => {
+    const cfg = error.config ?? {};
     const status = error.response?.status;
     const code = error.response?.data?.code;
-    const originalRequest = error.config;
     console.log(status, code);
 
-    if (status === 401 && code === 'AUTH4011' && !originalRequest._retry) {
-      originalRequest._retry = true;
-      try {
-        const { isSuccess } = await reissue();
-        if (isSuccess) {
-          return axiosInstance(originalRequest);
-        } else {
-          throw new Error('토큰 재발급 실패');
-        }
-      } catch (e) {
-        if (!hasHandledLogout) {
-          hasHandledLogout = true;
-          alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
-          window.location.href = '/login';
-        }
-        return Promise.reject(e);
-      }
-    }
-    if (status === 401 && code === 'AUTH4014') {
-      if (!hasHandledLogout) {
-        hasHandledLogout = true;
-        alert('로그인이 필요합니다.');
-        window.location.href = '/login';
-      }
+    if (cfg.skipAuth || cfg.optionalAuth) {
       return Promise.reject(error);
+    }
+
+    if (status === 401 && code === 'AUTH4011') {
+      try {
+        if (!cfg._retry) {
+          cfg._retry = true;
+          const { isSuccess } = await reissue();
+          if (isSuccess) return axiosInstance(cfg);
+        }
+      } catch {
+        /* 무시 */
+      }
+      openLoginModal({ from: window.location.pathname });
+      const authErr: any = new Error('AUTH_REQUIRED');
+      authErr.authRequired = true;
+      authErr.original = error;
+      return Promise.reject(authErr);
     }
 
     if (status >= 500) {

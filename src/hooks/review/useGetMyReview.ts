@@ -6,7 +6,7 @@ import { getMyReview } from '@/apis/review/myReview';
 
 export default function useGetMyReview() {
   return useInfiniteQuery({
-    queryKey: [QUERY_KEYS.GET_MY_REVIEW],
+    queryKey: QUERY_KEYS.GET_MY_REVIEW,
     queryFn: ({ pageParam = 0 }) => getMyReview({ page: pageParam, size: 5 }),
     initialPageParam: 0,
     getNextPageParam: (lastPage) => {

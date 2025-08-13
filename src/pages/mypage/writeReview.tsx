@@ -39,7 +39,6 @@ export default function WriteReview() {
 
   useEffect(() => {
     return () => {
-      // 페이지 떠날 때 파일 초기화(선택)
       resetFiles();
     };
   }, [resetFiles]);
