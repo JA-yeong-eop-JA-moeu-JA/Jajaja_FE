@@ -21,8 +21,8 @@ const MODAL_COMPONENTS: Record<TModalType, TComponentType> = {
   'confirm': TeamModal,
   'alert': ReviewModal,
   'bottom-sheet': HomeModal,
-  'bottom-drawer': () => OptionModal({ type: 'personal' }),
-  'bottom-drawer-team': () => OptionModal({ type: 'team' }),
+  'bottom-drawer': (props: any) => OptionModal({ type: 'personal', ...props }),
+  'bottom-drawer-team': (props: any) => OptionModal({ type: 'team', ...props }),
   'image': ImageModal,
   'cart-option': CartModal,
   'delivery': DeliveryRequestModal,
@@ -35,6 +35,8 @@ interface IModalOptions {
   item?: ICartItem;
   onUpdate?: (item: ICartItem) => void;
   onSelect?: (text: string) => void;
+  teamId?: number;
+  mode?: string;
   [key: string]: any;
 }
 
@@ -62,7 +64,7 @@ export const useModalStore = create<IModalStore>((set) => ({
               item: options.item,
               onUpdate: options.onUpdate,
             })
-        : ModalComponent;
+        : () => createElement(ModalComponent, options);
 
     set({
       isModalOpen: true,
