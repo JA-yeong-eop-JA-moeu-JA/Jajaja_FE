@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 
-import type { TPaymentData, TPaymentItem, TPurchaseType } from '@/types/cart/TCart';
+import type { TOrderType, TPaymentData, TPaymentItem } from '@/types/cart/TCart';
 
 import { useModalStore } from '@/stores/modalStore';
 import { useCart } from '@/hooks/cart/useCartQuery';
@@ -80,7 +80,7 @@ export default function OptionModal({ type }: { type?: string }) {
     }
   };
 
-  const handleDirectPurchase = (purchaseType: TPurchaseType) => {
+  const handleDirectPurchase = (orderType: TOrderType) => {
     if (selectedItems.length === 0) {
       toast.error('옵션을 선택해주세요');
       return;
@@ -100,7 +100,7 @@ export default function OptionModal({ type }: { type?: string }) {
     }));
 
     const paymentData: TPaymentData = {
-      purchaseType,
+      orderType,
       selectedItems: paymentItems,
     };
 

@@ -68,7 +68,7 @@ export type TDeleteCartItemParams = {
 };
 
 // 팀 구매 관련 새 타입들
-export type TPurchaseType = 'individual' | 'team_create' | 'team_join';
+export type TOrderType = 'individual' | 'team_create' | 'team_join';
 
 export type TPaymentItem = {
   id: number; // 장바구니 아이템 ID
@@ -84,7 +84,7 @@ export type TPaymentItem = {
 };
 
 export type TPaymentData = {
-  purchaseType: TPurchaseType;
+  orderType: TOrderType;
   selectedItems: TPaymentItem[];
   teamId?: number;
 };

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 declare global {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   interface Window {
-    TossPayments: (clientKey: string) => ITossPaymentsInstance;
+    TossPayments?: (clientKey: string) => ITossPaymentsInstance;
   }
 }
 
@@ -55,7 +55,7 @@ export const useTossPayments = (): IUseTossPaymentsReturn => {
           throw new Error('토스페이먼츠 클라이언트 키가 설정되지 않았습니다.');
         }
 
-        if (window.TossPayments) {
+        if (typeof window.TossPayments === 'function') {
           console.log('토스페이먼츠 SDK 로드됨, 초기화 중...');
           const toss = window.TossPayments(clientKey);
           console.log('토스페이먼츠 인스턴스 생성 완료:', toss);
@@ -71,10 +71,10 @@ export const useTossPayments = (): IUseTossPaymentsReturn => {
       }
     };
 
-    if (window.TossPayments) {
+    if (typeof window.TossPayments === 'function') {
       initializeTossPayments();
     } else {
-      console.log('⏳ 토스페이먼츠 SDK 로딩 대기 중...');
+      console.log('토스페이먼츠 SDK 로딩 대기 중...');
 
       let attempts = 0;
       const maxAttempts = 50;
@@ -83,7 +83,7 @@ export const useTossPayments = (): IUseTossPaymentsReturn => {
         attempts++;
         console.log(`SDK 로딩 확인 시도 ${attempts}/${maxAttempts}`);
 
-        if (window.TossPayments) {
+        if (typeof window.TossPayments === 'function') {
           console.log('SDK 로드 완료!');
           clearInterval(checkTossPayments);
           initializeTossPayments();

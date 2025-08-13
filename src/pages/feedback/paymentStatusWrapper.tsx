@@ -3,18 +3,9 @@ import { useParams } from 'react-router-dom';
 import PaymentStatusPage from './paymentStatus';
 import { usePaymentStatus } from './PaymentStatusHandler';
 
-interface IPaymentStatusWrapper {
-  // 결제 성공 시 추가 정보 표시
-  orderInfo?: {
-    orderId: string;
-    orderName: string;
-    amount: string;
-  };
-}
-
 export default function PaymentStatusWrapper() {
   const { status } = useParams<{ status: 'success' | 'fail' }>();
-  const { isConfirming, confirmResult, error } = usePaymentStatus();
+  const { isConfirming, error } = usePaymentStatus();
 
   if (status !== 'success' && status !== 'fail') {
     return <div>잘못된 접근입니다.</div>;

@@ -49,7 +49,7 @@ export default function Payment() {
     if (!paymentData?.selectedItems) return 123122;
 
     return paymentData.selectedItems.reduce((acc, item) => {
-      const price = paymentData.purchaseType === 'individual' ? item.individualPrice || item.unitPrice : item.teamPrice || item.unitPrice;
+      const price = paymentData.orderType === 'individual' ? item.individualPrice || item.unitPrice : item.teamPrice || item.unitPrice;
       return acc + price * item.quantity;
     }, 0);
   };
@@ -133,7 +133,7 @@ export default function Payment() {
         point: usedPoints > 0 ? usedPoints : 1000,
 
         // 팀 구매 관련 필드 추가
-        purchaseType: paymentData?.purchaseType === 'individual' ? 'PERSONAL' : 'TEAM',
+        orderType: paymentData?.orderType === 'individual' ? 'PERSONAL' : 'TEAM',
         ...(paymentData?.teamId && { teamId: paymentData.teamId }),
       };
 
@@ -241,17 +241,17 @@ export default function Payment() {
         </div>
       </section>
 
-      {paymentData?.purchaseType !== 'individual' && (
+      {paymentData?.orderType !== 'individual' && (
         <section className="p-4 border-b-4 border-black-1">
           <p className="text-subtitle-medium mb-4">팀 구매 정보</p>
           <div className="bg-orange-50 p-3 rounded">
-            {paymentData.purchaseType === 'team_create' && (
+            {paymentData.orderType === 'team_create' && (
               <>
                 <p className="text-small-medium">팀을 생성하고 있습니다</p>
                 <p className="text-small-regular">결제 완료 후 30분간 팀원 모집이 시작됩니다</p>
               </>
             )}
-            {paymentData.purchaseType === 'team_join' && (
+            {paymentData.orderType === 'team_join' && (
               <>
                 <p className="text-small-medium">팀 구매에 참여합니다</p>
                 <p className="text-small-regular">팀 구매가로 할인받으세요!</p>

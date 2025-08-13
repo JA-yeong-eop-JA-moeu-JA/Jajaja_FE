@@ -16,7 +16,7 @@ export const useTeamJoinFromCart = () => {
 
       // 팀 매칭 완료 시 장바구니에서 자동 제거됨
       const paymentData: TPaymentData = {
-        purchaseType: 'team_join',
+        orderType: 'team_join',
         selectedItems: [],
       };
 

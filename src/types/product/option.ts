@@ -10,4 +10,6 @@ export type TProductOption = {
   unitPrice: number;
 };
 
+export type TOption = TProductOption;
+
 export type TGetOptionList = TCommonResponse<TProductOption[]>;
