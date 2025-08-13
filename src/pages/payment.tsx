@@ -13,7 +13,6 @@ import { usePaymentWidget } from '@/hooks/payment/usePaymentWidget';
 import { Button } from '@/components/common/button';
 import PageHeader from '@/components/head_bottom/PageHeader';
 
-// import OrderItem from '@/components/review/orderItem';
 import Down from '@/assets/icons/down.svg?react';
 import { orderData } from '@/mocks/orderData';
 
@@ -127,13 +126,15 @@ export default function Payment() {
 
     try {
       const prepareData = {
-        purchaseType: paymentData?.purchaseType || 'individual',
-        teamId: paymentData?.teamId,
-        items: paymentData?.selectedItems.map((item) => item.optionId) || [1, 2, 3],
+        items: paymentData?.selectedItems.map((item) => item.id) || [1, 2, 3],
         addressId: 1,
         deliveryRequest: selectedDeliveryRequest || '현관문 앞에 놓아주세요.',
         appliedCouponId: 5,
         point: usedPoints > 0 ? usedPoints : 1000,
+
+        // 팀 구매 관련 필드 추가
+        purchaseType: paymentData?.purchaseType === 'individual' ? 'PERSONAL' : 'TEAM',
+        ...(paymentData?.teamId && { teamId: paymentData.teamId }),
       };
 
       const prepareResult = await paymentPrepareMutation.mutateAsync(prepareData);
@@ -247,7 +248,7 @@ export default function Payment() {
             {paymentData.purchaseType === 'team_create' && (
               <>
                 <p className="text-small-medium">팀을 생성하고 있습니다</p>
-                <p className="text-small-regular">결제 완료 후 30분간 팀원을 모집이 시작됩니다</p>
+                <p className="text-small-regular">결제 완료 후 30분간 팀원 모집이 시작됩니다</p>
               </>
             )}
             {paymentData.purchaseType === 'team_join' && (
@@ -264,7 +265,7 @@ export default function Payment() {
         <p className="text-subtitle-medium mb-4">주문 상품 {currentOrderItems.length}개</p>
         {currentOrderItems.map((item, index) => (
           <div key={item.productId || index} className="mb-5">
-            {/*<OrderItem item={item} show={false} />*/}
+            {/* <OrderItem item={item} show={false} /> */}
           </div>
         ))}
       </section>
@@ -310,7 +311,9 @@ export default function Payment() {
 
       <PaymentSummarySection total={originalAmount} discount={discount} pointsUsed={usedPoints} shippingFee={shippingFee} finalAmount={finalAmount} />
 
-      {/*기존 약관ui 추가하기!!! 토스 agreement는 지워도될듯*/}
+      <section className="p-4 bg-black-0">
+        <div id="payment-agreement" className="min-h-[100px]" />
+      </section>
 
       <div className="fixed bottom-14 left-0 right-0 w-full max-w-[600px] mx-auto">
         <Button

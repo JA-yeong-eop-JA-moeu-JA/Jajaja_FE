@@ -17,6 +17,7 @@ export type TCartProduct = {
   unitPrice: number;
   totalPrice: number;
   teamAvailable: boolean;
+  // 팀 구매 관련 필드
   teamPrice?: number;
   individualPrice?: number;
   discountRate?: number;
@@ -66,9 +67,11 @@ export type TDeleteCartItemParams = {
   optionId?: number;
 };
 
+// 팀 구매 관련 새 타입들
 export type TPurchaseType = 'individual' | 'team_create' | 'team_join';
 
 export type TPaymentItem = {
+  id: number; // 장바구니 아이템 ID
   productId: number;
   optionId: number;
   quantity: number;

@@ -7,6 +7,7 @@ import type { TCartProduct, TPaymentData, TPaymentItem } from '@/types/cart/TCar
 import { useModalStore } from '@/stores/modalStore';
 import { useProductCheckboxStore } from '@/stores/productCheckboxStore';
 import { useCart } from '@/hooks/cart/useCartQuery';
+import { useTeamJoinFromCart } from '@/hooks/team/useTeamJoinCart';
 
 import { Button } from '@/components/common/button';
 import BaseCheckbox from '@/components/common/checkbox';
@@ -66,6 +67,7 @@ export default function ShoppingCart() {
   const { openModal } = useModalStore();
 
   const { cartData, isLoading, isError, deleteSelectedItems, isDeletingMultiple, refetch } = useCart();
+  const { mutate: joinTeamFromCartMutation, isPending: isJoiningTeam } = useTeamJoinFromCart();
 
   const cartList = useMemo(() => {
     if (!cartData?.products) return [];
@@ -177,26 +179,10 @@ export default function ShoppingCart() {
         return;
       }
 
-      const paymentItems: TPaymentItem[] = selectedOptions.map((option) => ({
-        productId: option.productId,
-        optionId: option.optionId,
-        quantity: option.quantity,
-        unitPrice: option.unitPrice,
-        teamPrice: option.unitPrice,
-        individualPrice: option.price,
-        productName: option.productName,
-        optionName: option.optionName,
-        productThumbnail: option.imageUrl,
-      }));
-
-      const paymentData: TPaymentData = {
-        purchaseType: 'team_join',
-        selectedItems: paymentItems,
-      };
-
-      navigate('/payment', { state: paymentData });
+      // 팀 참여 API 호출 (성공 시 자동으로 결제 페이지 이동)
+      joinTeamFromCartMutation(productId);
     },
-    [groupedCartItems, checkedItems, navigate],
+    [groupedCartItems, checkedItems, joinTeamFromCartMutation],
   );
 
   const handleIndividualPurchase = useCallback(() => {
@@ -211,6 +197,7 @@ export default function ShoppingCart() {
     }
 
     const paymentItems: TPaymentItem[] = selectedItems.map((item) => ({
+      id: item.id,
       productId: item.productId,
       optionId: item.optionId,
       quantity: item.quantity,
@@ -308,9 +295,9 @@ export default function ShoppingCart() {
                         variant={group.options.some((option) => option.teamAvailable) ? 'outline-orange' : 'outline-gray'}
                         className={`flex-1 py-1 ${!group.options.some((option) => option.teamAvailable) ? 'border-black-1 text-black-2' : ''}`}
                         onClick={() => handleTeamJoin(group.productId)}
-                        disabled={!group.options.some((option) => option.teamAvailable)}
+                        disabled={!group.options.some((option) => option.teamAvailable) || isJoiningTeam}
                       >
-                        팀 참여
+                        {isJoiningTeam ? '참여 중...' : '팀 참여'}
                       </Button>
                       <Button kind="select-content" variant="outline-gray" className="flex-1 py-1" onClick={() => handleOptionChange(group.options[0])}>
                         옵션 변경

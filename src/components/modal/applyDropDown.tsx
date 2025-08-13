@@ -1,11 +1,11 @@
 import { useState } from 'react';
 
-import type { TOption } from '@/types/product/option';
+import type { TProductOption } from '@/types/product/option';
 
 import Down from '@/assets/icons/down.svg?react';
 
 type TProps = {
-  options?: TOption[];
+  options?: TProductOption[];
   onChange?: (selected: { id: number }) => void;
   defaultLabel?: string;
 };

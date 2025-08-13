@@ -75,7 +75,7 @@ export default function OptionModal({ type }: { type?: string }) {
       closeModal();
       toast.success('장바구니에 상품이 담겼습니다');
     } catch (error) {
-      console.error('장바구니 담기 실패:', error);
+      console.error('Cart add failed:', error);
       toast.error('장바구니 담기에 실패했습니다');
     }
   };
@@ -87,6 +87,7 @@ export default function OptionModal({ type }: { type?: string }) {
     }
 
     const paymentItems: TPaymentItem[] = selectedItems.map((item) => ({
+      id: 0, // 장바구니에 없는 상품이므로 0
       productId,
       optionId: item.id,
       quantity: item.quantity,
