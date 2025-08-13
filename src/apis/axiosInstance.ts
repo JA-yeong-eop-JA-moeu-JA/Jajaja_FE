@@ -1,72 +1,55 @@
-// src/apis/axiosInstance.ts
-
 import axios from 'axios';
 
+import { openLoginModal } from '@/stores/modalStore';
+
+import { reissue } from './auth/auth';
+
 export const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080', // 🔥 fallback 추가
+  // 프록시 사용 시 baseURL을 빈 문자열로 설정 (또는 조건부 설정)
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   withCredentials: true,
-  timeout: 10000, // 타임아웃 설정
-  headers: {
-    'Content-Type': 'application/json',
-  },
 });
 
-let isRefreshing = false;
+axiosInstance.interceptors.request.use((config) => {
+  if (config.skipAuth) {
+    config.withCredentials = false;
+  }
+  return config;
+});
 
 axiosInstance.interceptors.response.use(
   (response) => {
-    // 디버깅용 로그 (개발 환경에서만)
-    if (import.meta.env.DEV) {
-      console.log('✅ API 응답:', {
-        status: response.status,
-        url: response.config.url,
-        data: response.data,
-      });
-    }
     return response;
   },
   async (error) => {
-    const originalRequest = error.config;
-    const { status, data } = error.response || {};
+    const cfg = error.config ?? {};
+    const status = error.response?.status;
+    const code = error.response?.data?.code;
+    console.log(status, code);
 
-    // 토큰 갱신 로직
-    if (status === 401 && data?.code === 'AUTH4011') {
-      if (originalRequest._retry) {
-        return Promise.reject(error);
-      }
-      originalRequest._retry = true;
-
-      if (!isRefreshing) {
-        isRefreshing = true;
-        try {
-          await axiosInstance.post('/api/auth/reissue');
-          return axiosInstance(originalRequest);
-        } catch (reissueError) {
-          alert('세션이 만료되었습니다. 다시 로그인 해주세요.');
-          window.location.href = '/login';
-          return Promise.reject(reissueError);
-        } finally {
-          isRefreshing = false;
-        }
-      }
+    if (cfg.skipAuth || cfg.optionalAuth) {
+      return Promise.reject(error);
     }
 
-    // 500 에러 처리
-    if (status === 500) {
-      console.error('❌ 서버 에러:', {
-        url: error.config?.url,
-        status: status,
-        message: data?.message || '서버 에러가 발생했습니다.',
-        result: data?.result, // 상세 에러 정보
-      });
-
-      // 개발 환경에서는 상세 에러 표시
-      if (import.meta.env.DEV) {
-        console.error('서버 에러 상세:', data);
-        alert(`서버 에러: ${data?.message || '알 수 없는 오류'}\n상세: ${data?.result || ''}`);
-      } else {
-        alert('서버 에러가 발생했습니다. 잠시 후 다시 시도해주세요.');
+    if (status === 401 && code === 'AUTH4011') {
+      try {
+        if (!cfg._retry) {
+          cfg._retry = true;
+          const { isSuccess } = await reissue();
+          if (isSuccess) return axiosInstance(cfg);
+        }
+      } catch {
+        /* 무시 */
       }
+      openLoginModal({ from: window.location.pathname });
+      const authErr: any = new Error('AUTH_REQUIRED');
+      authErr.authRequired = true;
+      authErr.original = error;
+      return Promise.reject(authErr);
+    }
+
+    if (status >= 500) {
+      alert('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
     }
 
     return Promise.reject(error);

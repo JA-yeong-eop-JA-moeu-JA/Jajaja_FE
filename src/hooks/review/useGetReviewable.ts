@@ -6,7 +6,7 @@ import { getReviewable } from '@/apis/review/myReview';
 
 export default function useGetReviewable() {
   return useInfiniteQuery({
-    queryKey: [QUERY_KEYS.GET_REVIEWABLE],
+    queryKey: QUERY_KEYS.GET_REVIEWABLE,
     queryFn: ({ pageParam = 0 }) => getReviewable({ page: pageParam, size: 5 }),
     initialPageParam: 0,
     getNextPageParam: (lastPage) => {
