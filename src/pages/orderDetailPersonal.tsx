@@ -1,8 +1,6 @@
 // src/pages/OrderDetailPersonal.tsx
+import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-
-// mocks 의존 피하려면 이렇게 쓰는 걸 추천 (없으면 기존 경로 유지해도 됨)
-//import type { IOrderItem } from '@/types/order/orderItem';
 import useOrderDetailPersonal from '@/hooks/order/useOrderDetailPersonal';
 
 import PageHeader from '@/components/head_bottom/PageHeader';
@@ -11,6 +9,8 @@ import PaymentInfo from '@/components/orderDetail/paymentInfo';
 
 type TOrderStatus = '배송 중' | '결제 완료' | '결제 취소' | '반품 접수' | '교환 접수';
 type TMatchStatus = '매칭 중' | '매칭 완료' | '매칭 실패';
+
+const MATCH_TTL_MINUTES = 600;
 
 function formatPayMethod(method: string) {
   if (method === 'KAKAO') return '카카오페이';
@@ -42,6 +42,29 @@ const toMatchStatusLabel = (items: Array<{ teamStatus?: string; matchingStatus?:
   return '매칭 실패';
 };
 
+function getRemainMs(teamCreatedAt: string | null | undefined) {
+  if (!teamCreatedAt) return 0;
+  const start = new Date(teamCreatedAt).getTime();
+  const end = start + MATCH_TTL_MINUTES * 60_000;
+  return Math.max(0, end - Date.now());
+}
+function fmtHMS(ms: number) {
+  const hh = String(Math.floor(ms / 3_600_000)).padStart(2, '0');
+  const mm = String(Math.floor((ms % 3_600_000) / 60_000)).padStart(2, '0');
+  const ss = String(Math.floor((ms % 60_000) / 1_000)).padStart(2, '0');
+  return `${hh}:${mm}:${ss}`;
+}
+function Countdown({ teamCreatedAt }: { teamCreatedAt?: string | null }) {
+  const [remain, setRemain] = useState(() => getRemainMs(teamCreatedAt));
+  useEffect(() => {
+    setRemain(getRemainMs(teamCreatedAt));
+    const t = setInterval(() => setRemain(getRemainMs(teamCreatedAt)), 1000);
+    return () => clearInterval(t);
+  }, [teamCreatedAt]);
+  if (!teamCreatedAt) return null;
+  return <span className="text-xs text-gray-500">{remain === 0 ? '마감' : fmtHMS(remain)}</span>;
+}
+
 export default function OrderDetailPersonal() {
   const params = useParams<{ orderId?: string }>();
   const [searchParams] = useSearchParams();
@@ -65,9 +88,15 @@ export default function OrderDetailPersonal() {
   }
 
   const { date, orderNumber, items, delivery, payment } = data;
+
+  // ▼ MATCHING인 첫 아이템(있다면) 찾기 (teamCreatedAt 사용)
+  const firstMatching = items.find(
+    (it) => (it.teamStatus ?? it.matchStatus ?? '').toUpperCase() === 'MATCHING',
+  );
+  const teamCreatedAt = firstMatching?.teamCreatedAt;
+
   const mappedItems = items.map((it) => {
     const isAfterSales = ['RETURN_REQUESTED', 'EXCHANGE_REQUESTED'].includes((it.status ?? '').toUpperCase());
-
     return {
       orderId: id,
       orderProductId: it.orderProductId,
@@ -82,6 +111,8 @@ export default function OrderDetailPersonal() {
 
       orderStatus: toOrderStatusLabel([it]),
       matchStatus: isAfterSales ? undefined : toMatchStatusLabel([it]),
+      // 필요하면 이 라인으로 teamCreatedAt도 아이템에 넘길 수 있음:
+      // teamCreatedAt: it.teamCreatedAt ?? null,
     };
   });
 
@@ -104,7 +135,16 @@ export default function OrderDetailPersonal() {
           <p className="text-body-regular text-black-4">주문 번호 {orderNumber}</p>
         </div>
 
-        <h2 className="text-subtitle-medium px-5">주문 상품</h2>
+        {/* 주문 상품 헤더 + 우측에 매칭 상태/카운트다운 */}
+        <div className="px-5 flex items-center justify-between">
+          <h2 className="text-subtitle-medium">주문 상품</h2>
+          {firstMatching && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs">매칭 중</span>
+              <Countdown teamCreatedAt={teamCreatedAt} />
+            </div>
+          )}
+        </div>
 
         {/* 팀/개인 공용: 개인은 matchStatus가 표시되지 않음 */}
         <OrderProductList items={mappedItems} parentOrderId={id} />

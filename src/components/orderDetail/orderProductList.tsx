@@ -45,29 +45,41 @@ export default function OrderProductList({ items, parentOrderId, orderDate }: IO
     <section className="px-2 pb-4 border-b border-b-4 border-b-black-1 flex flex-col gap-4">
       {items.map((item) => {
         const itemOrderStatus = (item.orderStatus ?? '결제 완료') as TOrderStatusKey;
-        const itemMatchStatus = (item.matchStatus ?? '매칭 완료') as TMatchStatusKey;
+        const itemMatchStatus = item.matchStatus as TMatchStatusKey | undefined;
 
         return (
           <div key={`${item.orderId}-${item.productId}`}>
             {/* 상품별 상태 배지 */}
             <div className="flex justify-between items-center px-4 pb-2">
-              <span className={`text-body-medium ${ORDER_STATUS_COLOR_MAP[itemOrderStatus]}`}>{itemOrderStatus}</span>
-              <span className={`text-body-medium ${MATCH_STATUS_COLOR_MAP[itemMatchStatus]}`}>{itemMatchStatus}</span>
+              <span className={`text-body-medium ${ORDER_STATUS_COLOR_MAP[itemOrderStatus]}`}>
+                {itemOrderStatus}
+              </span>
+              {itemMatchStatus && (
+                <span className={`text-body-medium ${MATCH_STATUS_COLOR_MAP[itemMatchStatus]}`}>
+                  {itemMatchStatus}
+                </span>
+              )}
             </div>
 
             <div className="flex flex-col mb-4 px-4">
               <OrderItem item={toReviewable(item)} show={false} />
             </div>
 
-            <div className="text-body-medium w-full md:flex-row justify-between">
+            <div className="text-body-medium w-full justify-between">
               <SelectButton
                 kind="select-content"
                 leftText="교환/반품"
                 rightText="배송 조회"
                 leftVariant="outline-orange"
                 rightVariant="outline-orange"
-                onLeftClick={() => navigate(`/mypage/apply?orderId=${parentOrderId ?? item.orderId}&orderProductId=${item.orderProductId}`)}
-                onRightClick={() => navigate(`/mypage/deliveryInfo?orderProductId=${item.orderProductId}`)}
+                onLeftClick={() =>
+                  navigate(
+                    `/mypage/apply?orderId=${parentOrderId ?? item.orderId}&orderProductId=${item.orderProductId}`,
+                  )
+                }
+                onRightClick={() =>
+                  navigate(`/mypage/deliveryInfo?orderProductId=${item.orderProductId}`)
+                }
               />
             </div>
           </div>
