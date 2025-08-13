@@ -36,4 +36,4 @@ export interface IGetCategoryProductsResponse {
     }[];
   };
 }
-export type TCategorySort = 'POPULAR' | 'NEW' | 'LOW_PRICE' | 'REVIEW';
+export type TCategorySort = 'POPULAR' | 'NEW' | 'PRICE_ASC' | 'REVIEW';

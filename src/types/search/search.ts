@@ -6,7 +6,7 @@ export type TGetSearchKeyWord = TCommonResponse<{
 }>;
 
 // types/search/search.ts
-export type TCategorySort = 'POPULAR' | 'NEW' | 'LOW_PRICE' | 'REVIEW';
+export type TCategorySort = 'POPULAR' | 'NEW' | 'PRICE_ASC' | 'REVIEW';
 
 export interface IProductDTO {
   productId: number;

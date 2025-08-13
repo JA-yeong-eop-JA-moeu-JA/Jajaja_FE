@@ -28,10 +28,12 @@ import Up from '@/assets/icons/up.svg?react';
 
 export default function Search() {
   const { data } = useGetKeyword();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const menuRef = useRef<HTMLDivElement>(null);
   const [keywordParam, setKeyword] = useState<string | null>(null);
-
+  const [sort, setSort] = useState<TCategorySort>(
+    (searchParams.get('sort') as TCategorySort) || 'NEW'
+  );
   const [sortOption, setSortOption] = useState('인기순');
   const [change, setChange] = useState(false);
   const [inputValue, setValue] = useState('');
@@ -52,27 +54,35 @@ export default function Search() {
 
   const subcategoryId = Number(searchParams.get('subcategoryId') || '');
   const isCategoryMode = !!subcategoryId;
-  const SORT_LABEL_TO_ENUM: Record<string, TCategorySort> = {
-    '인기순': 'POPULAR',
-    '신상품순': 'NEW',
-    '낮은 가격순': 'LOW_PRICE',
-    '리뷰순': 'REVIEW',
+  const SORT_ENUM_TO_LABEL: Record<TCategorySort, string> = {
+    POPULAR: '인기순',
+    NEW: '신상품순',
+    PRICE_ASC: '낮은 가격순',
+    REVIEW: '리뷰순',
+  };
+
+  const labelToEnum = (label: string): TCategorySort => {
+    const s = label.replace(/\s/g, '');
+    if (s.includes('인기')) return 'POPULAR';
+    if (s.includes('신상품') || s.includes('최신')) return 'NEW';
+    if (s.includes('낮은가격') || s.includes('가격낮')) return 'PRICE_ASC';
+    if (s.includes('리뷰')) return 'REVIEW';
+    return 'NEW';
   };
 
   const page = Number(searchParams.get('page') || '0');
   const size = searchParams.get('size') ? Number(searchParams.get('size')) : 20;
-  const apiSort: TCategorySort = SORT_LABEL_TO_ENUM[sortOption] || 'NEW';
 
   const categoryQuery = useCategoryProducts({
     subcategoryId: isCategoryMode ? subcategoryId : undefined,
-    sort: apiSort,
+    sort,
     page,
     size,
   });
 
   const keywordQuery = useKeywordProducts({
     keyword: !isCategoryMode ? keywordParam || '' : undefined,
-    sort: apiSort,
+    sort,
     page,
     size,
   });
@@ -116,6 +126,18 @@ export default function Search() {
     if (labelFromUrl) setValue(labelFromUrl);
   }, [isCategoryMode, searchParams]);
 
+  useEffect(() => {
+    const s = (searchParams.get('sort') as TCategorySort) || 'NEW';
+
+    // enum 동기화
+    if (s !== sort) setSort(s);
+
+    // 라벨 동기화
+    const label = SORT_ENUM_TO_LABEL[s] ?? '신상품순';
+    if (label !== sortOption) setSortOption(label);
+  }, [searchParams]); // (필요시 sort, sortOption 추가)
+
+
   const handleDelete = async (id: number) => mutate(id);
 
   const handleValue = (e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value);
@@ -127,24 +149,35 @@ export default function Search() {
     if (keyword) {
       qs.set('keyword', keyword);
       qs.delete('subcategoryId');
-      qs.set('sort', apiSort);
+      qs.set('sort', sort);
     } else {
       qs.delete('keyword');
     }
     qs.set('page', '0');
     window.history.replaceState(null, '', `/search?${qs.toString()}`);
   };
+
   const handleSortSelect = (value?: string) => {
-    if (value) {
-      setSortOption(value);
-      const qs = new URLSearchParams(searchParams);
-      qs.set('sort', SORT_LABEL_TO_ENUM[value] || 'NEW');
-      qs.set('page', '0');
-      window.history.replaceState(null, '', `/search?${qs.toString()}`);
-      setChange(true);
-    }
+    if (!value) return;
+
+    // 라벨 상태 갱신
+    setSortOption(value);
+
+    // enum으로 변환해 API/URL에 쓰기
+    const nextSort = labelToEnum(value);
+    setSort(nextSort);
+
+    // ⚠️ window.history 대신 라우터 setter 사용 (검색파라미터 반영 보장)
+    const qs = new URLSearchParams(searchParams);
+    qs.set('sort', nextSort);
+    qs.set('page', '0');
+    setSearchParams(qs, { replace: true });
+
     setIsAsc(true);
+    setChange(true);
   };
+
+
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
