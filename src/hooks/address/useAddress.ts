@@ -8,6 +8,7 @@ import { useCoreMutation, useCoreQuery } from '@/hooks/customQuery';
 export const useGetAddresses = () => {
   return useCoreQuery(QUERY_KEYS.GET_ADDRESSES, () => addressApi.getAddresses(), {
     staleTime: 5 * 60 * 1000,
+    select: (data) => data.data.result,
   });
 };
 
