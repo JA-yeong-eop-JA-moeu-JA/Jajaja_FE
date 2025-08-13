@@ -16,7 +16,15 @@ export type TCoupons = {
   applicableConditions: TApplicableConditions;
 };
 
-export type TGetCoupons = TCommonResponse<{
+export type TGetCouponsResponse = TCommonResponse<{
   page: TPage;
   coupons: TCoupons[];
 }>;
+
+export type TApplyCouponResponse = TCommonResponse<{
+  data: TCoupons;
+}>;
+
+export type TCancelCouponRequest = {
+  id: number;
+};

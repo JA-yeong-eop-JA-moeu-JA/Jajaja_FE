@@ -5,7 +5,7 @@ import { getTeamProducts } from '@/apis/board/team';
 import { useCoreQuery } from '@/hooks/customQuery';
 
 export const useTeamProducts = (page: number) => {
-  const DEFAULT_SIZE = 5; // ✅ 페이지당 개수 고정
+  const DEFAULT_SIZE = 5;
 
   const queryResult = useCoreQuery([...QUERY_KEYS.GET_TEAM_PRODUCTS, page], () => getTeamProducts(page, DEFAULT_SIZE), {
     retry: 1,

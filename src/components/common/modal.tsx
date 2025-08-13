@@ -135,6 +135,13 @@ export default function ModalProvider({ children }: IModalProviderProps) {
           </div>
         </div>
       )}
+      {type === 'login' && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
+          <div className="bg-white min-h-10 rounded-lg shadow-md max-w-76 w-full" onClick={(e) => e.stopPropagation()}>
+            {createElement(modalContent, options)}
+          </div>
+        </div>
+      )}
     </>
   );
 }

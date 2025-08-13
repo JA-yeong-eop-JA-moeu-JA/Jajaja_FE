@@ -8,7 +8,7 @@ import { categoryApi } from '@/apis/category/category';
 
 import { useCoreQuery } from '@/hooks/customQuery';
 
-const SORTS = ['POPULAR', 'NEW', 'PRICE_ASC', 'REVIEW'] as const;
+const SORTS = ['POPULAR', 'NEW', 'LOW_PRICE', 'REVIEW'] as const;
 type TSort = (typeof SORTS)[number];
 const getSafeSort = (s?: string): TCategorySort => ((SORTS as readonly string[]).includes(s ?? '') ? (s as TSort) : 'NEW');
 

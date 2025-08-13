@@ -7,6 +7,7 @@ import svgr from 'vite-plugin-svgr';
 
 // https://vite.dev/config/
 const hasCert = fs.existsSync('./key.pem') && fs.existsSync('./cert.pem');
+
 export default defineConfig({
   plugins: [react(), tailwindcss(), svgr({ include: '**/*.svg?react' })],
   resolve: {
@@ -22,9 +23,37 @@ export default defineConfig({
         },
         host: true,
         port: 5173,
+        // 프록시 설정 추가
+        proxy: {
+          '/api': {
+            target: 'http://localhost:8080',
+            changeOrigin: true,
+            secure: false,
+            ws: true,
+          },
+          '/oauth2': {
+            target: 'http://localhost:8080',
+            changeOrigin: true,
+            secure: false,
+          },
+        },
       }
     : {
         host: true,
         port: 5173,
+        // 프록시 설정 추가
+        proxy: {
+          '/api': {
+            target: 'http://localhost:8080',
+            changeOrigin: true,
+            secure: false,
+            ws: true,
+          },
+          '/oauth2': {
+            target: 'http://localhost:8080',
+            changeOrigin: true,
+            secure: false,
+          },
+        },
       },
 });

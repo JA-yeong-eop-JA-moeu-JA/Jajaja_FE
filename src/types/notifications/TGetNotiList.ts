@@ -1,4 +1,5 @@
 import type { TCommonResponse } from '../common';
+import type { TPage } from '../TPage';
 
 export type TGetNoti = {
   id: number;
@@ -8,4 +9,7 @@ export type TGetNoti = {
   createdAt: string;
 };
 
-export type TGetNotiList = TCommonResponse<TGetNoti[]>;
+export type TGetNotiList = TCommonResponse<{
+  page: TPage;
+  notifications: TGetNoti[];
+}>;
