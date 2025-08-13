@@ -210,7 +210,7 @@ export default function ShoppingCart() {
     }));
 
     const paymentData: TPaymentData = {
-      purchaseType: 'individual',
+      orderType: 'individual',
       selectedItems: paymentItems,
     };
 
