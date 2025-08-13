@@ -242,6 +242,7 @@ export default function ShoppingCart() {
                         kind="select-content"
                         variant={group.options.some((option) => option.teamAvailable) ? 'outline-orange' : 'outline-gray'}
                         className={`flex-1 py-1 ${!group.options.some((option) => option.teamAvailable) ? 'border-black-1 text-black-2' : ''}`}
+                        onClick={() => navigate('/payment')}
                         disabled={!group.options.some((option) => option.teamAvailable)}
                       >
                         팀 참여

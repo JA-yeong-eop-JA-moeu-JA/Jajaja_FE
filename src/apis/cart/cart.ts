@@ -1,4 +1,4 @@
-import type { TGetCartResponse, TCartItemRequest, TCartMutationResponse, TDeleteCartItemParams } from '@/types/cart/TCart';
+import type { TCartItemRequest, TCartMutationResponse, TDeleteCartItemParams, TGetCartResponse } from '@/types/cart/TCart';
 
 import { axiosInstance } from '@/apis/axiosInstance';
 
