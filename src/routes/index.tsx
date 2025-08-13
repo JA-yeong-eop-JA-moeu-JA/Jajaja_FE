@@ -28,7 +28,6 @@ import WriteReview from '@/pages/mypage/writeReview';
 import Notifications from '@/pages/notifications';
 import OnBoarding from '@/pages/onBoarding';
 import OrderDetailPersonal from '@/pages/orderDetailPersonal';
-import OrderDetailTeam from '@/pages/orderDetailTeam';
 import OrderList from '@/pages/orderListPage';
 import Payment from '@/pages/payment';
 import PhotoReview from '@/pages/photoReview';
@@ -79,7 +78,6 @@ export const router = createBrowserRouter([
           { path: 'mypage/deliveryInfo', element: <DeliveryInfo /> },
           { path: 'mypage/order', element: <OrderList /> },
           { path: 'mypage/order/orderDetailPersonal', element: <OrderDetailPersonal /> },
-          { path: 'mypage/order/orderDetailTeam', element: <OrderDetailTeam /> },
           { path: 'mypage/apply', element: <ApplyReturnOrExchange /> },
           { path: 'mypage/order/exchange/complete', element: <ExchangeOK /> },
           { path: 'mypage/order/return/complete', element: <ReturnOK /> },

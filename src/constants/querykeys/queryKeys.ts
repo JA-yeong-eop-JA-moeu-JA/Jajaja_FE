@@ -14,8 +14,12 @@ export const QUERY_KEYS = {
   GET_RECENT_SEARCH: ['getRecentSearch'],
   GET_PHOTO: ['getPhoto'],
   GET_POINTS: ['getPoints'],
+  GET_ORDER_DETAIL_PERSONAL: ['getOrderDetailPersonal'],
+  GET_ORDER_PRODUCT_DELIVERY: ['getOrderProductDelivery'],
+  GET_MY_ORDERS: ['getMyOrders'],
   GET_REVIEWABLE: ['getReviewable'],
   GET_MY_REVIEW: ['getMyReview'],
   GET_ADDRESSES: ['getAddresses'],
   GET_ADDRESS: (id: number) => ['getAddress', id],
+  GET_KEYWORD_PRODUCTS: ['GET_KEYWORD_PRODUCTS'],
 };
