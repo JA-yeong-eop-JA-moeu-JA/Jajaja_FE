@@ -6,8 +6,6 @@ import OrderList from '@/components/orderDetail/OrderList';
 export default function OrderListPage() {
   const { data: orders = [], isLoading, isError, refetch } = useMyOrders();
 
-
-
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <header>

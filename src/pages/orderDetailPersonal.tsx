@@ -1,6 +1,7 @@
 // src/pages/OrderDetailPersonal.tsx
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
+
 import useOrderDetailPersonal from '@/hooks/order/useOrderDetailPersonal';
 
 import PageHeader from '@/components/head_bottom/PageHeader';
@@ -90,9 +91,7 @@ export default function OrderDetailPersonal() {
   const { date, orderNumber, items, delivery, payment } = data;
 
   // ▼ MATCHING인 첫 아이템(있다면) 찾기 (teamCreatedAt 사용)
-  const firstMatching = items.find(
-    (it) => (it.teamStatus ?? it.matchStatus ?? '').toUpperCase() === 'MATCHING',
-  );
+  const firstMatching = items.find((it) => (it.teamStatus ?? it.matchStatus ?? '').toUpperCase() === 'MATCHING');
   const teamCreatedAt = firstMatching?.teamCreatedAt;
 
   const mappedItems = items.map((it) => {

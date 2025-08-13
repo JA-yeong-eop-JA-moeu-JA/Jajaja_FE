@@ -29,7 +29,6 @@ const mapToIOrders = (orders?: TOrder[] | null): IOrder[] =>
     })),
   }));
 
- 
 export const useMyOrders = (opts?: { page?: number; size?: number; sort?: string }) => {
   const { page = 0, size = 1, sort } = opts ?? {};
 
@@ -48,9 +47,7 @@ export const useMyOrders = (opts?: { page?: number; size?: number; sort?: string
       refetchOnWindowFocus: true,
       refetchInterval: (query: any) => {
         const data = (query?.state?.data ?? []) as IOrder[];
-        const hasMatching = data.some((o: IOrder) =>
-          o.items.some((it: IOrderItem) => it.matchStatus === 'MATCHING'),
-        );
+        const hasMatching = data.some((o: IOrder) => o.items.some((it: IOrderItem) => it.matchStatus === 'MATCHING'));
         return hasMatching ? 10_000 : false;
       },
     },

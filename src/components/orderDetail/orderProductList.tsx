@@ -51,14 +51,8 @@ export default function OrderProductList({ items, parentOrderId, orderDate }: IO
           <div key={`${item.orderId}-${item.productId}`}>
             {/* 상품별 상태 배지 */}
             <div className="flex justify-between items-center px-4 pb-2">
-              <span className={`text-body-medium ${ORDER_STATUS_COLOR_MAP[itemOrderStatus]}`}>
-                {itemOrderStatus}
-              </span>
-              {itemMatchStatus && (
-                <span className={`text-body-medium ${MATCH_STATUS_COLOR_MAP[itemMatchStatus]}`}>
-                  {itemMatchStatus}
-                </span>
-              )}
+              <span className={`text-body-medium ${ORDER_STATUS_COLOR_MAP[itemOrderStatus]}`}>{itemOrderStatus}</span>
+              {itemMatchStatus && <span className={`text-body-medium ${MATCH_STATUS_COLOR_MAP[itemMatchStatus]}`}>{itemMatchStatus}</span>}
             </div>
 
             <div className="flex flex-col mb-4 px-4">
@@ -72,14 +66,8 @@ export default function OrderProductList({ items, parentOrderId, orderDate }: IO
                 rightText="배송 조회"
                 leftVariant="outline-orange"
                 rightVariant="outline-orange"
-                onLeftClick={() =>
-                  navigate(
-                    `/mypage/apply?orderId=${parentOrderId ?? item.orderId}&orderProductId=${item.orderProductId}`,
-                  )
-                }
-                onRightClick={() =>
-                  navigate(`/mypage/deliveryInfo?orderProductId=${item.orderProductId}`)
-                }
+                onLeftClick={() => navigate(`/mypage/apply?orderId=${parentOrderId ?? item.orderId}&orderProductId=${item.orderProductId}`)}
+                onRightClick={() => navigate(`/mypage/deliveryInfo?orderProductId=${item.orderProductId}`)}
               />
             </div>
           </div>

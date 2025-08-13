@@ -7,6 +7,7 @@ import type { TReviewableOrderItem } from '@/types/review/myReview';
 import { MATCH_STATUS_COLOR_MAP, ORDER_STATUS_COLOR_MAP } from '@/constants/product/statusColorMap';
 
 import OrderItem from '@/components/review/orderItem';
+
 import ChevronRight from '@/assets/ChevronRight2.svg';
 
 interface IOrderProps {
@@ -20,8 +21,8 @@ const MATCH_TTL_MINUTES = 600;
 /** BE 상태(영문) → UI 라벨(한글) 매핑 */
 const MATCH_STATUS_LABEL_MAP: Record<'MATCHING' | 'MATCHED' | 'FAILED', keyof typeof MATCH_STATUS_COLOR_MAP> = {
   MATCHING: '매칭 중',
-  MATCHED:  '매칭 완료',
-  FAILED:   '매칭 실패',
+  MATCHED: '매칭 완료',
+  FAILED: '매칭 실패',
 };
 
 function getRemainMs(teamCreatedAt: string | null) {
@@ -38,13 +39,7 @@ function formatHMS(ms: number) {
   return `${hh}:${mm}:${ss}`;
 }
 
-function Countdown({
-  teamCreatedAt,
-  onExpire,
-}: {
-  teamCreatedAt: string | null;
-  onExpire?: () => void;
-}) {
+function Countdown({ teamCreatedAt, onExpire }: { teamCreatedAt: string | null; onExpire?: () => void }) {
   const [remain, setRemain] = useState<number>(() => getRemainMs(teamCreatedAt));
 
   useEffect(() => {
@@ -80,10 +75,7 @@ export default function OrderList({ orders, onExpire }: IOrderProps) {
   return (
     <div className="w-full flex flex-col">
       {orders.map((order, index) => (
-        <section
-          key={order.id}
-          className={`w-full pb-4 mb-4 ${index !== orders.length - 1 ? 'border-b-black-1 border-b-4' : ''}`}
-        >
+        <section key={order.id} className={`w-full pb-4 mb-4 ${index !== orders.length - 1 ? 'border-b-black-1 border-b-4' : ''}`}>
           <button
             className="w-full flex items-center justify-between pb-2 px-4"
             onClick={() => navigate(`/mypage/order/orderDetailPersonal?orderId=${order.id}`)}
@@ -119,23 +111,15 @@ export default function OrderList({ orders, onExpire }: IOrderProps) {
                 {(osLabel || msLabel) && (
                   <div className="pb-4 flex justify-between items-center text-body-medium">
                     {/* 왼쪽: 주문 상태 */}
-                    <div>
-                      {osLabel && <span className={ORDER_STATUS_COLOR_MAP[osLabel]}>{osLabel}</span>}
-                    </div>
+                    <div>{osLabel && <span className={ORDER_STATUS_COLOR_MAP[osLabel]}>{osLabel}</span>}</div>
 
                     {/* 오른쪽: 매칭 상태 + 카운트다운 */}
                     <div className="flex items-center gap-2">
                       {msLabel && <span className={MATCH_STATUS_COLOR_MAP[msLabel]}>{msLabel}</span>}
-                      {isMatching && (
-                        <Countdown
-                          teamCreatedAt={(item as any).teamCreatedAt ?? null}
-                          onExpire={onExpire}
-                        />
-                      )}
+                      {isMatching && <Countdown teamCreatedAt={(item as any).teamCreatedAt ?? null} onExpire={onExpire} />}
                     </div>
                   </div>
                 )}
-
 
                 <OrderItem item={toReviewable(order, item)} show={false} />
               </div>

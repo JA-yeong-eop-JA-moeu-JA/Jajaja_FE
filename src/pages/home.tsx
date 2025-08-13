@@ -60,8 +60,7 @@ export default function Home() {
       // 140px 이상 내려갔을 때만 숨김
       if (currY > 140 && currY > lastY) {
         setScrollDir('down');
-      } 
-      else if (currY < lastY) {
+      } else if (currY < lastY) {
         setScrollDir('up');
       }
 
@@ -71,7 +70,6 @@ export default function Home() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastY]);
-
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -89,7 +87,6 @@ export default function Home() {
       </div>
 
       <div className="pt-15">
- 
         <section className="w-full">
           <Banner />
         </section>
