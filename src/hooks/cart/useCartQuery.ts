@@ -52,29 +52,29 @@ export const useCart = () => {
   const deleteMultipleMutation = useDeleteMultipleCartMutation();
 
   const addItem = useCallback(
-    (item: TCartItemRequest) => {
-      addMutation.mutate([item]);
+    (item: TCartItemRequest): Promise<any> => {
+      return addMutation.mutateAsync([item]);
     },
     [addMutation],
   );
 
   const updateItem = useCallback(
-    (item: TCartItemRequest) => {
-      addMutation.mutate([item]);
+    (item: TCartItemRequest): Promise<any> => {
+      return addMutation.mutateAsync([item]);
     },
     [addMutation],
   );
 
   const deleteItem = useCallback(
-    (params: TDeleteCartItemParams) => {
-      deleteMutation.mutate(params);
+    (params: TDeleteCartItemParams): Promise<any> => {
+      return deleteMutation.mutateAsync(params);
     },
     [deleteMutation],
   );
 
   const deleteSelectedItems = useCallback(
-    (items: TDeleteCartItemParams[]) => {
-      deleteMultipleMutation.mutate(items);
+    (items: TDeleteCartItemParams[]): Promise<any> => {
+      return deleteMultipleMutation.mutateAsync(items);
     },
     [deleteMultipleMutation],
   );

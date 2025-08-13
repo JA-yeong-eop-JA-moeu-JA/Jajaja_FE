@@ -38,7 +38,7 @@ interface ISelectedOption {
 
 export default function CartModal({ item, onUpdate }: ICartModalProps) {
   const { closeModal } = useModalStore();
-  const { updateItem, addItem, deleteItem, cartData, isAdding } = useCart();
+  const { addItem, deleteItem, cartData, isAdding } = useCart();
 
   const { data: optionsData, isLoading: isLoadingOptions } = useCartProductOptions(item.productId);
 
@@ -79,14 +79,13 @@ export default function CartModal({ item, onUpdate }: ICartModalProps) {
       const found = formattedOptions.find((option) => option.id === optionId);
       if (!found) return;
 
-      // 이미 있는 옵션인지 확인
       const existingIndex = selectedOptions.findIndex((opt) => opt.optionId === optionId);
 
       if (existingIndex >= 0) {
-        // 이미 있으면 수량 증가
-        setSelectedOptions((prev) => prev.map((opt, idx) => (idx === existingIndex ? { ...opt, quantity: opt.quantity + 1 } : opt)));
+        // 이미 있으면 alert, 수량은+-로 개별 조정해야함
+        alert(`${found.name} 옵션이 이미 선택되어 있습니다.`);
+        return;
       } else {
-        // 새 옵션 추가
         setSelectedOptions((prev) => [
           ...prev,
           {
@@ -101,12 +100,10 @@ export default function CartModal({ item, onUpdate }: ICartModalProps) {
     [formattedOptions, selectedOptions],
   );
 
-  // 수량 변경
   const handleQuantityChange = useCallback((index: number, offset: number) => {
     setSelectedOptions((prev) => prev.map((opt, idx) => (idx === index ? { ...opt, quantity: Math.max(1, opt.quantity + offset) } : opt)));
   }, []);
 
-  // 옵션 제거
   const handleRemoveOption = useCallback((index: number) => {
     setSelectedOptions((prev) => prev.filter((_, idx) => idx !== index));
   }, []);
@@ -119,30 +116,41 @@ export default function CartModal({ item, onUpdate }: ICartModalProps) {
     return selectedOptions.reduce((acc, opt) => acc + opt.quantity, 0);
   }, [selectedOptions]);
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     try {
-      currentProductCartItems.forEach((cartItem) => {
-        deleteItem({
+      console.log('장바구니 옵션 변경 시작:', {
+        기존옵션들: currentProductCartItems,
+        새로운옵션들: selectedOptions,
+      });
+
+      for (const cartItem of currentProductCartItems) {
+        console.log('삭제:', cartItem);
+        await deleteItem({
           productId: cartItem.productId,
           optionId: cartItem.optionId,
         });
-      });
+      }
 
-      selectedOptions.forEach((option) => {
-        addItem({
+      for (const option of selectedOptions) {
+        console.log('추가:', option);
+        await addItem({
           productId: item.productId,
           optionId: option.optionId,
           quantity: option.quantity,
         });
-      });
+      }
+
+      console.log('장바구니 옵션 변경 완료');
 
       onUpdate?.(item);
       closeModal();
     } catch (error) {
       console.error('장바구니 업데이트 실패:', error);
+      alert('장바구니 업데이트에 실패했습니다. 다시 시도해주세요.');
     }
   }, [selectedOptions, currentProductCartItems, deleteItem, addItem, item, onUpdate, closeModal]);
 
+  // 로딩
   if (isLoadingOptions) {
     return (
       <div className="h-full pb-2 flex flex-col gap-4 select-none">
@@ -156,7 +164,6 @@ export default function CartModal({ item, onUpdate }: ICartModalProps) {
     );
   }
 
-  // 옵션 없음
   if (!formattedOptions.length) {
     return (
       <div className="h-full pb-2 flex flex-col gap-4 select-none">
@@ -183,7 +190,6 @@ export default function CartModal({ item, onUpdate }: ICartModalProps) {
       <div className="px-4">
         <DropDown options={formattedOptions} value={0} onChange={({ id }) => handleAddOption(id)} />
       </div>
-
       <div className="flex-1 px-4 space-y-3 max-h-60 overflow-y-auto">
         {selectedOptions.map((option, index) => (
           <div key={`${option.optionId}-${index}`} className="bg-black-0 rounded p-4 relative">
@@ -209,7 +215,7 @@ export default function CartModal({ item, onUpdate }: ICartModalProps) {
         ))}
       </div>
 
-      <div className="px-4 py-3 bg-black-0 mx-4 rounded">
+      <div className="px-4 py-3 mx-4">
         <div className="flex justify-between items-center">
           <p className="text-small-medium">총 {totalQuantity}개</p>
           <p className="text-body-medium font-bold">{totalPrice.toLocaleString()} 원</p>
@@ -228,7 +234,6 @@ export default function CartModal({ item, onUpdate }: ICartModalProps) {
             rightVariant="right-orange"
             onLeftClick={closeModal}
             onRightClick={handleSave}
-            disabled={selectedOptions.length === 0}
           />
         )}
       </div>

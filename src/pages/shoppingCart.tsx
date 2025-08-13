@@ -246,18 +246,13 @@ export default function ShoppingCart() {
                       >
                         팀 참여
                       </Button>
-                      <Button
-                        kind="select-content"
-                        variant="outline-gray"
-                        className="flex-1 py-1"
-                        onClick={() => handleOptionChange(group.options[0])} // 첫 번째 옵션을 기준으로 모달 열기
-                      >
+                      <Button kind="select-content" variant="outline-gray" className="flex-1 py-1" onClick={() => handleOptionChange(group.options[0])}>
                         옵션 변경
                       </Button>
                     </div>
                   </div>
 
-                  <div className="px-4 py-3 bg-black-0 flex justify-between items-center">
+                  <div className="px-4 py-3 flex justify-between items-center">
                     <p className="text-small-medium text-black-4">총 {groupTotalQuantity}개</p>
                     <p className="text-body-medium">{groupTotalPrice.toLocaleString()} 원</p>
                   </div>
