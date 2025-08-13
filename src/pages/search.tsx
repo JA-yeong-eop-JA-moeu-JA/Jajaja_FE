@@ -185,11 +185,9 @@ export default function Search() {
 
   const isLoading = isCategoryMode ? categoryQuery.isLoading : keywordQuery.isLoading;
   const isError = isCategoryMode ? categoryQuery.isError : keywordQuery.isError;
-
-  const isSearchRoute = pathname.startsWith('/search');
   const hasKeyword = new URLSearchParams(search).has('keyword');
   const handleNavigate = () => {
-    if (isSearchRoute || hasKeyword) {
+    if (hasKeyword) {
       window.location.replace('/search');
     } else {
       navigate(-1);
