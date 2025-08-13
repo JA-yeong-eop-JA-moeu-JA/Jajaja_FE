@@ -9,7 +9,7 @@ import { getProductsByKeyword } from '@/apis/search/search';
 import { useCoreQuery } from '@/hooks/customQuery';
 
 // 허용 정렬값
-const SORTS = ['POPULAR', 'NEW', 'PRICE_ASC', 'REVIEW'] as const;
+const SORTS = ['POPULAR', 'NEW', 'LOW_PRICE', 'REVIEW'] as const;
 type TSort = (typeof SORTS)[number];
 
 // string → TCategorySort 안전 변환

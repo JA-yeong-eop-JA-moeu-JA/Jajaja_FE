@@ -1,8 +1,11 @@
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+import Storage from '@/utils/storage';
 
 import { useModalStore } from '@/stores/modalStore';
 import useHomeProduct from '@/hooks/home/useGetProduct';
+import useCategory from '@/hooks/onBoarding/useCategory';
 
 import SearchInput from '@/components/common/SearchInput';
 import BottomBar from '@/components/head_bottom/BottomBar';
@@ -15,13 +18,10 @@ import Recommand from '@/components/home/recommand';
 import { useAuth } from '@/context/AuthContext';
 
 export default function Home() {
-  // 로그인 유무 테스트 코드
-  const { isLoggedIn, user /*refetch*/ } = useAuth();
-  // 로그인 유무 알고 싶을 때
-  console.log('isLoggedIn:', isLoggedIn);
+  const { isLoggedIn } = useAuth();
+  const { mutate } = useCategory();
   // user 정보 알고 싶을 때
-  console.log('user:', user?.name);
-
+  // console.log('user:', user?.name);
   /*  refetch 호출로 user 정보 재요청(useUserInfo를 강제 호출하여 로그인 유무 확인)
   회원이어야만 작동하는 버튼 트리거에 넣으면 좋습니다
   useEffect(() => {
@@ -40,6 +40,13 @@ export default function Home() {
       mounted = false;
     };
   }, [refetch]); */
+  const called = useRef(false);
+  useEffect(() => {
+    if (!isLoggedIn || called.current || Storage.getServer()) return;
+    called.current = true;
+    Storage.setServer();
+    mutate({ businessCategoryId: Number(Storage.getCategory()) });
+  }, [isLoggedIn, mutate]);
 
   const [scrollDir, setScrollDir] = useState<'up' | 'down'>('up');
   const [lastY, setLastY] = useState(0);
@@ -52,15 +59,17 @@ export default function Home() {
       openModal('bottom-sheet');
     }
   }, [openModal]);
-
   useEffect(() => {
     const handleScroll = () => {
       const currY = window.scrollY;
 
-      // 140px 이상 내려갔을 때만 숨김
-      if (currY > 140 && currY > lastY) {
-        setScrollDir('down');
-      } else if (currY < lastY) {
+      if (currY > 140) {
+        if (currY > lastY + 5) {
+          setScrollDir('down');
+        } else if (currY < lastY - 5) {
+          setScrollDir('up');
+        }
+      } else {
         setScrollDir('up');
       }
 
@@ -75,18 +84,18 @@ export default function Home() {
     <div className="flex flex-col min-h-screen">
       <div
         className={`fixed top-0 left-0 right-0 z-50 bg-white transition-all duration-300
-                    max-w-screen-sm mx-auto
+                    max-w-[600px] mx-auto
                     ${scrollDir === 'down' ? '-translate-y-[104px] opacity-0 pointer-events-none' : 'translate-y-0 opacity-100 pointer-events-auto'}`}
       >
         <header className="px-4">
           <Header showSearch={false} />
         </header>
-        <header className="w-full pb-2.5 px-6 max-w-screen-sm mx-auto">
+        <header className="pb-2.5 px-4">
           <SearchInput value={''} onFocus={() => navigate('/search')} />
         </header>
       </div>
 
-      <div className="pt-15">
+      <div className="pt-26.5">
         <section className="w-full">
           <Banner />
         </section>

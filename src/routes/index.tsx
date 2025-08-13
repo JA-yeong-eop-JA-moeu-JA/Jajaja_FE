@@ -54,7 +54,6 @@ export const router = createBrowserRouter([
           { path: 'agreement', element: <Agreement /> },
           { path: 'coupon', element: <CouponsPage /> },
           { path: 'shoppingcart', element: <ShoppingCart /> },
-          { path: 'search', element: <Search /> },
           { path: 'board', element: <Board /> },
           { path: 'category', element: <CategoryPage /> },
           { path: 'product/:id', element: <Product /> },
@@ -68,6 +67,7 @@ export const router = createBrowserRouter([
         path: '/',
         element: <ProtectedLayout />,
         children: [
+          { path: 'search', element: <Search /> },
           { path: 'mypage', element: <MyPage /> },
           { path: 'mypage/me', element: <MyDetailPage /> },
           { path: 'mypage/me/profile', element: <Profile /> },

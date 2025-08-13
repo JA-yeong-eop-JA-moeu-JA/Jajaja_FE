@@ -11,6 +11,7 @@ import useGetProductDetail from '@/hooks/product/useGetProductDetail';
 
 import { Button } from '@/components/common/button';
 import ProductHeader from '@/components/head_bottom/ProductHeader';
+import Loading from '@/components/loading';
 import ReviewCard from '@/components/product/reviewCard';
 import StarRating from '@/components/product/starRating';
 
@@ -20,7 +21,7 @@ import Share from '@/assets/icons/share.svg?react';
 export default function Product() {
   const navigate = useNavigate();
 
-  const { data } = useGetProductDetail();
+  const { data, isLoading } = useGetProductDetail();
   const { id } = useParams<{ id: string }>();
   const { openModal } = useModalStore();
   const [fold, setFold] = useState(false);
@@ -42,7 +43,12 @@ export default function Product() {
       mode: 'team_join',
     });
   };
-
+  if (isLoading)
+    return (
+      <div className="w-full h-screen flex items-center justify-center">
+        <Loading />
+      </div>
+    );
   return (
     <div className="pb-16">
       <ProductHeader />

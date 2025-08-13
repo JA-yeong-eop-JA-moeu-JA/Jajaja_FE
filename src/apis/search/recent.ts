@@ -9,6 +9,6 @@ export const getRecent = async (): Promise<TGetRecent> => {
 };
 
 export const deleteRecent = async (keywordId: number): Promise<TCommonResponse<{}>> => {
-  const { data } = await axiosInstance.delete(`/api/search/recent-keywords/${keywordId}`);
+  const { data } = await axiosInstance.delete(`/api/search/recent-keywords/${keywordId}`, { optionalAuth: true });
   return data;
 };

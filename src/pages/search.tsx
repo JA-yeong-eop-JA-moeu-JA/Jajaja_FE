@@ -2,7 +2,7 @@ import 'react-indiana-drag-scroll/dist/style.css';
 
 import { type ChangeEvent, useEffect, useRef, useState } from 'react';
 import ScrollContainer from 'react-indiana-drag-scroll';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 import type { TCategorySort } from '@/types/category';
 
@@ -25,6 +25,7 @@ import Back from '@/assets/icons/back.svg?react';
 import Down from '@/assets/icons/down.svg?react';
 import NoResult from '@/assets/icons/noResult.svg?react';
 import Up from '@/assets/icons/up.svg?react';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Search() {
   const { data } = useGetKeyword();
@@ -35,16 +36,22 @@ export default function Search() {
   const [sortOption, setSortOption] = useState('인기순');
   const [change, setChange] = useState(false);
   const [inputValue, setValue] = useState('');
-
   const [isAsc, setIsAsc] = useState(true);
+  const { pathname, search } = useLocation();
 
-  const { data: recent } = useGetRecent();
+  const navigate = useNavigate();
+  const { isError: authError } = useAuth();
+  const { data: recent, refetch } = useGetRecent();
   const { mutate } = useDeleteRecent();
-
+  useEffect(() => {
+    if (!authError) {
+      refetch();
+    }
+  }, [authError, refetch]);
   useEffect(() => {
     const keyword = new URLSearchParams(location.search).get('keyword');
     setKeyword(keyword);
-  }, [location.search]);
+  }, [search]);
 
   const COLUMN_COUNT = 2;
   const rowsPerColumn = data ? Math.ceil(data?.result.keywords.length / COLUMN_COUNT) : 0;
@@ -54,16 +61,16 @@ export default function Search() {
   const isCategoryMode = !!subcategoryId;
   const SORT_ENUM_TO_LABEL: Record<TCategorySort, string> = {
     POPULAR: '인기순',
-    NEW: '신상품순',
-    PRICE_ASC: '낮은 가격순',
-    REVIEW: '리뷰순',
+    NEW: '최신상품순',
+    LOW_PRICE: '낮은 가격 순',
+    REVIEW: '리뷰 많은 순',
   };
 
   const labelToEnum = (label: string): TCategorySort => {
     const s = label.replace(/\s/g, '');
     if (s.includes('인기')) return 'POPULAR';
     if (s.includes('신상품') || s.includes('최신')) return 'NEW';
-    if (s.includes('낮은가격') || s.includes('가격낮')) return 'PRICE_ASC';
+    if (s.includes('낮은')) return 'LOW_PRICE';
     if (s.includes('리뷰')) return 'REVIEW';
     return 'NEW';
   };
@@ -148,7 +155,7 @@ export default function Search() {
       qs.delete('keyword');
     }
     qs.set('page', '0');
-    window.history.replaceState(null, '', `/search?${qs.toString()}`);
+    setSearchParams(qs, { replace: true });
   };
 
   const handleSortSelect = (value?: string) => {
@@ -179,11 +186,20 @@ export default function Search() {
   const isLoading = isCategoryMode ? categoryQuery.isLoading : keywordQuery.isLoading;
   const isError = isCategoryMode ? categoryQuery.isError : keywordQuery.isError;
 
+  const isSearchRoute = pathname.startsWith('/search');
+  const hasKeyword = new URLSearchParams(search).has('keyword');
+  const handleNavigate = () => {
+    if (isSearchRoute || hasKeyword) {
+      window.location.replace('/search');
+    } else {
+      navigate(-1);
+    }
+  };
   return (
     <>
       <header className="w-full pr-4 py-1 flex items-center">
-        <Back onClick={() => window.history.back()} />
-        <SearchInput value={inputValue} autoFocus onEnter={handleFilter} onChange={handleValue} onClick={() => handleFilter(inputValue)} />
+        <Back onClick={handleNavigate} />
+        <SearchInput value={inputValue} autoFocus onChange={handleValue} onEnter={handleFilter} onClick={handleFilter} />
       </header>
 
       {!change && (
@@ -191,9 +207,9 @@ export default function Search() {
           <section>
             <p className="text-subtitle-medium mb-2">최근 검색</p>
             <ScrollContainer className="flex w-full gap-2 overflow-x-auto cursor-grab pr-5" vertical={false}>
-              {recent?.result.length === 0 && <p className="text-body-regular text-black-4 py-2.5">최근 검색어가 없습니다.</p>}
+              {(!recent || recent?.result.length === 0) && <p className="text-body-regular text-black-4 py-2.5">최근 검색어가 없습니다.</p>}
               {recent?.result.map(({ id, keyword }) => (
-                <div key={id} className="shrink-0">
+                <div key={id} className="shrink-0" onClick={() => handleFilter(keyword)}>
                   <Tag msg={keyword} onDelete={() => handleDelete(id)} />
                 </div>
               ))}
