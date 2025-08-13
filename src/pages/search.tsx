@@ -37,7 +37,7 @@ export default function Search() {
   const [change, setChange] = useState(false);
   const [inputValue, setValue] = useState('');
   const [isAsc, setIsAsc] = useState(true);
-  const { pathname, search } = useLocation();
+  const { search } = useLocation();
 
   const navigate = useNavigate();
   const { isError: authError } = useAuth();
