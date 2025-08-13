@@ -1,3 +1,5 @@
+// components/orderDetail/OrderList.tsx
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import type { IOrder, IOrderItem } from '@/types/order/orderList';
@@ -10,9 +12,54 @@ import ChevronRight from '@/assets/ChevronRight2.svg';
 
 interface IOrderProps {
   orders: IOrder[];
+  onExpire?: () => void; // 만료 순간 refetch 등을 위해 부모에서 콜백 주입 가능
 }
 
-export default function OrderList({ orders }: IOrderProps) {
+/** 팀 매칭 유효시간(분) — BE와 합의된 값으로 변경 */
+const MATCH_TTL_MINUTES = 600;
+
+/** BE 상태(영문) → UI 라벨(한글) 매핑 */
+const MATCH_STATUS_LABEL_MAP: Record<'MATCHING' | 'MATCHED' | 'FAILED', keyof typeof MATCH_STATUS_COLOR_MAP> = {
+  MATCHING: '매칭 중',
+  MATCHED: '매칭 완료',
+  FAILED: '매칭 실패',
+};
+
+function getRemainMs(teamCreatedAt: string | null) {
+  if (!teamCreatedAt) return 0;
+  const start = new Date(teamCreatedAt).getTime();
+  const end = start + MATCH_TTL_MINUTES * 60_000;
+  return Math.max(0, end - Date.now());
+}
+
+function formatHMS(ms: number) {
+  const hh = String(Math.floor(ms / 3_600_000)).padStart(2, '0');
+  const mm = String(Math.floor((ms % 3_600_000) / 60_000)).padStart(2, '0');
+  const ss = String(Math.floor((ms % 60_000) / 1_000)).padStart(2, '0');
+  return `${hh}:${mm}:${ss}`;
+}
+
+function Countdown({ teamCreatedAt, onExpire }: { teamCreatedAt: string | null; onExpire?: () => void }) {
+  const [remain, setRemain] = useState<number>(() => getRemainMs(teamCreatedAt));
+
+  useEffect(() => {
+    setRemain(getRemainMs(teamCreatedAt));
+    const t = setInterval(() => {
+      const left = getRemainMs(teamCreatedAt);
+      setRemain(left);
+      if (left === 0) {
+        clearInterval(t);
+        onExpire?.();
+      }
+    }, 1000);
+    return () => clearInterval(t);
+  }, [teamCreatedAt, onExpire]);
+
+  if (!teamCreatedAt) return null;
+  return <span className="ml-2 text-xs text-gray-500">{remain === 0 ? '마감' : formatHMS(remain)}</span>;
+}
+
+export default function OrderList({ orders, onExpire }: IOrderProps) {
   const navigate = useNavigate();
 
   const toReviewable = (order: IOrder, item: IOrderItem): TReviewableOrderItem => {
@@ -42,13 +89,15 @@ export default function OrderList({ orders }: IOrderProps) {
             type TOSKey = keyof typeof ORDER_STATUS_COLOR_MAP;
             type TMSKey = keyof typeof MATCH_STATUS_COLOR_MAP;
 
-            const DEFAULT_OS: TOSKey = '결제 완료' as TOSKey;
-            const DEFAULT_MS: TMSKey = '매칭 완료' as TMSKey;
+            const DEFAULT_OS: TOSKey = '결제 완료';
+            const DEFAULT_MS: TMSKey = '매칭 완료';
 
-            const rawOs = (item as any).orderStatus as TOSKey | null | undefined;
-            const rawMs = (item as any).matchStatus as TMSKey | null | undefined;
-            const os = (rawOs ?? DEFAULT_OS) as TOSKey | undefined;
-            const ms = (rawMs ?? DEFAULT_MS) as TMSKey | undefined;
+            const osLabel = ((item as any).orderStatus ?? DEFAULT_OS) as TOSKey | undefined;
+
+            const beMs = (item as any).matchStatus as 'MATCHING' | 'MATCHED' | 'FAILED' | null | undefined;
+            const msLabel = (beMs ? MATCH_STATUS_LABEL_MAP[beMs] : DEFAULT_MS) as TMSKey | undefined;
+
+            const isMatching = beMs === 'MATCHING';
 
             return (
               <div
@@ -59,13 +108,19 @@ export default function OrderList({ orders }: IOrderProps) {
                   navigate(`/mypage/order/orderDetailPersonal?orderId=${order.id}`);
                 }}
               >
-                {/* 상태 텍스트 */}
-                {(os || ms) && (
-                  <div className="pb-2 flex justify-between text-body-medium">
-                    {os && <span className={ORDER_STATUS_COLOR_MAP[os]}>{os}</span>}
-                    {ms && <span className={MATCH_STATUS_COLOR_MAP[ms]}>{ms}</span>}
+                {(osLabel || msLabel) && (
+                  <div className="pb-4 flex justify-between items-center text-body-medium">
+                    {/* 왼쪽: 주문 상태 */}
+                    <div>{osLabel && <span className={ORDER_STATUS_COLOR_MAP[osLabel]}>{osLabel}</span>}</div>
+
+                    {/* 오른쪽: 매칭 상태 + 카운트다운 */}
+                    <div className="flex items-center gap-2">
+                      {msLabel && <span className={MATCH_STATUS_COLOR_MAP[msLabel]}>{msLabel}</span>}
+                      {isMatching && <Countdown teamCreatedAt={(item as any).teamCreatedAt ?? null} onExpire={onExpire} />}
+                    </div>
                   </div>
                 )}
+
                 <OrderItem item={toReviewable(order, item)} show={false} />
               </div>
             );

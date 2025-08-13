@@ -8,6 +8,7 @@ function normalizeItems(items: any[]): IOrderProduct[] {
     orderProductId: it.orderProductId,
     status: it.status,
     teamStatus: it.teamStatus ?? it.matchingStatus,
+    teamCreatedAt: it.teamCreatedAt ?? null,
     product: {
       id: it.product.id,
       image: it.product.image,

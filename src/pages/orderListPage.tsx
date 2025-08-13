@@ -4,10 +4,7 @@ import PageHeader from '@/components/head_bottom/PageHeader';
 import OrderList from '@/components/orderDetail/OrderList';
 
 export default function OrderListPage() {
-  const { data: orders = [], isLoading, isError } = useMyOrders();
-  if (import.meta.env.DEV) {
-    console.log('[OrderListPage] orders len:', orders.length, 'first:', orders[0]);
-  }
+  const { data: orders = [], isLoading, isError, refetch } = useMyOrders();
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -23,7 +20,7 @@ export default function OrderListPage() {
         ) : orders.length === 0 ? (
           <p className="text-center text-black-3">주문이 없습니다.</p>
         ) : (
-          <OrderList orders={orders} />
+          <OrderList orders={orders} onExpire={refetch} />
         )}
       </main>
     </div>

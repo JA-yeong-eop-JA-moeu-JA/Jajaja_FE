@@ -56,13 +56,15 @@ export default function Home() {
   useEffect(() => {
     const handleScroll = () => {
       const currY = window.scrollY;
-      if (currY > lastY + 5) {
+
+      // 140px 이상 내려갔을 때만 숨김
+      if (currY > 140 && currY > lastY) {
         setScrollDir('down');
-        setLastY(currY);
-      } else if (currY < lastY - 5) {
+      } else if (currY < lastY) {
         setScrollDir('up');
-        setLastY(currY);
       }
+
+      setLastY(currY);
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -76,15 +78,15 @@ export default function Home() {
                     max-w-screen-sm mx-auto
                     ${scrollDir === 'down' ? '-translate-y-[104px] opacity-0 pointer-events-none' : 'translate-y-0 opacity-100 pointer-events-auto'}`}
       >
-        <header className="px-3">
+        <header className="px-4">
           <Header showSearch={false} />
+        </header>
+        <header className="w-full pb-2.5 px-6 max-w-screen-sm mx-auto">
+          <SearchInput value={''} onFocus={() => navigate('/search')} />
         </header>
       </div>
 
       <div className="pt-15">
-        <header className="w-full pb-2.5 max-w-screen-sm mx-auto">
-          <SearchInput value={''} onFocus={() => navigate('/search')} />
-        </header>
         <section className="w-full">
           <Banner />
         </section>
