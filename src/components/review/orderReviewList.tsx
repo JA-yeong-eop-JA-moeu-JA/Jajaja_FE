@@ -15,7 +15,7 @@ export default function OrderReviewList({ orders }: IOrderProps) {
         <section key={order.id} className="w-full">
           <p className="pt-3 pb-5 text-subtitle-medium">{format(new Date(order.date), 'yy.MM.dd.')}</p>
           {order.items.map((item) => (
-            <OrderItem key={order.id} item={item} show={true} />
+            <OrderItem key={item.orderProductId} item={item} show={true} />
           ))}
         </section>
       ))}
