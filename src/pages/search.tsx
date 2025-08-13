@@ -31,9 +31,7 @@ export default function Search() {
   const [searchParams, setSearchParams] = useSearchParams();
   const menuRef = useRef<HTMLDivElement>(null);
   const [keywordParam, setKeyword] = useState<string | null>(null);
-  const [sort, setSort] = useState<TCategorySort>(
-    (searchParams.get('sort') as TCategorySort) || 'NEW'
-  );
+  const [sort, setSort] = useState<TCategorySort>((searchParams.get('sort') as TCategorySort) || 'NEW');
   const [sortOption, setSortOption] = useState('인기순');
   const [change, setChange] = useState(false);
   const [inputValue, setValue] = useState('');
@@ -128,15 +126,11 @@ export default function Search() {
 
   useEffect(() => {
     const s = (searchParams.get('sort') as TCategorySort) || 'NEW';
-
-    // enum 동기화
     if (s !== sort) setSort(s);
 
-    // 라벨 동기화
     const label = SORT_ENUM_TO_LABEL[s] ?? '신상품순';
     if (label !== sortOption) setSortOption(label);
-  }, [searchParams]); // (필요시 sort, sortOption 추가)
-
+  }, [searchParams]);
 
   const handleDelete = async (id: number) => mutate(id);
 
@@ -159,15 +153,10 @@ export default function Search() {
 
   const handleSortSelect = (value?: string) => {
     if (!value) return;
-
-    // 라벨 상태 갱신
     setSortOption(value);
 
-    // enum으로 변환해 API/URL에 쓰기
     const nextSort = labelToEnum(value);
     setSort(nextSort);
-
-    // ⚠️ window.history 대신 라우터 setter 사용 (검색파라미터 반영 보장)
     const qs = new URLSearchParams(searchParams);
     qs.set('sort', nextSort);
     qs.set('page', '0');
@@ -176,8 +165,6 @@ export default function Search() {
     setIsAsc(true);
     setChange(true);
   };
-
-
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -189,7 +176,6 @@ export default function Search() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // 로딩/에러 처리
   const isLoading = isCategoryMode ? categoryQuery.isLoading : keywordQuery.isLoading;
   const isError = isCategoryMode ? categoryQuery.isError : keywordQuery.isError;
 
