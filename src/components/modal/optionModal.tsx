@@ -167,11 +167,19 @@ export default function OptionModal({ type }: { type?: string }) {
           <Cart />
         </div>
         {isTeam ? (
-          <button className="w-full h-12 flex justify-center items-center rounded-sm text-body-medium text-white bg-black" onClick={handleIndividualPurchase}>
+          <button
+            className="w-full h-12 flex justify-center items-center rounded-sm text-body-medium text-white bg-black disabled:opacity-50"
+            disabled={selectedItems.length === 0}
+            onClick={handleIndividualPurchase}
+          >
             1인 구매하기
           </button>
         ) : (
-          <button className="w-full h-12 flex justify-center items-center rounded-sm text-body-medium text-white bg-orange" onClick={handleTeamCreate}>
+          <button
+            className="w-full h-12 flex justify-center items-center rounded-sm text-body-medium text-white bg-orange disabled:opacity-50"
+            disabled={selectedItems.length === 0}
+            onClick={handleTeamCreate}
+          >
             팀 생성하기
           </button>
         )}

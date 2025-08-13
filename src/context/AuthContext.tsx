@@ -15,7 +15,7 @@ interface IAuthContextType {
 
 const AuthContext = createContext<IAuthContextType | null>(null);
 
-const PROTECTED_PREFIXES = ['/mypage', '/notifications', '/payment', '/address'];
+const PROTECTED_PREFIXES = ['/mypage', '/notifications', '/payment', '/address', '/search'];
 
 export function AuthProvider({ children }: PropsWithChildren) {
   const { pathname } = useLocation();
@@ -23,7 +23,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const { data, isError, isLoading, refetch } = useUserInfo({ enabled: isProtected });
 
   const user = data?.result ?? null;
-  const isLoggedIn = !!user;
+  const isLoggedIn = !!user || isError;
 
   return <AuthContext.Provider value={{ user, isLoggedIn, isLoading, isError, refetch }}>{children}</AuthContext.Provider>;
 }

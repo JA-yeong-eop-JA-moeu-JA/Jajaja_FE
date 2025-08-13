@@ -83,7 +83,7 @@ export default function ReviewCard({ review, isLike, imageUrls }: TGetReviews) {
       <section className="flex items-center gap-2">
         {imageUrls.slice(0, 4).map((img, idx) => (
           <div key={idx} className="relative">
-            <img src={img} onClick={() => openModal('image', { src: img, images: imageUrls })} />
+            <img className="size-19" src={img} onClick={() => openModal('image', { src: img, images: imageUrls })} />
             {idx === 3 && review.imagesCount > 4 && (
               <div
                 className="flex justify-center items-center text-white text-body-regular absolute top-0 left-0 bg-[#00000099] w-full h-full"

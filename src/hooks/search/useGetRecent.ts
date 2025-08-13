@@ -4,7 +4,10 @@ import { getRecent } from '@/apis/search/recent';
 
 import { useCoreQuery } from '@/hooks/customQuery';
 
+import { useAuth } from '@/context/AuthContext';
+
 export default function useGetRecent() {
-  const { data } = useCoreQuery(QUERY_KEYS.GET_RECENT_SEARCH, () => getRecent());
-  return { data };
+  const { isError } = useAuth();
+  const { data, refetch } = useCoreQuery(QUERY_KEYS.GET_RECENT_SEARCH, () => getRecent(), { enabled: !isError, retry: false });
+  return { data, refetch };
 }

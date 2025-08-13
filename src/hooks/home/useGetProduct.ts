@@ -5,10 +5,11 @@ import { getHomeProduct } from '@/apis/home/product';
 
 import { useCoreQuery } from '@/hooks/customQuery';
 
+import { useAuth } from '@/context/AuthContext';
+
 export default function useHomeProduct() {
-  const hasAccessToken = document.cookie.includes('accessToken');
-  const category = Number(Storage.getCategory());
-  const categoryId = hasAccessToken ? undefined : category;
-  const { data } = useCoreQuery(QUERY_KEYS.GET_HOME_PRODUCT, () => getHomeProduct({ categoryId: categoryId }));
+  const { isLoggedIn } = useAuth();
+  const category = isLoggedIn ? undefined : Number(Storage.getCategory());
+  const { data } = useCoreQuery(QUERY_KEYS.GET_HOME_PRODUCT, () => getHomeProduct({ categoryId: category }));
   return { data };
 }
