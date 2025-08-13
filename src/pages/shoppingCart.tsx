@@ -53,6 +53,14 @@ const convertToCartItem = (apiItem: TCartProduct): ICartItem => ({
   productThumbnail: '',
 });
 
+interface IGroupedCartItem {
+  productId: number;
+  productName: string;
+  brand: string;
+  imageUrl: string;
+  options: ICartItem[];
+}
+
 export default function ShoppingCart() {
   const navigate = useNavigate();
   const { openModal } = useModalStore();
@@ -64,7 +72,32 @@ export default function ShoppingCart() {
     return cartData.products.map(convertToCartItem);
   }, [cartData?.products]);
 
-  const productIds = useMemo(() => cartList.map((item) => item.productId.toString()), [cartList]);
+  // productId기준으로 상품별 그룹화
+  const groupedCartItems = useMemo(() => {
+    const groups: Record<number, IGroupedCartItem> = {};
+
+    cartList.forEach((item) => {
+      if (!groups[item.productId]) {
+        groups[item.productId] = {
+          productId: item.productId,
+          productName: item.productName,
+          brand: item.brand,
+          imageUrl: item.imageUrl,
+          options: [],
+        };
+      }
+      groups[item.productId].options.push(item);
+    });
+
+    // 옵션명 순으로 정렬
+    Object.values(groups).forEach((group) => {
+      group.options.sort((a, b) => a.optionName.localeCompare(b.optionName));
+    });
+
+    return Object.values(groups).sort((a, b) => a.productName.localeCompare(b.productName));
+  }, [cartList]);
+
+  const productIds = useMemo(() => cartList.map((item) => `${item.productId}-${item.optionId}`), [cartList]);
 
   const { checkedItems, initialize, toggle, toggleAll, isAllChecked, reset } = useProductCheckboxStore();
 
@@ -74,7 +107,8 @@ export default function ShoppingCart() {
 
   const totalPrice = useMemo(() => {
     return cartList.reduce((acc: number, product: ICartItem) => {
-      if (checkedItems[product.productId]) {
+      const itemKey = `${product.productId}-${product.optionId}`;
+      if (checkedItems[itemKey]) {
         return acc + product.totalPrice;
       }
       return acc;
@@ -87,7 +121,10 @@ export default function ShoppingCart() {
 
   const handleDeleteSelected = useCallback(() => {
     const itemsToDelete = cartList
-      .filter((product) => checkedItems[product.productId])
+      .filter((product) => {
+        const itemKey = `${product.productId}-${product.optionId}`;
+        return checkedItems[itemKey];
+      })
       .map((product) => ({
         productId: product.productId,
         optionId: product.optionId,
@@ -114,8 +151,9 @@ export default function ShoppingCart() {
   }, [toggleAll, isAllChecked]);
 
   const handleToggleItem = useCallback(
-    (productId: string) => {
-      toggle(productId);
+    (productId: number, optionId: number) => {
+      const itemKey = `${productId}-${optionId}`;
+      toggle(itemKey);
     },
     [toggle],
   );
@@ -176,37 +214,56 @@ export default function ShoppingCart() {
               </button>
             </section>
 
-            {cartList.map((product) => (
-              <section key={`${product.productId}-${product.optionId}`} className="w-full px-4 py-5 border-b-4 border-black-0">
-                <div className="flex items-start gap-3">
-                  <BaseCheckbox checked={checkedItems[product.productId] || false} onClick={() => handleToggleItem(product.productId.toString())} />
-                  <div className="flex-1">
-                    <OrderItem item={product} show={false} showPrice={false} />
+            {groupedCartItems.map((group) => {
+              const groupTotalPrice = group.options.reduce((acc, option) => acc + option.totalPrice, 0);
+              const groupTotalQuantity = group.options.reduce((acc, option) => acc + option.quantity, 0);
+
+              return (
+                <section key={group.productId} className="w-full border-b-4 border-black-0">
+                  {group.options.map((product, index) => {
+                    const itemKey = `${product.productId}-${product.optionId}`;
+                    const isChecked = checkedItems[itemKey] || false;
+
+                    return (
+                      <div key={itemKey} className={`px-4 py-5 ${index < group.options.length - 1 ? 'border-b border-black-1' : ''}`}>
+                        <div className="flex items-start gap-3">
+                          <BaseCheckbox checked={isChecked} onClick={() => handleToggleItem(product.productId, product.optionId)} />
+                          <div className="flex-1">
+                            <OrderItem item={product} show={false} showPrice={false} />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  <div className="px-4 pb-3">
+                    <div className="flex w-full gap-2">
+                      <Button
+                        kind="select-content"
+                        variant={group.options.some((option) => option.teamAvailable) ? 'outline-orange' : 'outline-gray'}
+                        className={`flex-1 py-1 ${!group.options.some((option) => option.teamAvailable) ? 'border-black-1 text-black-2' : ''}`}
+                        disabled={!group.options.some((option) => option.teamAvailable)}
+                      >
+                        팀 참여
+                      </Button>
+                      <Button
+                        kind="select-content"
+                        variant="outline-gray"
+                        className="flex-1 py-1"
+                        onClick={() => handleOptionChange(group.options[0])} // 첫 번째 옵션을 기준으로 모달 열기
+                      >
+                        옵션 변경
+                      </Button>
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex w-full gap-2 mt-3">
-                  <Button
-                    kind="select-content"
-                    variant={product.teamAvailable ? 'outline-orange' : 'outline-gray'}
-                    className={`flex-1 py-1 ${!product.teamAvailable ? 'border-black-1 text-black-2' : ''}`}
-                    disabled={!product.teamAvailable}
-                  >
-                    팀 참여
-                  </Button>
-                  <Button kind="select-content" variant="outline-gray" className="flex-1 py-1" onClick={() => handleOptionChange(product)}>
-                    옵션 변경
-                  </Button>
-                </div>
-
-                <div className="flex justify-end items-baseline gap-2 mt-3 w-full">
-                  {product.originalPrice !== product.price && (
-                    <p className="text-black-3 text-small-regular line-through">{product.originalPrice.toLocaleString()} 원</p>
-                  )}
-                  <p className="text-body-medium">{product.totalPrice.toLocaleString()} 원</p>
-                </div>
-              </section>
-            ))}
+                  <div className="px-4 py-3 bg-black-0 flex justify-between items-center">
+                    <p className="text-small-medium text-black-4">총 {groupTotalQuantity}개</p>
+                    <p className="text-body-medium">{groupTotalPrice.toLocaleString()} 원</p>
+                  </div>
+                </section>
+              );
+            })}
           </>
         )}
       </div>

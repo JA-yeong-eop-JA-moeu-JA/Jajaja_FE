@@ -1,5 +1,6 @@
-import { axiosInstance } from '@/apis/axiosInstance';
 import type { TGetCartResponse, TCartItemRequest, TCartMutationResponse, TDeleteCartItemParams } from '@/types/cart/TCart';
+
+import { axiosInstance } from '@/apis/axiosInstance';
 
 export const getCartItems = async (): Promise<TGetCartResponse> => {
   const response = await axiosInstance.get<TGetCartResponse>('/api/carts/');
