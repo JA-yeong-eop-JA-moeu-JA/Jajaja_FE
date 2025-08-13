@@ -15,7 +15,7 @@ interface IAuthContextType {
 
 const AuthContext = createContext<IAuthContextType | null>(null);
 
-const PROTECTED_PREFIXES = ['/mypage', '/notifications', '/payment'];
+const PROTECTED_PREFIXES = ['/mypage', '/notifications', '/payment', '/address'];
 
 export function AuthProvider({ children }: PropsWithChildren) {
   const { pathname } = useLocation();
