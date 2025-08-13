@@ -28,7 +28,6 @@ import WriteReview from '@/pages/mypage/writeReview';
 import Notifications from '@/pages/notifications';
 import OnBoarding from '@/pages/onBoarding';
 import OrderDetailPersonal from '@/pages/orderDetailPersonal';
-import OrderDetailTeam from '@/pages/orderDetailTeam';
 import OrderList from '@/pages/orderListPage';
 import Payment from '@/pages/payment';
 import PhotoReview from '@/pages/photoReview';
