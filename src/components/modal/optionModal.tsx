@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'sonner';
+
+import type { TOrderType, TPaymentData, TPaymentItem } from '@/types/cart/TCart';
 
 import { useModalStore } from '@/stores/modalStore';
+import { useCart } from '@/hooks/cart/useCartQuery';
 import useGetOption from '@/hooks/product/useGetOption';
-import useMakeTeam from '@/hooks/product/useMakeTeam';
 
 import DropDown from './dropDown';
 
@@ -18,9 +21,20 @@ export default function OptionModal({ type }: { type?: string }) {
   const { closeModal } = useModalStore();
   const { id: product } = useParams<{ id: string }>();
   const productId = Number(product);
-  const { mutate } = useMakeTeam();
-  const [selectedItems, setSelectedItems] = useState<{ id: number; name: string; originPrice: number; unitPrice: number; quantity: number }[]>([]);
+  const { addItem } = useCart();
+
+  const [selectedItems, setSelectedItems] = useState<
+    {
+      id: number;
+      name: string;
+      originPrice: number;
+      unitPrice: number;
+      quantity: number;
+    }[]
+  >([]);
+
   const isTeam = type === 'team';
+
   const handleSelect = (selectedId: number) => {
     const found = data?.result.find(({ id: optionId }) => optionId === selectedId);
     if (!found) return;
@@ -34,21 +48,79 @@ export default function OptionModal({ type }: { type?: string }) {
       }
     });
   };
+
   const handleCalculate = (id: number, offset: number) => {
     setSelectedItems((prev) => prev.map((item) => (item.id === id ? { ...item, quantity: Math.max(item.quantity + offset, 1) } : item)));
   };
+
   const handleRemove = (id: number) => {
     setSelectedItems((prev) => prev.filter((item) => item.id !== id));
   };
-  const handleTeam = () => {
-    mutate({ productId });
+
+  const handleAddToCart = async () => {
+    if (selectedItems.length === 0) {
+      toast.error('옵션을 선택해주세요');
+      return;
+    }
+
+    try {
+      for (const item of selectedItems) {
+        await addItem({
+          productId,
+          optionId: item.id,
+          quantity: item.quantity,
+          unitPrice: isTeam ? item.unitPrice : item.originPrice,
+        });
+      }
+      closeModal();
+      toast.success('장바구니에 상품이 담겼습니다');
+    } catch (error) {
+      console.error('Cart add failed:', error);
+      toast.error('장바구니 담기에 실패했습니다');
+    }
+  };
+
+  const handleDirectPurchase = (orderType: TOrderType) => {
+    if (selectedItems.length === 0) {
+      toast.error('옵션을 선택해주세요');
+      return;
+    }
+
+    const paymentItems: TPaymentItem[] = selectedItems.map((item) => ({
+      id: 0, // 장바구니에 없는 상품이므로 0
+      productId,
+      optionId: item.id,
+      quantity: item.quantity,
+      unitPrice: isTeam ? item.unitPrice : item.originPrice,
+      teamPrice: item.unitPrice,
+      individualPrice: item.originPrice,
+      productName: data?.result.find((opt) => opt.id === item.id)?.name || '',
+      optionName: item.name,
+      productThumbnail: '',
+    }));
+
+    const paymentData: TPaymentData = {
+      orderType,
+      selectedItems: paymentItems,
+    };
+
+    navigate('/payment', { state: paymentData });
     closeModal();
+  };
+
+  const handleTeamCreate = () => {
+    handleDirectPurchase('team_create');
+  };
+
+  const handleIndividualPurchase = () => {
+    handleDirectPurchase('individual');
   };
 
   const totalQuantity = selectedItems.reduce((acc, item) => acc + item.quantity, 0);
   const originTotalPrice = selectedItems.reduce((acc, item) => acc + item.originPrice * item.quantity, 0);
   const unitTotalPrice = selectedItems.reduce((acc, item) => acc + item.unitPrice * item.quantity, 0);
   const diff = originTotalPrice - unitTotalPrice;
+
   return (
     <div className="h-full px-4 pb-2 flex flex-col gap-7 select-none">
       <div className="flex flex-col gap-2">
@@ -91,21 +163,15 @@ export default function OptionModal({ type }: { type?: string }) {
       </div>
 
       <div className="flex items-center gap-2">
-        <div
-          className="min-w-16 h-12 flex items-center justify-center rounded-sm border border-black-4"
-          onClick={() => {
-            closeModal();
-            navigate('/shoppingcart');
-          }}
-        >
+        <div className="min-w-16 h-12 flex items-center justify-center rounded-sm border border-black-4 cursor-pointer" onClick={handleAddToCart}>
           <Cart />
         </div>
         {isTeam ? (
-          <button className="w-full h-12 flex justify-center items-center rounded-sm text-body-medium text-white bg-black" onClick={() => closeModal()}>
+          <button className="w-full h-12 flex justify-center items-center rounded-sm text-body-medium text-white bg-black" onClick={handleIndividualPurchase}>
             1인 구매하기
           </button>
         ) : (
-          <button className="w-full h-12 flex justify-center items-center rounded-sm text-body-medium text-white bg-orange" onClick={handleTeam}>
+          <button className="w-full h-12 flex justify-center items-center rounded-sm text-body-medium text-white bg-orange" onClick={handleTeamCreate}>
             팀 생성하기
           </button>
         )}

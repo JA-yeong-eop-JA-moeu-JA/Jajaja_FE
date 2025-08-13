@@ -8,7 +8,6 @@ import { Timer } from '@/utils/timer';
 
 import { useModalStore } from '@/stores/modalStore';
 import useGetProductDetail from '@/hooks/product/useGetProductDetail';
-import useJoinTeam from '@/hooks/product/useJoinTeam';
 
 import { Button } from '@/components/common/button';
 import ProductHeader from '@/components/head_bottom/ProductHeader';
@@ -21,13 +20,13 @@ import Share from '@/assets/icons/share.svg?react';
 export default function Product() {
   const navigate = useNavigate();
 
-  const { mutate } = useJoinTeam();
   const { data } = useGetProductDetail();
   const { id } = useParams<{ id: string }>();
   const { openModal } = useModalStore();
   const [fold, setFold] = useState(false);
   const [showNav, setShowNav] = useState(false);
   const shortReview = REVIEW_LIST.slice(0, 3);
+
   useEffect(() => {
     const handleScroll = () => {
       setShowNav(window.scrollY > 0);
@@ -36,6 +35,14 @@ export default function Product() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleTeamJoinWithModal = (teamId: number) => {
+    openModal('bottom-drawer-team', {
+      teamId,
+      mode: 'team_join',
+    });
+  };
+
   return (
     <div className="pb-16">
       <ProductHeader />
@@ -92,7 +99,7 @@ export default function Product() {
               </div>
               <div className="flex items-center gap-3">
                 {expireAt && <Timer expireAt={expireAt} />}
-                <button className="px-4 py-2 rounded-sm text-body-regular border-1 border-green-hover" onClick={() => mutate(teamId)}>
+                <button className="px-4 py-2 rounded-sm text-body-regular border-1 border-green-hover" onClick={() => handleTeamJoinWithModal(teamId)}>
                   참여
                 </button>
               </div>

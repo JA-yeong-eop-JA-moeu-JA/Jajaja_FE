@@ -3,11 +3,13 @@ import type { TCommonResponse } from '@/types/common';
 export type TOptionRequest = {
   productId: number;
 };
-export type TOption = {
+export type TProductOption = {
   id: number;
   name: string;
   originPrice: number;
   unitPrice: number;
 };
 
-export type TGetOptionList = TCommonResponse<TOption[]>;
+export type TOption = TProductOption;
+
+export type TGetOptionList = TCommonResponse<TProductOption[]>;

@@ -17,6 +17,10 @@ export type TCartProduct = {
   unitPrice: number;
   totalPrice: number;
   teamAvailable: boolean;
+  // 팀 구매 관련 필드
+  teamPrice?: number;
+  individualPrice?: number;
+  discountRate?: number;
 };
 
 export type TCoupon = {
@@ -53,7 +57,7 @@ export type TCartItemRequest = {
   optionId: number;
   quantity: number;
   unitPrice?: number;
-  totalPrice?: number; // 서버 추가 예정 (Todo: 필수 필드로 변경)
+  totalPrice?: number;
 };
 
 export type TCartMutationResponse = TCommonResponse<string>;
@@ -61,4 +65,26 @@ export type TCartMutationResponse = TCommonResponse<string>;
 export type TDeleteCartItemParams = {
   productId: number;
   optionId?: number;
+};
+
+// 팀 구매 관련 새 타입들
+export type TOrderType = 'individual' | 'team_create' | 'team_join';
+
+export type TPaymentItem = {
+  id: number; // 장바구니 아이템 ID
+  productId: number;
+  optionId: number;
+  quantity: number;
+  unitPrice: number;
+  teamPrice?: number;
+  individualPrice?: number;
+  productName: string;
+  optionName: string;
+  productThumbnail: string;
+};
+
+export type TPaymentData = {
+  orderType: TOrderType;
+  selectedItems: TPaymentItem[];
+  teamId?: number;
 };

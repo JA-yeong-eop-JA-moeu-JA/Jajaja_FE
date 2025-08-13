@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
-import type { TCartProduct } from '@/types/cart/TCart';
+import type { TCartProduct, TPaymentData, TPaymentItem } from '@/types/cart/TCart';
 
 import { useModalStore } from '@/stores/modalStore';
 import { useProductCheckboxStore } from '@/stores/productCheckboxStore';
 import { useCart } from '@/hooks/cart/useCartQuery';
+import { useTeamJoinFromCart } from '@/hooks/team/useTeamJoinCart';
 
 import { Button } from '@/components/common/button';
 import BaseCheckbox from '@/components/common/checkbox';
@@ -34,7 +36,6 @@ export interface ICartItem {
   teamAvailable: boolean;
 }
 
-// 기존 인터페이스로 변환
 const convertToCartItem = (apiItem: TCartProduct): ICartItem => ({
   id: apiItem.id,
   productId: apiItem.productId,
@@ -66,13 +67,13 @@ export default function ShoppingCart() {
   const { openModal } = useModalStore();
 
   const { cartData, isLoading, isError, deleteSelectedItems, isDeletingMultiple, refetch } = useCart();
+  const { mutate: joinTeamFromCartMutation, isPending: isJoiningTeam } = useTeamJoinFromCart();
 
   const cartList = useMemo(() => {
     if (!cartData?.products) return [];
     return cartData.products.map(convertToCartItem);
   }, [cartData?.products]);
 
-  // productId기준으로 상품별 그룹화
   const groupedCartItems = useMemo(() => {
     const groups: Record<number, IGroupedCartItem> = {};
 
@@ -89,7 +90,6 @@ export default function ShoppingCart() {
       groups[item.productId].options.push(item);
     });
 
-    // 옵션명 순으로 정렬
     Object.values(groups).forEach((group) => {
       group.options.sort((a, b) => a.optionName.localeCompare(b.optionName));
     });
@@ -164,6 +164,58 @@ export default function ShoppingCart() {
       message: '장바구니에서 상품을 삭제할까요?',
     });
   }, [openModal, handleDeleteSelected]);
+
+  const handleTeamJoin = useCallback(
+    (productId: number) => {
+      const selectedOptions = groupedCartItems
+        .find((group) => group.productId === productId)
+        ?.options.filter((option) => {
+          const itemKey = `${option.productId}-${option.optionId}`;
+          return checkedItems[itemKey];
+        });
+
+      if (!selectedOptions || selectedOptions.length === 0) {
+        toast.error('구매할 상품을 선택해주세요');
+        return;
+      }
+
+      // 팀 참여 API 호출 (성공 시 자동으로 결제 페이지 이동)
+      joinTeamFromCartMutation(productId);
+    },
+    [groupedCartItems, checkedItems, joinTeamFromCartMutation],
+  );
+
+  const handleIndividualPurchase = useCallback(() => {
+    const selectedItems = cartList.filter((product) => {
+      const itemKey = `${product.productId}-${product.optionId}`;
+      return checkedItems[itemKey];
+    });
+
+    if (selectedItems.length === 0) {
+      toast.error('구매할 상품을 선택해주세요');
+      return;
+    }
+
+    const paymentItems: TPaymentItem[] = selectedItems.map((item) => ({
+      id: item.id,
+      productId: item.productId,
+      optionId: item.optionId,
+      quantity: item.quantity,
+      unitPrice: item.price,
+      teamPrice: item.unitPrice,
+      individualPrice: item.price,
+      productName: item.productName,
+      optionName: item.optionName,
+      productThumbnail: item.imageUrl,
+    }));
+
+    const paymentData: TPaymentData = {
+      orderType: 'individual',
+      selectedItems: paymentItems,
+    };
+
+    navigate('/payment', { state: paymentData });
+  }, [cartList, checkedItems, navigate]);
 
   if (isLoading) {
     return <Loading />;
@@ -242,10 +294,10 @@ export default function ShoppingCart() {
                         kind="select-content"
                         variant={group.options.some((option) => option.teamAvailable) ? 'outline-orange' : 'outline-gray'}
                         className={`flex-1 py-1 ${!group.options.some((option) => option.teamAvailable) ? 'border-black-1 text-black-2' : ''}`}
-                        onClick={() => navigate('/payment')}
-                        disabled={!group.options.some((option) => option.teamAvailable)}
+                        onClick={() => handleTeamJoin(group.productId)}
+                        disabled={!group.options.some((option) => option.teamAvailable) || isJoiningTeam}
                       >
-                        팀 참여
+                        {isJoiningTeam ? '참여 중...' : '팀 참여'}
                       </Button>
                       <Button kind="select-content" variant="outline-gray" className="flex-1 py-1" onClick={() => handleOptionChange(group.options[0])}>
                         옵션 변경
@@ -266,7 +318,7 @@ export default function ShoppingCart() {
 
       {!isCartEmpty && (
         <div className="fixed bottom-14 left-0 right-0 w-full max-w-[600px] mx-auto px-4">
-          <Button kind="basic" variant="solid-orange" className="w-full" disabled={totalPrice === 0} onClick={() => navigate('/payment')}>
+          <Button kind="basic" variant="solid-orange" className="w-full" disabled={totalPrice === 0} onClick={handleIndividualPurchase}>
             {totalPrice.toLocaleString()} 원 1인 구매하기
           </Button>
         </div>
