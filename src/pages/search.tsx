@@ -2,10 +2,19 @@ import 'react-indiana-drag-scroll/dist/style.css';
 
 import { type ChangeEvent, useEffect, useRef, useState } from 'react';
 import ScrollContainer from 'react-indiana-drag-scroll';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
-import { SEARCHWORD } from '@/constants/search/searchWord';
-import { TOTALLIST } from '@/constants/search/totalList';
+import type { TCategorySort } from '@/types/category';
+
+import { formatKoreanDateLabel } from '@/utils/time';
+
+// search 에 카테고리 api 연동을 위해서 추가, 수정 부분은 아이콘으로 표시 해뒀습니다!!
+// ⭐ 추가
+import { useCategoryProducts } from '@/hooks/category/useCategoryProduct';
+import useDeleteRecent from '@/hooks/search/useDeleteRecent';
+import useGetKeyword from '@/hooks/search/useGetKeyword';
+import useGetRecent from '@/hooks/search/useGetRecent';
+import { useKeywordProducts } from '@/hooks/search/useKeywordProduct';
 
 import SearchInput from '@/components/common/SearchInput';
 import ProductCard from '@/components/home/productCard';
@@ -16,95 +25,209 @@ import Back from '@/assets/icons/back.svg?react';
 import Down from '@/assets/icons/down.svg?react';
 import NoResult from '@/assets/icons/noResult.svg?react';
 import Up from '@/assets/icons/up.svg?react';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Search() {
-  const [searchParams] = useSearchParams();
+  const { data } = useGetKeyword();
+  const [searchParams, setSearchParams] = useSearchParams();
   const menuRef = useRef<HTMLDivElement>(null);
-  const [filteredWords, setFilteredWords] = useState(SEARCHWORD);
+  const [keywordParam, setKeyword] = useState<string | null>(null);
+  const [sort, setSort] = useState<TCategorySort>((searchParams.get('sort') as TCategorySort) || 'NEW');
   const [sortOption, setSortOption] = useState('인기순');
   const [change, setChange] = useState(false);
   const [inputValue, setValue] = useState('');
   const [isAsc, setIsAsc] = useState(true);
-  const [filteredList, setFilteredList] = useState(TOTALLIST);
-  const keywordParam = searchParams.get('keyword');
-  const COLUMN_COUNT = 2;
-  const rowsPerColumn = Math.ceil(SEARCHWORD.length / COLUMN_COUNT);
-  const columns = Array.from({ length: COLUMN_COUNT }, (_, i) => SEARCHWORD.slice(i * rowsPerColumn, (i + 1) * rowsPerColumn));
-  const handleDelete = (id: number) => {
-    setFilteredWords((prev) => prev.filter((word) => word.id !== id));
-  };
-  const handleValue = (e: ChangeEvent<HTMLInputElement>) => {
-    setValue(e.target.value);
-  };
-  const handleFilter = (value?: string) => {
-    setChange(true);
-    const keyword = value ?? inputValue;
+  const { pathname, search } = useLocation();
 
-    if (!keyword.trim()) {
-      setFilteredList(TOTALLIST);
-      return;
+  const navigate = useNavigate();
+  const { isError: authError } = useAuth();
+  const { data: recent, refetch } = useGetRecent();
+  const { mutate } = useDeleteRecent();
+  useEffect(() => {
+    if (!authError) {
+      refetch();
     }
-    const matchIndex = TOTALLIST.findIndex((item) => item.name.includes(keyword));
-    if (matchIndex !== -1) {
-      const matched = TOTALLIST[matchIndex];
-      const rest = [...TOTALLIST.slice(0, matchIndex), ...TOTALLIST.slice(matchIndex + 1)];
-      setFilteredList([matched, ...rest]);
+  }, [authError, refetch]);
+  useEffect(() => {
+    const keyword = new URLSearchParams(location.search).get('keyword');
+    setKeyword(keyword);
+  }, [search]);
+
+  const COLUMN_COUNT = 2;
+  const rowsPerColumn = data ? Math.ceil(data?.result.keywords.length / COLUMN_COUNT) : 0;
+  const columns = Array.from({ length: COLUMN_COUNT }, (_, i) => data?.result.keywords.slice(i * rowsPerColumn, (i + 1) * rowsPerColumn));
+
+  const subcategoryId = Number(searchParams.get('subcategoryId') || '');
+  const isCategoryMode = !!subcategoryId;
+  const SORT_ENUM_TO_LABEL: Record<TCategorySort, string> = {
+    POPULAR: '인기순',
+    NEW: '최신상품순',
+    LOW_PRICE: '낮은 가격 순',
+    REVIEW: '리뷰 많은 순',
+  };
+
+  const labelToEnum = (label: string): TCategorySort => {
+    const s = label.replace(/\s/g, '');
+    if (s.includes('인기')) return 'POPULAR';
+    if (s.includes('신상품') || s.includes('최신')) return 'NEW';
+    if (s.includes('낮은')) return 'LOW_PRICE';
+    if (s.includes('리뷰')) return 'REVIEW';
+    return 'NEW';
+  };
+
+  const page = Number(searchParams.get('page') || '0');
+  const size = searchParams.get('size') ? Number(searchParams.get('size')) : 20;
+
+  const categoryQuery = useCategoryProducts({
+    subcategoryId: isCategoryMode ? subcategoryId : undefined,
+    sort,
+    page,
+    size,
+  });
+
+  const keywordQuery = useKeywordProducts({
+    keyword: !isCategoryMode ? keywordParam || '' : undefined,
+    sort,
+    page,
+    size,
+  });
+
+  type TProductCardItem = {
+    id: number;
+    name: string;
+    price: number;
+    discountRate: number;
+    imageUrl: string;
+    store?: string;
+    rating?: number;
+    reviewCount?: number;
+    tag?: string;
+  };
+
+  const mapToProductCard = (p: any): TProductCardItem => ({
+    id: p.productId ?? p.id,
+    name: p.name ?? p.productName,
+    price: p.salePrice ?? p.price,
+    discountRate: p.discountRate ?? 0,
+    imageUrl: p.imageUrl ?? p.thumbnailUrl,
+    store: p.store,
+    rating: p.rating,
+    reviewCount: p.reviewCount,
+    tag: '',
+  });
+
+  const displayList: TProductCardItem[] = isCategoryMode ? categoryQuery.products.map(mapToProductCard) : keywordQuery.products.map(mapToProductCard);
+
+  useEffect(() => {
+    if (keywordParam) {
+      setValue(keywordParam);
+      setChange(true);
+    }
+    if (isCategoryMode) setChange(true);
+  }, [keywordParam, isCategoryMode]);
+  useEffect(() => {
+    if (!isCategoryMode) return;
+    const labelFromUrl = searchParams.get('keyword') || searchParams.get('subcategoryName');
+    if (labelFromUrl) setValue(labelFromUrl);
+  }, [isCategoryMode, searchParams]);
+
+  useEffect(() => {
+    const s = (searchParams.get('sort') as TCategorySort) || 'NEW';
+    if (s !== sort) setSort(s);
+
+    const label = SORT_ENUM_TO_LABEL[s] ?? '신상품순';
+    if (label !== sortOption) setSortOption(label);
+  }, [searchParams]);
+
+  const handleDelete = async (id: number) => mutate(id);
+
+  const handleValue = (e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value);
+
+  const handleFilter = (value?: string) => {
+    const keyword = (value ?? inputValue).trim();
+    setChange(true);
+    const qs = new URLSearchParams(searchParams);
+    if (keyword) {
+      qs.set('keyword', keyword);
+      qs.delete('subcategoryId');
+      qs.set('sort', sort);
     } else {
-      setFilteredList([]);
+      qs.delete('keyword');
     }
+    qs.set('page', '0');
+    setSearchParams(qs, { replace: true });
   };
+
   const handleSortSelect = (value?: string) => {
-    if (value) setSortOption(value);
+    if (!value) return;
+    setSortOption(value);
+
+    const nextSort = labelToEnum(value);
+    setSort(nextSort);
+    const qs = new URLSearchParams(searchParams);
+    qs.set('sort', nextSort);
+    qs.set('page', '0');
+    setSearchParams(qs, { replace: true });
+
     setIsAsc(true);
+    setChange(true);
   };
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setIsAsc(true);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-  useEffect(() => {
-    if (keywordParam) {
-      setValue(keywordParam);
-      setChange(true);
-      handleFilter(keywordParam);
+
+  const isLoading = isCategoryMode ? categoryQuery.isLoading : keywordQuery.isLoading;
+  const isError = isCategoryMode ? categoryQuery.isError : keywordQuery.isError;
+
+  const isSearchRoute = pathname.startsWith('/search');
+  const hasKeyword = new URLSearchParams(search).has('keyword');
+  const handleNavigate = () => {
+    if (isSearchRoute || hasKeyword) {
+      window.location.replace('/search');
+    } else {
+      navigate(-1);
     }
-  }, [keywordParam]);
+  };
   return (
     <>
       <header className="w-full pr-4 py-1 flex items-center">
-        <Back onClick={() => window.history.back()} />
-        <SearchInput value={inputValue} autoFocus onEnter={handleFilter} onChange={handleValue} onClick={handleFilter} />
+        <Back onClick={handleNavigate} />
+        <SearchInput value={inputValue} autoFocus onChange={handleValue} onEnter={handleFilter} onClick={handleFilter} />
       </header>
+
       {!change && (
-        <section className="py-3 px-5 flex flex-col gap-7">
+        <section className="py-3 pl-5 flex flex-col gap-7">
           <section>
             <p className="text-subtitle-medium mb-2">최근 검색</p>
-            <ScrollContainer className="flex w-full gap-2 overflow-x-auto cursor-grab" vertical={false}>
-              {!filteredWords.length && <p className="text-body-regular text-black-4 py-2.5">최근 검색어가 없습니다.</p>}
-              {filteredWords.map(({ id, name }) => (
-                <div key={id} className="shrink-0">
-                  <Tag msg={name} onDelete={() => handleDelete(id)} />
+            <ScrollContainer className="flex w-full gap-2 overflow-x-auto cursor-grab pr-5" vertical={false}>
+              {(!recent || recent?.result.length === 0) && <p className="text-body-regular text-black-4 py-2.5">최근 검색어가 없습니다.</p>}
+              {recent?.result.map(({ id, keyword }) => (
+                <div key={id} className="shrink-0" onClick={() => handleFilter(keyword)}>
+                  <Tag msg={keyword} onDelete={() => handleDelete(id)} />
                 </div>
               ))}
             </ScrollContainer>
           </section>
+
           <section>
-            <div className="flex items-end justify-between mb-4">
+            <div className="flex items-center justify-between mb-4 pr-5">
               <p className="text-subtitle-medium">인기 검색어</p>
-              <p className="text-small-medium text-black-4">07.24. 10:00 기준</p>
+              <p className="text-small-medium text-black-4">{formatKoreanDateLabel(data?.result.baseTime)}</p>
             </div>
             <div className="w-full grid grid-cols-2 gap-x-6">
               {columns.map((col, colIndex) => (
                 <div key={colIndex} className="flex flex-col gap-y-3">
-                  {col.map(({ id, name }) => (
+                  {col?.map((item, id) => (
                     <div key={id} className="flex gap-2 items-center">
-                      <p className="text-subtitle-medium text-green">{id}</p>
-                      <p className="text-body-regular">{name}</p>
+                      <p className="text-subtitle-medium text-green">{colIndex * (col?.length ?? 0) + id + 1}</p>
+                      <p className="text-body-regular">{item}</p>
                     </div>
                   ))}
                 </div>
@@ -113,6 +236,7 @@ export default function Search() {
           </section>
         </section>
       )}
+
       {change && (
         <section className="w-full px-4 pb-7">
           <div ref={menuRef} className="py-4 relative w-fit ml-auto text-small-medium">
@@ -127,15 +251,33 @@ export default function Search() {
               </div>
             )}
           </div>
-          {filteredList.length === 0 ? (
+
+          {/* 로딩/에러/결과 */}
+          {isLoading ? (
+            <div className="w-full flex items-center justify-center h-[calc(100vh-144px)]">
+              <p className="text-subtitle-medium">로딩 중…</p>
+            </div>
+          ) : isError ? (
+            <div className="w-full flex items-center justify-center h-[calc(100vh-144px)]">
+              <p className="text-subtitle-medium text-error-3">불러오기에 실패했습니다.</p>
+            </div>
+          ) : displayList.length === 0 ? (
             <div className="w-full flex flex-col items-center justify-center h-[calc(100vh-144px)] gap-3">
               <NoResult />
               <p className="text-subtitle-medium">찾으시는 상품이 없습니다.</p>
             </div>
           ) : (
             <div className="w-full grid grid-cols-2 gap-x-2 gap-y-6.5 items-center justify-center ">
-              {filteredList.map((item) => (
-                <ProductCard key={item.id} data={item} />
+              {displayList.map((item) => (
+                <ProductCard
+                  key={item.id}
+                  {...{
+                    ...item,
+                    store: item.store ?? '',
+                    rating: item.rating ?? 0,
+                    reviewCount: item.reviewCount ?? 0,
+                  }}
+                />
               ))}
             </div>
           )}

@@ -16,33 +16,35 @@ export default function Login() {
 
   return (
     <div className="w-full h-screen flex flex-col justify-between">
-      <header className="px-2">
-        <Header showLogo={false} />
-      </header>
+      <div>
+        <header className="px-2">
+          <Header showLogo={false} />
+        </header>
 
-      <div className="w-full bg-white text-black pt-15 pb-27 flex flex-col items-center justify-center gap-17.75">
-        <div className="flex flex-col items-center justify-center gap-4">
-          <div className="w-40 h-9">
-            <Logo />
+        <div className="w-full bg-white text-black pt-15 flex flex-col items-center justify-center gap-17.75">
+          <div className="flex flex-col items-center justify-center gap-4">
+            <div className="w-40 h-9">
+              <Logo />
+            </div>
+            <div className="w-31.5 h-5">
+              <SubLogo />
+            </div>
           </div>
-          <div className="w-31.5 h-5">
-            <SubLogo />
-          </div>
-        </div>
 
-        <div className="w-full flex flex-col items-center justify-center gap-4 px-4">
-          <button className="w-full h-12 rounded bg-[#FDDC3F] flex items-center justify-center relative" onClick={handleKakaoLogin}>
-            <span className="absolute left-6 flex items-center">
-              <Kakao className="w-6.5 h-6" />
-            </span>
-            <p className="text-black text-body-medium mx-auto">카카오로 시작하기</p>
-          </button>
-          <button className="w-full h-12 rounded border border-black-2 flex items-center justify-center relative" onClick={handleGoogleLogin}>
-            <span className="absolute left-6 flex items-center">
-              <Google className="w-6.5 h-6.5" />
-            </span>
-            <p className="text-black text-body-medium mx-auto">Google로 시작하기</p>
-          </button>
+          <div className="w-full flex flex-col items-center justify-center gap-4 px-4">
+            <button className="w-full h-12 rounded bg-[#FDDC3F] flex items-center justify-center relative" onClick={handleKakaoLogin}>
+              <span className="absolute left-6 flex items-center">
+                <Kakao className="w-6.5 h-6" />
+              </span>
+              <p className="text-black text-body-medium mx-auto">카카오로 시작하기</p>
+            </button>
+            <button className="w-full h-12 rounded border border-black-2 flex items-center justify-center relative" onClick={handleGoogleLogin}>
+              <span className="absolute left-6 flex items-center">
+                <Google className="w-6.5 h-6.5" />
+              </span>
+              <p className="text-black text-body-medium mx-auto">Google로 시작하기</p>
+            </button>
+          </div>
         </div>
       </div>
 

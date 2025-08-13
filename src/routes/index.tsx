@@ -1,8 +1,8 @@
 import { createBrowserRouter, Outlet } from 'react-router-dom';
 
-import { AuthProvider } from '@/context/AuthContext';
 import Layout from '@/layouts';
 import ProtectedLayout from '@/layouts/ProtectedLayout';
+import RootLayout from '@/layouts/rootLayout';
 import AddAddress from '@/pages/addAddress';
 import AddressChange from '@/pages/addressChange';
 import Agreement from '@/pages/agreement';
@@ -28,7 +28,6 @@ import WriteReview from '@/pages/mypage/writeReview';
 import Notifications from '@/pages/notifications';
 import OnBoarding from '@/pages/onBoarding';
 import OrderDetailPersonal from '@/pages/orderDetailPersonal';
-import OrderDetailTeam from '@/pages/orderDetailTeam';
 import OrderList from '@/pages/orderListPage';
 import Payment from '@/pages/payment';
 import PhotoReview from '@/pages/photoReview';
@@ -39,57 +38,57 @@ import ShoppingCart from '@/pages/shoppingCart';
 
 export const router = createBrowserRouter([
   {
-    path: '/',
-    element: (
-      <Layout>
-        <Outlet />
-      </Layout>
-    ),
+    element: <RootLayout />,
     children: [
-      { index: true, element: <OnBoarding /> },
-      { path: 'home', element: <Home /> },
-      { path: 'login', element: <Login /> },
-      { path: 'agreement', element: <Agreement /> },
-      { path: 'coupon', element: <CouponsPage /> },
-      { path: 'shoppingcart', element: <ShoppingCart /> },
-      { path: 'search', element: <Search /> },
-      { path: 'board', element: <Board /> },
-      { path: 'category', element: <CategoryPage /> },
-      { path: 'product/:id', element: <Product /> },
-      { path: 'product/:id/photoReview', element: <PhotoReview /> },
-      { path: 'product/:id/review', element: <Review /> },
-      { path: 'notfound', element: <NotFound /> },
-      { path: '*', element: <NotFound /> },
-    ],
-  },
-  {
-    path: '/',
-    element: (
-      <AuthProvider>
-        <ProtectedLayout />
-      </AuthProvider>
-    ),
-    children: [
-      { path: 'mypage', element: <MyPage /> },
-      { path: 'mypage/me', element: <MyDetailPage /> },
-      { path: 'mypage/me/profile', element: <Profile /> },
-      { path: 'mypage/point', element: <Points /> },
-      { path: 'mypage/coupon', element: <Coupons /> },
-      { path: 'mypage/review', element: <MyReview /> },
-      { path: 'mypage/review/:orderId/:productId', element: <WriteReview /> },
-      { path: 'mypage/deliveryInfo', element: <DeliveryInfo /> },
-      { path: 'mypage/order', element: <OrderList /> },
-      { path: 'mypage/order/orderDetailPersonal', element: <OrderDetailPersonal /> },
-      { path: 'mypage/order/orderDetailTeam', element: <OrderDetailTeam /> },
-      { path: 'mypage/apply', element: <ApplyReturnOrExchange /> },
-      { path: 'mypage/order/exchange/complete', element: <ExchangeOK /> },
-      { path: 'mypage/order/return/complete', element: <ReturnOK /> },
-      { path: 'notifications', element: <Notifications /> },
-      { path: 'payment', element: <Payment /> },
-      { path: 'payment/:status', element: <PaymentStatusWrapper /> },
-      { path: 'address/change', element: <AddressChange /> },
-      { path: 'address/edit', element: <EditAddress /> },
-      { path: 'address/add', element: <AddAddress /> },
+      {
+        path: '/',
+        element: (
+          <Layout>
+            <Outlet />
+          </Layout>
+        ),
+        children: [
+          { index: true, element: <OnBoarding /> },
+          { path: 'home', element: <Home /> },
+          { path: 'login', element: <Login /> },
+          { path: 'agreement', element: <Agreement /> },
+          { path: 'coupon', element: <CouponsPage /> },
+          { path: 'shoppingcart', element: <ShoppingCart /> },
+          { path: 'board', element: <Board /> },
+          { path: 'category', element: <CategoryPage /> },
+          { path: 'product/:id', element: <Product /> },
+          { path: 'product/:id/photoReview', element: <PhotoReview /> },
+          { path: 'product/:id/review', element: <Review /> },
+          { path: 'notfound', element: <NotFound /> },
+          { path: '*', element: <NotFound /> },
+        ],
+      },
+      {
+        path: '/',
+        element: <ProtectedLayout />,
+        children: [
+          { path: 'search', element: <Search /> },
+          { path: 'mypage', element: <MyPage /> },
+          { path: 'mypage/me', element: <MyDetailPage /> },
+          { path: 'mypage/me/profile', element: <Profile /> },
+          { path: 'mypage/point', element: <Points /> },
+          { path: 'mypage/coupon', element: <Coupons /> },
+          { path: 'mypage/review', element: <MyReview /> },
+          { path: 'mypage/review/new', element: <WriteReview /> },
+          { path: 'mypage/deliveryInfo', element: <DeliveryInfo /> },
+          { path: 'mypage/order', element: <OrderList /> },
+          { path: 'mypage/order/orderDetailPersonal', element: <OrderDetailPersonal /> },
+          { path: 'mypage/apply', element: <ApplyReturnOrExchange /> },
+          { path: 'mypage/order/exchange/complete', element: <ExchangeOK /> },
+          { path: 'mypage/order/return/complete', element: <ReturnOK /> },
+          { path: 'notifications', element: <Notifications /> },
+          { path: 'payment', element: <Payment /> },
+          { path: 'payment/:status', element: <PaymentStatusWrapper /> },
+          { path: 'address/change', element: <AddressChange /> },
+          { path: 'address/edit', element: <EditAddress /> },
+          { path: 'address/add', element: <AddAddress /> },
+        ],
+      },
     ],
   },
 ]);

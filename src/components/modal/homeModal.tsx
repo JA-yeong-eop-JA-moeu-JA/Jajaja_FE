@@ -22,7 +22,7 @@ export default function HomeModal() {
   return (
     <>
       <div className="relative w-full pt-7 px-4 flex flex-col items-center gap-4">
-        <div className="absolute top-0 right-0" onClick={handleClose}>
+        <div className="absolute top-0 right-0 p-3.5" onClick={handleClose}>
           <Close />
         </div>
         <div className="flex flex-col items-center text-title-semibold">
@@ -38,7 +38,7 @@ export default function HomeModal() {
         </div>
       </div>
 
-      <div className="w-full px-4">
+      <div className="w-full">
         <Button kind="basic" variant="solid-orange" className="w-full" onClick={() => closeModal()}>
           기간 한정 포인트 확인하기
         </Button>

@@ -3,48 +3,31 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import { REVIEW_LIST } from '@/constants/product/reviews';
-import { TEAMS } from '@/constants/product/team';
-import { TOTALLIST } from '@/constants/search/totalList';
+
+import { Timer } from '@/utils/timer';
 
 import { useModalStore } from '@/stores/modalStore';
+import useGetProductDetail from '@/hooks/product/useGetProductDetail';
 
 import { Button } from '@/components/common/button';
 import ProductHeader from '@/components/head_bottom/ProductHeader';
+import Loading from '@/components/loading';
 import ReviewCard from '@/components/product/reviewCard';
 import StarRating from '@/components/product/starRating';
 
 import GoUP from '@/assets/icons/goUp.svg?react';
 import Share from '@/assets/icons/share.svg?react';
-import Add from '@/assets/images/product/adv.svg?react';
 
 export default function Product() {
   const navigate = useNavigate();
-  const { openModal } = useModalStore();
+
+  const { data, isLoading } = useGetProductDetail();
   const { id } = useParams<{ id: string }>();
-  const product = TOTALLIST.find((item) => item.id === Number(id));
-  const [teams, setTeams] = useState(() =>
-    TEAMS.map((team) => ({
-      ...team,
-      time: team.time,
-    })),
-  );
+  const { openModal } = useModalStore();
   const [fold, setFold] = useState(false);
   const [showNav, setShowNav] = useState(false);
   const shortReview = REVIEW_LIST.slice(0, 3);
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTeams((prev) =>
-        prev
-          .map((team) => ({
-            ...team,
-            time: team.time - 1000,
-          }))
-          .filter((team) => team.time > 0),
-      );
-    }, 1000);
 
-    return () => clearInterval(interval);
-  }, []);
   useEffect(() => {
     const handleScroll = () => {
       setShowNav(window.scrollY > 0);
@@ -53,36 +36,44 @@ export default function Product() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-  const formatTime = (ms: number) => {
-    const totalSeconds = Math.floor(ms / 1000);
-    const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
-    const seconds = String(totalSeconds % 60).padStart(2, '0');
-    return `${minutes}:${seconds}`;
+
+  const handleTeamJoinWithModal = (teamId: number) => {
+    openModal('bottom-drawer-team', {
+      teamId,
+      mode: 'team_join',
+    });
   };
+  if (isLoading)
+    return (
+      <div className="w-full h-screen flex items-center justify-center">
+        <Loading />
+      </div>
+    );
   return (
     <div className="pb-16">
       <ProductHeader />
-      <img src={product?.imageUrl} className="w-full" alt={product?.name} />
+      <img src={data?.result?.thumbnailUrl} className="w-full" alt={data?.result?.name} />
       <section className="py-5 px-4 flex flex-col gap-3">
         <div className="flex flex-col gap-2">
-          <p className="text-body-medium">{product?.company}</p>
-          <p className="text-body-regular">{product?.name}</p>
+          <p className="text-body-medium">{data?.result?.store}</p>
+          <p className="text-body-regular">{data?.result?.name}</p>
         </div>
         <div>
-          {product?.sale && (
-            <div className="flex items-center gap-2 text-body-regular text-black-4">
-              <p className="line-through">{Math.round(product?.price * (1 + product?.sale / 100)).toLocaleString()}</p>
+          {data?.result?.discountRate && (
+            <div className="flex items-center gap-1 text-body-regular text-black-4">
+              <p className="line-through">{data?.result.originPrice.toLocaleString()}</p>
               <p>원</p>
             </div>
           )}
           <div className="flex items-center text-title-medium gap-2 mb-1.5">
-            {product?.sale && <p className="text-error-3">{product?.sale}%</p>}
-            <p>{product?.price.toLocaleString()} 원</p>
+            {data?.result?.discountRate && <p className="text-error-3">{data?.result?.discountRate}%</p>}
+            <p>{data?.result?.salePrice.toLocaleString()} 원</p>
           </div>
-          <div className="flex items-center gap-2 text-body-regular">
-            <StarRating star={product?.star || 0} />
-            <p className="text-[#ffc800]">{product?.star || 0}</p>
-            <p className="text-black-4">· {product?.review || 0} 건 리뷰</p>
+
+          <div className="flex items-center gap-1 text-body-regular">
+            <StarRating star={data?.result?.rating || 0} />
+            <p className="text-[#ffc800]">{data?.result?.rating || 0}</p>
+            <p className="text-black-4">· {data?.result?.reviewCount || 0} 건 리뷰</p>
           </div>
         </div>
       </section>
@@ -94,7 +85,7 @@ export default function Product() {
             <p>배송비</p>
           </div>
           <div className="flex flex-col gap-3">
-            <p>5일 내 도착 예정 (토/일 공휴일 제외)</p>
+            <p>{data?.result.deliveryPeriod}일 내 도착 예정 (토/일 공휴일 제외)</p>
             <div className="flex flex-col">
               <p>무료</p>
               <p>제주 4000원, 도서 산간 6000원 추가</p>
@@ -106,22 +97,22 @@ export default function Product() {
       <section className="px-4 py-7.5">
         <p className="text-subtitle-medium mb-8.5">팀 구매 참여</p>
         <div className="flex flex-col gap-7">
-          {teams.map(({ imageUrl, teamId, name, time }) => (
+          {data?.result.teams.map(({ id: teamId, nickname, expireAt, profileUrl }) => (
             <div key={teamId} className="flex justify-between items-center">
               <div className="flex items-center gap-3 text-body-regular">
-                <img src={imageUrl} />
-                <p>{name}</p>
+                <img className="w-9 h-9" src={profileUrl} />
+                <p>{nickname}</p>
               </div>
               <div className="flex items-center gap-3">
-                <p className="text-body-medium text-green-hover">{formatTime(time)}</p>
-                <button className="px-4 py-2 rounded-sm text-body-regular border-1 border-green-hover" onClick={() => openModal('bottom-drawer-team')}>
+                {expireAt && <Timer expireAt={expireAt} />}
+                <button className="px-4 py-2 rounded-sm text-body-regular border-1 border-green-hover" onClick={() => handleTeamJoinWithModal(teamId)}>
                   참여
                 </button>
               </div>
             </div>
           ))}
-          {teams.length === 0 && (
-            <div className="flex flex-col items-center justify-center text-body-regular text-black-4">
+          {data?.result.teams.length === 0 && (
+            <div className="flex flex-col items-center justify-center pb-5.5 text-body-regular text-black-4">
               <p>모집 중인 팀이 없어요.</p>
               <p>직접 팀을 생성해보세요!</p>
             </div>
@@ -129,7 +120,7 @@ export default function Product() {
         </div>
       </section>
       <section className={`relative ${!fold ? 'h-155 overflow-hidden' : 'h-full overflow-auto'} w-full`}>
-        <Add />
+        <img src={data?.result?.imageUrl} className="w-full" />
         {!fold && (
           <div
             className="absolute bottom-0 left-0 flex justify-center items-center h-20 w-full "
@@ -148,9 +139,9 @@ export default function Product() {
       <section className="px-4 pt-7.5 p">
         <p className="text-title-medium mb-3">리뷰</p>
         <div className="flex flex-col gap-3">
-          {shortReview.map((item, idx) => (
+          {data?.result.reviews.map((item, idx) => (
             <div key={idx} className="flex flex-col gap-3">
-              <ReviewCard data={item} />
+              <ReviewCard {...item} />
               {idx !== shortReview.length - 1 && <hr className="border-black-1" />}
             </div>
           ))}
@@ -186,10 +177,10 @@ export default function Product() {
       )}
 
       <footer className="px-4 py-2 fixed bottom-0 max-w-[600px] bg-white w-full h-16 flex justify-center gap-2 items-center text-body-medium text-white">
-        <button className="rounded-sm bg-black py-2.5 w-full" onClick={() => openModal('bottom-drawer')}>
+        <button className="rounded-sm h-12 bg-black py-2.5 w-full" onClick={() => openModal('bottom-drawer-team')}>
           1인 구매하기
         </button>
-        <button className="rounded-sm bg-orange py-2.5 w-full" onClick={() => openModal('bottom-drawer-team')}>
+        <button className="rounded-sm h-12 bg-orange py-2.5 w-full" onClick={() => openModal('bottom-drawer')}>
           팀 생성하기
         </button>
       </footer>

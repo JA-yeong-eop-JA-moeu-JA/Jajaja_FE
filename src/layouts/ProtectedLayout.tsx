@@ -1,20 +1,26 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
+
+import Loading from '@/components/loading';
 
 import Layout from '.';
 import { useAuth } from '@/context/AuthContext';
 
 export default function ProtectedLayout() {
-  const { isLoggedIn, isLoading } = useAuth();
+  const { isLoggedIn, isLoading, isError } = useAuth();
+  const { pathname } = useLocation();
 
-  if (isLoading) return <div>로딩 중...</div>;
-
-  if (!isLoggedIn) {
-    return <Navigate to="/login" replace />;
-  }
-
+  const isSearchPage = pathname.startsWith('/search');
   return (
     <Layout>
-      <Outlet />
+      {isLoading ? (
+        <div className="w-full h-screen flex items-center justify-center">
+          <Loading />
+        </div>
+      ) : isSearchPage || (!isError && isLoggedIn) ? (
+        <Outlet />
+      ) : (
+        <div className="h-screen" />
+      )}
     </Layout>
   );
 }

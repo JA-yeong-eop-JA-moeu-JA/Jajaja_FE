@@ -22,7 +22,7 @@ export function SelectButton<K extends TSelectKind>(props: ISelectButtonProps<K>
   const marginY = kind === 'select-content' ? 'my-1 py-1' : 'my-2';
 
   return (
-    <div className={`flex justify-center gap-1 mx-4 ${marginY}`}>
+    <div className={`flex justify-center gap-2 mx-4 ${marginY}`}>
       <Button kind={kind} variant={leftVariant} onClick={onLeftClick}>
         {leftText}
       </Button>

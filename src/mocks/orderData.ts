@@ -1,4 +1,5 @@
 export interface IOrderItem {
+  productName: string;
   orderId: number;
   productId: number;
   name: string;
@@ -34,6 +35,7 @@ export const orderData: IOrder[] = [
         reviewed: false,
         orderStatus: '배송 중',
         matchStatus: '매칭 중',
+        productName: '',
       },
       {
         orderId: 1,
@@ -47,6 +49,7 @@ export const orderData: IOrder[] = [
         reviewed: false,
         orderStatus: '결제 완료',
         matchStatus: '매칭 완료',
+        productName: '',
       },
     ],
     createdAt: '25.05.12.',
@@ -66,6 +69,7 @@ export const orderData: IOrder[] = [
         reviewed: false,
         orderStatus: '결제 취소',
         matchStatus: '매칭 실패',
+        productName: '',
       },
     ],
     createdAt: '25.05.12.',
@@ -84,6 +88,7 @@ export const orderData: IOrder[] = [
         quantity: 2,
         reviewed: false,
         orderStatus: '반품 접수',
+        productName: '',
       },
     ],
     createdAt: '25.05.12.',

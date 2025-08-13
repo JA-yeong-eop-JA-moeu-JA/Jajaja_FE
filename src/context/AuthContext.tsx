@@ -1,4 +1,5 @@
 import { createContext, type PropsWithChildren, useContext } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import type { TGetUserInfoResponse } from '@/types/member/TGetUserInfo';
 
@@ -8,18 +9,23 @@ interface IAuthContextType {
   user: TGetUserInfoResponse['result'] | null;
   isLoading: boolean;
   isLoggedIn: boolean;
+  isError: boolean;
+  refetch: ReturnType<typeof useUserInfo>['refetch'];
 }
 
 const AuthContext = createContext<IAuthContextType | null>(null);
 
+const PROTECTED_PREFIXES = ['/mypage', '/notifications', '/payment', '/address', '/search'];
+
 export function AuthProvider({ children }: PropsWithChildren) {
-  const { data } = useUserInfo();
+  const { pathname } = useLocation();
+  const isProtected = PROTECTED_PREFIXES.some((p) => pathname.startsWith(p));
+  const { data, isError, isLoading, refetch } = useUserInfo({ enabled: isProtected });
 
   const user = data?.result ?? null;
-  const isLoggedIn = !!user;
-  const isLoading = data === undefined;
+  const isLoggedIn = !!user || isError;
 
-  return <AuthContext.Provider value={{ user, isLoggedIn, isLoading }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ user, isLoggedIn, isLoading, isError, refetch }}>{children}</AuthContext.Provider>;
 }
 
 export const useAuth = () => {

@@ -1,4 +1,4 @@
-import { createElement, type ReactNode, useEffect, useRef, useState } from 'react';
+import { createElement, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useModalStore } from '@/stores/modalStore';
 
@@ -9,7 +9,10 @@ interface IModalProviderProps {
 }
 
 export default function ModalProvider({ children }: IModalProviderProps) {
-  const { isModalOpen, modalContent, type, options } = useModalStore();
+  const { isModalOpen, modalContent, type, options, closeModal } = useModalStore();
+
+  const isSlidingType = useMemo(() => type === 'bottom-drawer' || type === 'bottom-drawer-team' || type === 'cart-option' || type === 'bottom-sheet', [type]);
+  const [entered, setEntered] = useState(false);
   const drawerRef = useRef<HTMLDivElement>(null);
 
   const baseHeight = 152;
@@ -55,12 +58,28 @@ export default function ModalProvider({ children }: IModalProviderProps) {
     setIsDragging(false);
     startY.current = null;
   };
+
+  useEffect(() => {
+    if (!isModalOpen) return;
+    setCurrentHeight(baseHeight);
+    setIsDragging(false);
+    startY.current = null;
+    startHeight.current = baseHeight;
+
+    if (isSlidingType) {
+      setEntered(false);
+      const raf = requestAnimationFrame(() => setEntered(true));
+      return () => cancelAnimationFrame(raf);
+    }
+  }, [isModalOpen, isSlidingType]);
+
   useEffect(() => {
     setCurrentHeight(baseHeight);
     setIsDragging(false);
     startY.current = null;
     startHeight.current = baseHeight;
   }, [isModalOpen]);
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => onMove(e.clientY);
     const handleTouchMove = (e: TouchEvent) => onMove(e.touches[0].clientY);
@@ -84,21 +103,37 @@ export default function ModalProvider({ children }: IModalProviderProps) {
 
   if (!isModalOpen || !modalContent) return <>{children}</>;
 
+  const closeWithSlide = () => {
+    if (!isSlidingType) {
+      closeModal();
+      return;
+    }
+    setEntered(false);
+    setTimeout(() => {
+      closeModal();
+    }, 250);
+  };
+
   return (
     <>
       {children}
 
       {(type === 'bottom-drawer' || type == 'bottom-drawer-team' || type === 'cart-option') && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center">
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center" onClick={closeWithSlide}>
           <div
             ref={drawerRef}
-            className="w-full max-w-150 bg-white rounded-t-lg transition-all duration-300 overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+            className={[
+              'w-full max-w-150 bg-white rounded-t-lg overflow-hidden',
+              isDragging ? 'transition-none' : 'transition-transform duration-250 ease-out',
+              entered ? 'translate-y-0' : 'translate-y-full',
+            ].join(' ')}
             style={{ minHeight: currentHeight }}
             onMouseDown={(e) => onStart(e.clientY)}
             onTouchStart={(e) => onStart(e.touches[0].clientY)}
           >
             <div className="flex flex-col">
-              <div className="w-full flex justify-center cursor-grab active:cursor-grabbing my-5">
+              <div className="w-full flex justify-center cursor-grab active:cursor-grabbing mt-3 mb-5">
                 <Bar />
               </div>
               {createElement(modalContent)}
@@ -108,20 +143,44 @@ export default function ModalProvider({ children }: IModalProviderProps) {
       )}
 
       {type === 'bottom-sheet' && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center">
-          <div className="h-fit min-h-20 max-w-150 w-full bg-white rounded-t-lg">{createElement(modalContent)}</div>
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center" onClick={closeModal}>
+          <div
+            className={[
+              'h-fit min-h-20 max-w-150 w-full bg-white rounded-t-lg',
+              'transition-transform duration-250 ease-out',
+              entered ? 'translate-y-0' : 'translate-y-full',
+            ].join(' ')}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {createElement(modalContent)}
+          </div>
         </div>
       )}
 
       {(type === 'alert' || type === 'confirm') && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
-          <div className="bg-white min-h-10 rounded-lg shadow-md max-w-76 w-full">{createElement(modalContent)}</div>
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center" onClick={closeModal}>
+          <div className="bg-white min-h-10 rounded-lg shadow-md max-w-76 w-full" onClick={(e) => e.stopPropagation()}>
+            {createElement(modalContent)}
+          </div>
         </div>
       )}
-      {type === 'image' && <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center">{createElement(modalContent, options)}</div>}
+      {type === 'image' && (
+        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center" onClick={closeModal}>
+          <div onClick={(e) => e.stopPropagation()}>{createElement(modalContent, options)}</div>
+        </div>
+      )}
       {type === 'delivery' && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center">
-          <div className="h-fit min-h-20 max-w-150 w-full bg-white rounded-t-lg">{createElement(modalContent)}</div>
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center" onClick={closeModal}>
+          <div className="h-fit min-h-20 max-w-150 w-full bg-white rounded-t-lg" onClick={(e) => e.stopPropagation()}>
+            {createElement(modalContent)}
+          </div>
+        </div>
+      )}
+      {type === 'login' && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
+          <div className="bg-white min-h-10 rounded-lg shadow-md max-w-76 w-full" onClick={(e) => e.stopPropagation()}>
+            {createElement(modalContent, options)}
+          </div>
         </div>
       )}
     </>
