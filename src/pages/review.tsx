@@ -27,7 +27,7 @@ export default function PhotoReview() {
       ([entry]) => {
         if (entry.isIntersecting) fetchNextPage();
       },
-      { threshold: 0.2 } // 1.0 → 0.2 권장
+      { threshold: 0.2 }, // 1.0 → 0.2 권장
     );
     observer.observe(bottomRef.current);
     return () => observer.disconnect();
@@ -60,18 +60,18 @@ export default function PhotoReview() {
       </section>
       <section className="flex items-center justify-self-end gap-3 text-body-regular mt-6 mb-3 mr-3">
         <div className="flex justify-end text-body-regular text-black-4 mb-1">
-                {[
-                  { label: '최신순', value: 'LATEST' },
-                  { label: '추천순', value: 'RECOMMEND' },
-                ].map(({ label, value }, index, array) => (
-                  <div key={value} className="flex items-center">
-                    <button onClick={() => setSortType(value as 'LATEST' | 'RECOMMEND')} className={sortType === value ? 'text-body-medium text-black' : ''}>
-                      {label}
-                    </button>
-                    {index < array.length - 1 && <span className="px-3 text-black-2">|</span>}
-                  </div>
-                ))}
-              </div>
+          {[
+            { label: '최신순', value: 'LATEST' },
+            { label: '추천순', value: 'RECOMMEND' },
+          ].map(({ label, value }, index, array) => (
+            <div key={value} className="flex items-center">
+              <button onClick={() => setSortType(value as 'LATEST' | 'RECOMMEND')} className={sortType === value ? 'text-body-medium text-black' : ''}>
+                {label}
+              </button>
+              {index < array.length - 1 && <span className="px-3 text-black-2">|</span>}
+            </div>
+          ))}
+        </div>
       </section>
       <section className="px-2">
         <div className="flex flex-col gap-3">
