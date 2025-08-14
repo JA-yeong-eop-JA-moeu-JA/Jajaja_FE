@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 
-import type { TOrderType, TPaymentData, TPaymentItem } from '@/types/cart/TCart';
+import type { TCartItemRequest, TOrderType, TPaymentData, TPaymentItem } from '@/types/cart/TCart';
 
 import { useModalStore } from '@/stores/modalStore';
 import { useCart } from '@/hooks/cart/useCartQuery';
@@ -21,7 +21,7 @@ export default function OptionModal({ type }: { type?: string }) {
   const { closeModal } = useModalStore();
   const { id: product } = useParams<{ id: string }>();
   const productId = Number(product);
-  const { addItem } = useCart();
+  const { addMultipleItems, isAddingMultiple } = useCart();
 
   const [selectedItems, setSelectedItems] = useState<
     {
@@ -64,18 +64,19 @@ export default function OptionModal({ type }: { type?: string }) {
     }
 
     try {
-      for (const item of selectedItems) {
-        await addItem({
-          productId,
-          optionId: item.id,
-          quantity: item.quantity,
-          unitPrice: isTeam ? item.unitPrice : item.originPrice,
-        });
-      }
+      const cartItems: TCartItemRequest[] = selectedItems.map((item) => ({
+        productId,
+        optionId: item.id,
+        quantity: item.quantity,
+        unitPrice: isTeam ? item.unitPrice : item.originPrice,
+        totalPrice: (isTeam ? item.unitPrice : item.originPrice) * item.quantity,
+      }));
+
+      await addMultipleItems(cartItems);
+
       closeModal();
       toast.success('장바구니에 상품이 담겼습니다');
-    } catch (error) {
-      console.error('Cart add failed:', error);
+    } catch {
       toast.error('장바구니 담기에 실패했습니다');
     }
   };
@@ -87,7 +88,7 @@ export default function OptionModal({ type }: { type?: string }) {
     }
 
     const paymentItems: TPaymentItem[] = selectedItems.map((item) => ({
-      id: 0, // 장바구니에 없는 상품이므로 0
+      id: 0,
       productId,
       optionId: item.id,
       quantity: item.quantity,
@@ -163,22 +164,27 @@ export default function OptionModal({ type }: { type?: string }) {
       </div>
 
       <div className="flex items-center gap-2">
-        <div className="min-w-16 h-12 flex items-center justify-center rounded-sm border border-black-4 cursor-pointer" onClick={handleAddToCart}>
-          <Cart />
+        <div
+          className={`min-w-16 h-12 flex items-center justify-center rounded-sm border border-black-4 cursor-pointer ${
+            isAddingMultiple ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
+          onClick={isAddingMultiple ? undefined : handleAddToCart}
+        >
+          {isAddingMultiple ? <div className="w-4 h-4 border-2 border-gray-300 border-t-black rounded-full animate-spin" /> : <Cart />}
         </div>
         {isTeam ? (
           <button
-            className="w-full h-12 flex justify-center items-center rounded-sm text-body-medium text-white bg-black disabled:opacity-50"
-            disabled={selectedItems.length === 0}
+            className="w-full h-12 flex justify-center items-center rounded-sm text-body-medium text-white bg-black"
             onClick={handleIndividualPurchase}
+            disabled={isAddingMultiple}
           >
             1인 구매하기
           </button>
         ) : (
           <button
-            className="w-full h-12 flex justify-center items-center rounded-sm text-body-medium text-white bg-orange disabled:opacity-50"
-            disabled={selectedItems.length === 0}
+            className="w-full h-12 flex justify-center items-center rounded-sm text-body-medium text-white bg-orange"
             onClick={handleTeamCreate}
+            disabled={isAddingMultiple}
           >
             팀 생성하기
           </button>
