@@ -10,7 +10,7 @@ import { calculateFinalAmount, formatPhoneNumber, generateCustomerKey } from '@/
 
 import { useModalStore } from '@/stores/modalStore';
 import { useGetAddresses } from '@/hooks/address/useAddress';
-import { useAppliedCoupon } from '@/hooks/coupon/useCoupons';
+import { useCartCoupon } from '@/hooks/coupon/useCoupons';
 import useUserInfo from '@/hooks/myPage/useUserInfo';
 import { usePaymentPrepare } from '@/hooks/payment/usePaymentPrepare';
 import { usePaymentWidget } from '@/hooks/payment/usePaymentWidget';
@@ -52,7 +52,7 @@ export default function Payment() {
   const { data: userInfo, isLoading: userLoading } = useUserInfo();
   const { data: addressesData, isLoading: addressesLoading } = useGetAddresses();
   const { data: pointsData, isLoading: pointsLoading } = useInfinitePoints();
-  const { getAppliedCoupon, calculateDiscount } = useAppliedCoupon();
+  const { calculateDiscount, getAppliedCoupon } = useCartCoupon();
   const paymentPrepareMutation = usePaymentPrepare();
 
   const user = userInfo?.result;
@@ -129,7 +129,7 @@ export default function Payment() {
 
     if (numValue > userPoints) {
       setUsedPoints(userPoints);
-      alert(`사용 가능한 포인트는 최대 ${userPoints.toLocaleString()}원입니다.`);
+      alert(`사용 가능한 적립금은 최대 ${userPoints.toLocaleString()}원입니다.`);
     } else if (numValue < 0) {
       setUsedPoints(0);
     } else {
@@ -224,7 +224,7 @@ export default function Payment() {
         if (axiosError.response?.data?.code) {
           switch (axiosError.response.data.code) {
             case 'POINT4002':
-              errorMessage = '사용 가능한 포인트를 초과했습니다. 포인트를 확인해주세요.';
+              errorMessage = '사용 가능한 적립금을 초과했습니다. 적립금을 확인해주세요.';
               setUsedPoints(0);
               break;
             case 'COUPON4003':
@@ -346,6 +346,28 @@ export default function Payment() {
     <>
       <PageHeader title="주문 결제" />
 
+      {paymentData?.orderType !== 'individual' && (
+        <section className="p-4 border-b-4 border-black-1">
+          <p className="text-subtitle-medium mb-4">팀 구매 정보</p>
+          <div className="bg-orange-50 p-3 rounded">
+            {paymentData.orderType === 'team_create' && (
+              <>
+                <p className="text-body-regular">팀을 생성하고 있습니다</p>
+                <p className="text-body-regular">
+                  결제 완료 직후부터 <span className="text-orange">30분간</span> 팀 매칭이 진행됩니다
+                </p>
+              </>
+            )}
+            {paymentData.orderType === 'team_join' && (
+              <>
+                <p className="text-small-medium">팀 구매에 참여하고 있습니다.</p>
+                <p className="text-small-regular">결제 확인 후 팀 매칭이 완료됩니다.</p>
+              </>
+            )}
+          </div>
+        </section>
+      )}
+
       <section className="border-b-4 border-black-1">
         <div className="w-full">
           {selectedAddress ? (
@@ -373,26 +395,6 @@ export default function Payment() {
         </div>
       </section>
 
-      {paymentData?.orderType !== 'individual' && (
-        <section className="p-4 border-b-4 border-black-1">
-          <p className="text-subtitle-medium mb-4">팀 구매 정보</p>
-          <div className="bg-orange-50 p-3 rounded">
-            {paymentData.orderType === 'team_create' && (
-              <>
-                <p className="text-small-medium">팀을 생성하고 있습니다</p>
-                <p className="text-small-regular">결제 완료 후 30분간 팀원 모집이 시작됩니다</p>
-              </>
-            )}
-            {paymentData.orderType === 'team_join' && (
-              <>
-                <p className="text-small-medium">팀 구매에 참여합니다</p>
-                <p className="text-small-regular">팀 구매가로 할인받으세요!</p>
-              </>
-            )}
-          </div>
-        </section>
-      )}
-
       <section className="p-4 border-b-4 border-black-1">
         <p className="text-subtitle-medium mb-4">주문 상품 {currentOrderItems.length}개</p>
         {currentOrderItems.map((item, index) => (
@@ -413,7 +415,7 @@ export default function Payment() {
         </div>
         <div className="flex gap-2 mb-2">
           <div className="flex-1 flex justify-between items-center border-1 border-black-3 rounded px-4 py-3">
-            <p className="text-body-medium">포인트</p>
+            <p className="text-body-medium">적립금</p>
             <div className="flex items-center gap-2">
               <input
                 type="number"
@@ -432,7 +434,7 @@ export default function Payment() {
           </button>
         </div>
         <div className="flex justify-end">
-          <p className="text-small-medium text-black-4">보유 포인트: {userPoints.toLocaleString()} 원</p>
+          <p className="text-small-medium text-black-4">보유 적립금: {userPoints.toLocaleString()} 원</p>
         </div>
       </section>
 
