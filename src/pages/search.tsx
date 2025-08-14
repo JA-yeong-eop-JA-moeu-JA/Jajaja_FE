@@ -143,7 +143,7 @@ export default function Search() {
       const qs = new URLSearchParams(searchParams);
       const cur = Number(qs.get('page') || '0');
       qs.set('page', String(cur + 1));
-      qs.set('size', String(PAGE_SIZE));     // ★ 유지
+      qs.set('size', String(PAGE_SIZE)); // ★ 유지
       setSearchParams(qs, { replace: true });
     },
     root: null,
@@ -216,7 +216,7 @@ export default function Search() {
       qs.delete('keyword');
     }
     qs.set('page', '0');
-    qs.set('size', String(PAGE_SIZE));   // ★ 추가
+    qs.set('size', String(PAGE_SIZE)); // ★ 추가
     Storage.setKeyword(keyword);
     setSearchParams(qs, { replace: true });
     setTimeout(() => (document.activeElement as HTMLElement | null)?.blur(), 0);
@@ -231,7 +231,7 @@ export default function Search() {
     const qs = new URLSearchParams(searchParams);
     qs.set('sort', nextSort);
     qs.set('page', '0');
-    qs.set('size', String(PAGE_SIZE));   // ★ 추가
+    qs.set('size', String(PAGE_SIZE)); // ★ 추가
     setSearchParams(qs, { replace: true });
     setIsAsc(true);
     setChange(true);
