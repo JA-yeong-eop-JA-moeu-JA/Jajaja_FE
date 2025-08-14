@@ -5,7 +5,6 @@ export type TGetSearchKeyWord = TCommonResponse<{
   keywords: string[];
 }>;
 
-// types/search/search.ts
 export type TCategorySort = 'POPULAR' | 'NEW' | 'LOW_PRICE' | 'REVIEW';
 
 export interface IProductDTO {

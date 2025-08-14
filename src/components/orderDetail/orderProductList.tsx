@@ -7,28 +7,29 @@ import { MATCH_STATUS_COLOR_MAP, ORDER_STATUS_COLOR_MAP } from '@/constants/prod
 import { SelectButton } from '@/components/common/button';
 import OrderItem from '@/components/review/orderItem';
 
-// 🔧 IOrderItem 확장해서 필요한 필드 추가
 type TOrderStatusKey = keyof typeof ORDER_STATUS_COLOR_MAP;
 type TMatchStatusKey = keyof typeof MATCH_STATUS_COLOR_MAP;
 
 type TOrderListItem = IOrderItem & {
-  orderProductId: number; // ← 필수
-  orderStatus?: TOrderStatusKey; // ← per-item 상태 (옵션)
-  matchStatus?: TMatchStatusKey; // ← per-item 상태 (옵션)
-  orderDate?: string; // ← 있으면 카드에 넘김
+  orderProductId: number;
+  orderStatus?: TOrderStatusKey; 
+  matchStatus?: TMatchStatusKey; 
+  orderDate?: string; 
 };
 
 interface IOrderProductListSectionProps {
   items: TOrderListItem[];
-  parentOrderId?: number; // ← 진짜 주문 ID(쿼리용)
+  parentOrderId?: number;
   orderDate?: string;
 }
+
+const ENABLED_LABELS: TOrderStatusKey[] = ['결제 완료', '배송 중', '배송 완료'];
 
 export default function OrderProductList({ items, parentOrderId, orderDate }: IOrderProductListSectionProps) {
   const navigate = useNavigate();
 
   const toReviewable = (it: TOrderListItem): TReviewableOrderItem => ({
-    orderId: it.orderId, // 카드에 보여줄 주문 ID (페이지에서 세팅)
+    orderId: it.orderId, 
     orderDate: orderDate ?? it.orderDate ?? '',
     orderProductId: it.orderProductId,
     productId: it.productId,
@@ -47,9 +48,10 @@ export default function OrderProductList({ items, parentOrderId, orderDate }: IO
         const itemOrderStatus = item.orderStatus as TOrderStatusKey | undefined;
         const itemMatchStatus = item.matchStatus as TMatchStatusKey | undefined;
 
+        const isEnabled = !!itemOrderStatus && ENABLED_LABELS.includes(itemOrderStatus);
+
         return (
           <div key={`${item.orderId}-${item.productId}`}>
-            {/* 상품별 상태 배지 */}
             <div className="flex justify-between items-center px-4 pb-2">
               {itemOrderStatus && <span className={`text-body-medium ${ORDER_STATUS_COLOR_MAP[itemOrderStatus]}`}>{itemOrderStatus}</span>}
               {itemMatchStatus && <span className={`text-body-medium ${MATCH_STATUS_COLOR_MAP[itemMatchStatus]}`}>{itemMatchStatus}</span>}
@@ -64,10 +66,16 @@ export default function OrderProductList({ items, parentOrderId, orderDate }: IO
                 kind="select-content"
                 leftText="교환/반품"
                 rightText="배송 조회"
-                leftVariant="outline-orange"
-                rightVariant="outline-orange"
-                onLeftClick={() => navigate(`/mypage/apply?orderId=${parentOrderId ?? item.orderId}&orderProductId=${item.orderProductId}`)}
-                onRightClick={() => navigate(`/mypage/deliveryInfo?orderProductId=${item.orderProductId}`)}
+                leftVariant={isEnabled ? 'outline-orange' : 'disabled'}
+                rightVariant={isEnabled ? 'outline-orange' : 'disabled'}
+                onLeftClick={() => {
+                  if (!isEnabled) return;
+                  navigate(`/mypage/apply?orderId=${parentOrderId ?? item.orderId}&orderProductId=${item.orderProductId}`);
+                }}
+                onRightClick={() => {
+                  if (!isEnabled) return;
+                  navigate(`/mypage/deliveryInfo?orderProductId=${item.orderProductId}`);
+                }}
               />
             </div>
           </div>

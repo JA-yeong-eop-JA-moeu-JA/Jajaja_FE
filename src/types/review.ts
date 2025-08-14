@@ -1,4 +1,3 @@
-// types/review.ts
 export interface IReview {
   id: number;
   nickname: string;

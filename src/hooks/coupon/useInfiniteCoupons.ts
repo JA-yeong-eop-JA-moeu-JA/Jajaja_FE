@@ -13,8 +13,8 @@ export default function useInfiniteCoupons() {
       const page = lastPage.result.page;
       return page.hasNextPage ? page.currentPage + 1 : undefined;
     },
-    staleTime: 5 * 60 * 1000, // 5분
-    refetchOnWindowFocus: false, //자동 refetch 방지
-    retry: 1, // 재시도 횟수 제한
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false, 
+    retry: 1,
   });
 }

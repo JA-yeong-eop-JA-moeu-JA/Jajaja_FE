@@ -16,7 +16,7 @@ export default function Layout({ children }: PropsWithChildren) {
   const { isLoggedIn } = useAuth();
   const { pathname } = useLocation();
 
-  const hideBottomBarPaths = ['/payment', '/address/add', '/product'];
+  const hideBottomBarPaths = ['/payment', '/address/add', '/product', '/mypage/deliveryInfo', '/mypage/order', '/mypage/apply'];
 
   const shouldHideBottomBar = hideBottomBarPaths.some((path) => pathname.startsWith(path));
 

@@ -25,7 +25,6 @@ type TMatchStatus = '매칭 중' | '매칭 완료' | '매칭 실패';
 
 const MATCH_TTL_MINUTES = 600;
 
-// PaymentMethod.java: NORMAL, BILLING, BRANDPAY 만 사용
 function formatPayMethod(method: string) {
   switch ((method ?? '').toUpperCase()) {
     case 'NORMAL':
@@ -35,11 +34,10 @@ function formatPayMethod(method: string) {
     case 'BRANDPAY':
       return '브랜드페이';
     default:
-      return method; // 그 외 값은 그대로 노출
+      return method; 
   }
 }
 
-// BE OrderStatus 키
 type TBEOrderStatus =
   | 'READY'
   | 'DONE'
@@ -53,7 +51,6 @@ type TBEOrderStatus =
   | 'REFUNDED'
   | 'TEAM_MATCHING_FAILED';
 
-// 1:1 라벨 매핑
 const ORDER_STATUS_LABEL_MAP: Record<TBEOrderStatus, TOrderStatus> = {
   READY: '결제 대기',
   DONE: '결제 완료',
@@ -68,7 +65,6 @@ const ORDER_STATUS_LABEL_MAP: Record<TBEOrderStatus, TOrderStatus> = {
   TEAM_MATCHING_FAILED: '매칭 실패',
 };
 
-// 단일 아이템 기준으로 BE 값만 사용 (현재 호출부가 [it] 형태)
 const toOrderStatusLabel = (items: Array<{ status?: string }>): TOrderStatus => {
   const code = (items[0]?.status ?? '').toUpperCase() as TBEOrderStatus;
   return ORDER_STATUS_LABEL_MAP[code] ?? '결제 대기';
@@ -76,7 +72,7 @@ const toOrderStatusLabel = (items: Array<{ status?: string }>): TOrderStatus => 
 
 const toMatchStatusLabel = (items: Array<{ teamStatus?: string; matchingStatus?: string }>): TMatchStatus | undefined => {
   const raw = items.map((i) => (i.teamStatus ?? i.matchingStatus ?? '').toUpperCase()).filter(Boolean);
-  if (raw.length === 0) return undefined; // 개인 주문: 매칭 상태 없음
+  if (raw.length === 0) return undefined; 
   if (raw.some((v) => v === 'MATCHING')) return '매칭 중';
   if (raw.every((v) => v === 'COMPLETED')) return '매칭 완료';
   return '매칭 실패';
@@ -148,7 +144,6 @@ export default function OrderDetailPersonal() {
 
       orderStatus: toOrderStatusLabel([it]),
       matchStatus: isAfterSales ? undefined : toMatchStatusLabel([it]),
-      // teamCreatedAt: it.teamCreatedAt ?? null,
     };
   });
 
