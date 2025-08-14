@@ -51,7 +51,7 @@ export default function Product() {
     );
   return (
     <div className="pb-16">
-      <header className='px-2'>
+      <header className="px-2">
         <ProductHeader />
       </header>
       <img src={data?.result?.thumbnailUrl} className="w-full" alt={data?.result?.name} />
