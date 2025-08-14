@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import { usePaymentConfirm } from '@/hooks/payment/usePaymentConfirm';
@@ -28,12 +28,19 @@ export const usePaymentStatus = (): IUsePaymentStatusReturn => {
 
   const paymentConfirmMutation = usePaymentConfirm();
 
-  const paymentKey = searchParams.get('paymentKey');
-  const orderId = searchParams.get('orderId');
-  const amount = searchParams.get('amount');
+  const didEffectRun = useRef(false);
 
   useEffect(() => {
+    if (didEffectRun.current) {
+      return;
+    }
+    didEffectRun.current = true;
+
     const confirmPayment = async () => {
+      const paymentKey = searchParams.get('paymentKey');
+      const orderId = searchParams.get('orderId');
+      const amount = searchParams.get('amount');
+
       if (!paymentKey || !orderId || !amount) {
         setError('결제 정보가 올바르지 않습니다.');
         setIsConfirming(false);
@@ -41,30 +48,32 @@ export const usePaymentStatus = (): IUsePaymentStatusReturn => {
       }
 
       try {
-        console.log('결제 확인 요청:', { orderId, paymentKey, amount });
-
         const response = await paymentConfirmMutation.mutateAsync({
-          orderId,
+          orderId: orderId,
           paymentKey,
           paidAmount: Number(amount),
         });
 
         if (response.isSuccess) {
           setConfirmResult(response);
-          console.log('결제 확인 완료:', response);
         } else {
           setError(response.message || '결제 승인에 실패했습니다.');
         }
-      } catch (err) {
-        console.error('결제 승인 요청 실패:', err);
-        setError('결제 승인 중 오류가 발생했습니다.');
+      } catch (err: any) {
+        if (err.response?.data?.code === 'ORDER4001') {
+          setError(`주문을 찾을 수 없습니다. orderId: ${orderId}`);
+        } else if (err.response?.data?.code === 'PAYMENT4004') {
+          setError(`결제 금액이 일치하지 않습니다. 확인된 금액: ${amount}원`);
+        } else {
+          setError(err.response?.data?.message || '결제 승인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+        }
       } finally {
         setIsConfirming(false);
       }
     };
 
     confirmPayment();
-  }, [paymentKey, orderId, amount, paymentConfirmMutation]);
+  }, []);
 
   return {
     isConfirming: isConfirming || paymentConfirmMutation.isPending,

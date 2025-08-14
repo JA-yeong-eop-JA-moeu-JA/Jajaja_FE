@@ -3,7 +3,7 @@ export interface ITPaymentRequest {
   orderName: string;
   customerEmail?: string;
   customerName?: string;
-  customerMobilePhone?: string;
+  customerMobilePhone: string;
   successUrl: string;
   failUrl: string;
 }
@@ -34,7 +34,7 @@ export interface ITPaymentPrepareRequest {
 }
 
 export interface ITPaymentPrepareData {
-  orderId: number;
+  orderId: string;
   orderName: string;
   totalAmount: number;
   discountAmount: number;
@@ -47,7 +47,7 @@ export interface ITPaymentPrepareResponse {
   isSuccess: boolean;
   code: string;
   message: string;
-  data: ITPaymentPrepareData;
+  result: ITPaymentPrepareData;
 }
 
 export interface ITOrderItem {
