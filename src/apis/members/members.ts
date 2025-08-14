@@ -4,7 +4,7 @@ import type { TPatchUserInfoRequest } from '@/types/member/TPatchUserInfo';
 import { axiosInstance } from '../axiosInstance';
 
 export const getUserInfo = async (): Promise<TGetUserInfoResponse> => {
-  const { data } = await axiosInstance.get('/api/members/me', { optionalAuth: true });
+  const { data } = await axiosInstance.get('/api/members/me');
   return data;
 };
 

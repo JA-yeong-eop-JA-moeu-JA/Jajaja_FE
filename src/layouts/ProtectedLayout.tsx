@@ -1,4 +1,4 @@
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 
 import Loading from '@/components/loading';
 
@@ -7,19 +7,16 @@ import { useAuth } from '@/context/AuthContext';
 
 export default function ProtectedLayout() {
   const { isLoggedIn, isLoading, isError } = useAuth();
-  const { pathname } = useLocation();
-
-  const isSearchPage = pathname.startsWith('/search');
   return (
     <Layout>
       {isLoading ? (
         <div className="w-full h-screen flex items-center justify-center">
           <Loading />
         </div>
-      ) : isSearchPage || (!isError && isLoggedIn) ? (
-        <Outlet />
-      ) : (
+      ) : !isError && isLoggedIn ? (
         <div className="h-screen" />
+      ) : (
+        <Outlet />
       )}
     </Layout>
   );

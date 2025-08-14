@@ -59,6 +59,7 @@ export const router = createBrowserRouter([
           { path: 'product/:id', element: <Product /> },
           { path: 'product/:id/photoReview', element: <PhotoReview /> },
           { path: 'product/:id/review', element: <Review /> },
+          { path: 'search', element: <Search /> },
           { path: 'notfound', element: <NotFound /> },
           { path: '*', element: <NotFound /> },
         ],
@@ -67,7 +68,6 @@ export const router = createBrowserRouter([
         path: '/',
         element: <ProtectedLayout />,
         children: [
-          { path: 'search', element: <Search /> },
           { path: 'mypage', element: <MyPage /> },
           { path: 'mypage/me', element: <MyDetailPage /> },
           { path: 'mypage/me/profile', element: <Profile /> },
