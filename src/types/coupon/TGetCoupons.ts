@@ -9,6 +9,7 @@ type TApplicableConditions = {
 };
 
 export type TCoupons = {
+  discountAmount: any;
   couponId: number;
   couponName: string;
   discountType: 'PERCENTAGE' | 'FIXED_AMOUNT';

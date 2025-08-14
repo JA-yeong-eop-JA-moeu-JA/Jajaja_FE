@@ -45,6 +45,7 @@ export type TCartSummary = {
 export type TCartResult = {
   products: TCartProduct[];
   appliedCoupon: TCoupon | null;
+  availableCouponsCount: number;
   summary: TCartSummary;
   totalCount: number;
 };
