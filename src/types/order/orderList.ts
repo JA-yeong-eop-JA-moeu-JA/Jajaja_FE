@@ -18,7 +18,7 @@ export type TOrderItem = {
 
 export type TOrder = {
   id: number;
-  date: string | null; 
+  date: string | null;
   items: TOrderItem[] | null;
 };
 
@@ -48,8 +48,6 @@ export type TGetMyOrdersRequest = {
   size?: number;
   sort?: `${string},${'asc' | 'desc'}` | string;
 };
-
-
 
 export interface IOrderItem {
   orderId: number;

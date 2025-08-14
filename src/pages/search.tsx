@@ -6,14 +6,17 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 import type { TCategorySort } from '@/types/category';
 
+import Storage from '@/utils/storage';
 import { formatKoreanDateLabel } from '@/utils/time';
 
 import { useCategoryProducts } from '@/hooks/category/useCategoryProduct';
+import useInfiniteObserver from '@/hooks/common/useInfiniteObserver';
 import useDeleteRecent from '@/hooks/search/useDeleteRecent';
 import useGetKeyword from '@/hooks/search/useGetKeyword';
 import useGetRecent from '@/hooks/search/useGetRecent';
 import { useKeywordProducts } from '@/hooks/search/useKeywordProduct';
 
+import InfiniteScrollSentinel from '@/components/common/infiniteScroll';
 import SearchInput from '@/components/common/SearchInput';
 import ProductCard from '@/components/home/productCard';
 import Menu from '@/components/search/menu';
@@ -22,10 +25,12 @@ import Tag from '@/components/search/tag';
 import Back from '@/assets/icons/back.svg?react';
 import Down from '@/assets/icons/down.svg?react';
 import Up from '@/assets/icons/up.svg?react';
-import useInfiniteObserver from '@/hooks/common/useInfiniteObserver';
-import InfiniteScrollSentinel from '@/components/common/infiniteScroll';
 
 export default function Search() {
+  type TKeywordItem = {
+    id: number;
+    keyword: string;
+  };
   const { data } = useGetKeyword();
   const [searchParams, setSearchParams] = useSearchParams();
   const menuRef = useRef<HTMLDivElement>(null);
@@ -36,6 +41,7 @@ export default function Search() {
   const [inputValue, setValue] = useState('');
   const [isAsc, setIsAsc] = useState(true);
   const { search } = useLocation();
+  const [localKeywords, setLocalKeywords] = useState<TKeywordItem[]>(() => Storage.getKeyword());
 
   const navigate = useNavigate();
   const { data: recent } = useGetRecent();
@@ -48,9 +54,7 @@ export default function Search() {
 
   const COLUMN_COUNT = 2;
   const rowsPerColumn = data ? Math.ceil(data?.result.keywords.length / COLUMN_COUNT) : 0;
-  const columns = Array.from({ length: COLUMN_COUNT }, (_, i) =>
-    data?.result.keywords.slice(i * rowsPerColumn, (i + 1) * rowsPerColumn),
-  );
+  const columns = Array.from({ length: COLUMN_COUNT }, (_, i) => data?.result.keywords.slice(i * rowsPerColumn, (i + 1) * rowsPerColumn));
 
   const subcategoryId = Number(searchParams.get('subcategoryId') || '');
   const isCategoryMode = !!subcategoryId;
@@ -128,15 +132,9 @@ export default function Search() {
   }, [isCategoryMode, subcategoryId, sort]);
 
   const pageInfo = categoryQuery?.pageInfo;
-  const hasNextCategory = pageInfo
-    ? (pageInfo.hasNextPage ?? !pageInfo.isLast) 
-    : ((categoryQuery?.products?.length ?? 0) === size);
+  const hasNextCategory = pageInfo ? (pageInfo.hasNextPage ?? !pageInfo.isLast) : (categoryQuery?.products?.length ?? 0) === size;
 
-  const enableInfiniteCategory =
-    isCategoryMode &&
-    hasNextCategory &&
-    !categoryQuery.isLoading &&
-    accCategory.length >= size;
+  const enableInfiniteCategory = isCategoryMode && hasNextCategory && !categoryQuery.isLoading && accCategory.length >= size;
 
   const categorySentinelRef = useInfiniteObserver({
     enabled: enableInfiniteCategory,
@@ -151,9 +149,7 @@ export default function Search() {
     threshold: 0,
   });
 
-  const displayList: TProductCardItem[] = isCategoryMode
-    ? accCategory
-    : (keywordQuery.products ?? []).map(mapToProductCard);
+  const displayList: TProductCardItem[] = isCategoryMode ? accCategory : (keywordQuery.products ?? []).map(mapToProductCard);
 
   useEffect(() => {
     if (keywordParam) {
@@ -177,7 +173,25 @@ export default function Search() {
     if (label !== sortOption) setSortOption(label);
   }, [searchParams]);
 
-  const handleDelete = async (id: number) => mutate(id);
+  const keywordExist = Storage.getKeyword().length > 0 || (recent && recent.result.length > 0);
+  const isLocalData = !recent || recent.result.length === 0;
+  const keywordData = isLocalData ? localKeywords : recent!.result;
+
+  const handleDelete = async (id: number) => {
+    if (isLocalData) {
+      Storage.deleteKeyword(id);
+      setLocalKeywords((prev) => prev.filter((item) => item.id !== id));
+    } else {
+      await mutate(id);
+    }
+  };
+
+  useEffect(() => {
+    if (isLocalData) {
+      setLocalKeywords(Storage.getKeyword());
+    }
+  }, [isLocalData, recent]);
+
   const handleValue = (e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value);
 
   const handleFilter = (value?: string) => {
@@ -192,6 +206,7 @@ export default function Search() {
       qs.delete('keyword');
     }
     qs.set('page', '0');
+    Storage.setKeyword(keyword);
     setSearchParams(qs, { replace: true });
     setTimeout(() => {
       (document.activeElement as HTMLElement | null)?.blur();
@@ -243,8 +258,8 @@ export default function Search() {
           <section>
             <p className="text-subtitle-medium mb-2">최근 검색</p>
             <ScrollContainer className="flex w-full gap-2 overflow-x-auto cursor-grab pr-5" vertical={false}>
-              {recent?.result.length === 0 && <p className="text-body-regular text-black-4 py-2.5">최근 검색어가 없습니다.</p>}
-              {recent?.result.map(({ id, keyword }) => (
+              {!keywordExist && <p className="text-body-regular text-black-4 py-2.5">최근 검색어가 없습니다.</p>}
+              {keywordData?.map(({ id, keyword }) => (
                 <div key={id} className="shrink-0" onClick={() => handleFilter(keyword)}>
                   <Tag msg={keyword} onDelete={() => handleDelete(id)} />
                 </div>

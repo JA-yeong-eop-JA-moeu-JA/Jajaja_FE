@@ -1,9 +1,9 @@
-import { forwardRef } from 'react';
 import type { HTMLAttributes } from 'react';
+import { forwardRef } from 'react';
 
-type Props = HTMLAttributes<HTMLDivElement>;
+type TProps = HTMLAttributes<HTMLDivElement>;
 
-const InfiniteScrollSentinel = forwardRef<HTMLDivElement, Props>((props, ref) => {
+const InfiniteScrollSentinel = forwardRef<HTMLDivElement, TProps>((props, ref) => {
   return <div ref={ref} {...props} />;
 });
 

@@ -102,7 +102,7 @@ export default function ApplyReturnOrExchange() {
   const { items, delivery, payment } = data;
 
   const mappedItems: (IOrderItem & { orderProductId: number; orderId: number })[] = items.map((it) => ({
-    orderId: id, 
+    orderId: id,
     orderProductId: it.orderProductId,
     productId: it.product.id,
     name: it.product.name,
@@ -280,7 +280,7 @@ export default function ApplyReturnOrExchange() {
           };
 
           try {
-            await mutation.mutateAsync(vars); 
+            await mutation.mutateAsync(vars);
             setIsModalOpen(false);
             navigate(selectedType === '반품' ? '/mypage/order/return/complete' : '/mypage/order/exchange/complete');
           } catch (e: any) {

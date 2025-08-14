@@ -4,15 +4,15 @@ import type { TReviewItem } from '@/types/board/reviewBoard';
 
 import { useReviews } from '@/hooks/board/useReviews';
 import { useTeamProducts } from '@/hooks/board/useTeamProducts';
+import useInfiniteObserver from '@/hooks/common/useInfiniteObserver';
 import useUserInfo from '@/hooks/myPage/useUserInfo';
 
 import HorizontalProductCard from '@/components/board/HorizontalProductCard';
 import { PageButton, type TabId } from '@/components/common/button';
+import InfiniteScrollSentinel from '@/components/common/infiniteScroll';
 import BottomBar from '@/components/head_bottom/BottomBar';
 import Header from '@/components/head_bottom/HomeHeader';
 import ReviewCard from '@/components/product/reviewCard';
-import useInfiniteObserver from '@/hooks/common/useInfiniteObserver';
-import InfiniteScrollSentinel from '@/components/common/infiniteScroll';
 
 export default function Board() {
   const [selectedTop1, setSelectedTop1] = useState<TabId>('review');
@@ -80,13 +80,10 @@ export default function Board() {
   const REVIEW_PAGE_SIZE = reviewPage?.size ?? 5;
   const currentReviewPage = reviewPage?.currentPage ?? pageReview;
   const totalReviews = reviewPage?.totalElements ?? 0;
-  const hasNextReviews =
-    !!reviewPage?.hasNextPage || totalReviews > (currentReviewPage + 1) * REVIEW_PAGE_SIZE;
+  const hasNextReviews = !!reviewPage?.hasNextPage || totalReviews > (currentReviewPage + 1) * REVIEW_PAGE_SIZE;
 
-  const enableInfiniteReviews =
-    isReviewTab && hasInitReview && hasNextReviews && accReviews.length > 5 && !isLoadingReviews;
-  const enableInfiniteTeams =
-    isTeamTab && hasNextTeam && accTeams.length > 5 && !isLoading;
+  const enableInfiniteReviews = isReviewTab && hasInitReview && hasNextReviews && accReviews.length > 5 && !isLoadingReviews;
+  const enableInfiniteTeams = isTeamTab && hasNextTeam && accTeams.length > 5 && !isLoading;
 
   const scrollRootRef = useRef<HTMLDivElement | null>(null);
 
@@ -134,10 +131,7 @@ export default function Board() {
                   { label: '추천순', value: 'RECOMMEND' },
                 ].map(({ label, value }, index, array) => (
                   <div key={value} className="flex items-center">
-                    <button
-                      onClick={() => setSortType(value as 'LATEST' | 'RECOMMEND')}
-                      className={sortType === value ? 'text-body-medium text-black' : ''}
-                    >
+                    <button onClick={() => setSortType(value as 'LATEST' | 'RECOMMEND')} className={sortType === value ? 'text-body-medium text-black' : ''}>
                       {label}
                     </button>
                     {index < array.length - 1 && <span className="px-3 text-black-2">|</span>}
@@ -145,7 +139,7 @@ export default function Board() {
                 ))}
               </div>
 
-              {(pageReview === 0 && accReviews.length === 0 && hasInitReview && (isLoadingReviews || !isFetchedReviews)) ? (
+              {pageReview === 0 && accReviews.length === 0 && hasInitReview && (isLoadingReviews || !isFetchedReviews) ? (
                 <p className="text-center text-black-3">리뷰 로딩 중...</p>
               ) : isErrorReviews && pageReview === 0 && hasInitReview ? (
                 <p className="text-center text-error-3">리뷰 로드 실패</p>
@@ -165,7 +159,7 @@ export default function Board() {
           ) : (
             <>
               {/* 팀 리스트 (원본 흐름) */}
-              {(pageTeam === 0 && accTeams.length === 0 && (isLoading || !isFetched)) ? (
+              {pageTeam === 0 && accTeams.length === 0 && (isLoading || !isFetched) ? (
                 <p className="text-center text-black-3">팀 모집 목록 로딩 중...</p>
               ) : isError && pageTeam === 0 ? (
                 <p className="text-center text-error-3">모집중인 팀이 없습니다</p>

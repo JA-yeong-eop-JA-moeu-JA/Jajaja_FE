@@ -14,7 +14,7 @@ export default function useInfiniteCoupons() {
       return page.hasNextPage ? page.currentPage + 1 : undefined;
     },
     staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false, 
+    refetchOnWindowFocus: false,
     retry: 1,
   });
 }

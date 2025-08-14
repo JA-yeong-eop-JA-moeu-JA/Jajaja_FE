@@ -12,9 +12,9 @@ type TMatchStatusKey = keyof typeof MATCH_STATUS_COLOR_MAP;
 
 type TOrderListItem = IOrderItem & {
   orderProductId: number;
-  orderStatus?: TOrderStatusKey; 
-  matchStatus?: TMatchStatusKey; 
-  orderDate?: string; 
+  orderStatus?: TOrderStatusKey;
+  matchStatus?: TMatchStatusKey;
+  orderDate?: string;
 };
 
 interface IOrderProductListSectionProps {
@@ -29,7 +29,7 @@ export default function OrderProductList({ items, parentOrderId, orderDate }: IO
   const navigate = useNavigate();
 
   const toReviewable = (it: TOrderListItem): TReviewableOrderItem => ({
-    orderId: it.orderId, 
+    orderId: it.orderId,
     orderDate: orderDate ?? it.orderDate ?? '',
     orderProductId: it.orderProductId,
     productId: it.productId,

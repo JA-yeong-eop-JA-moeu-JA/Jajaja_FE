@@ -1,6 +1,8 @@
 import type { TGetReviewsSuccess, TReviewSort } from '@/types/board/reviewBoard';
 import { QUERY_KEYS } from '@/constants/querykeys/queryKeys';
+
 import { getReviews } from '@/apis/board/reviewBoard';
+
 import { useCoreQuery } from '@/hooks/customQuery';
 
 type TUseReviewsParams = {
@@ -14,7 +16,7 @@ export const useReviews = (params: TUseReviewsParams) => {
   const DEFAULT_SIZE = 5;
   const page = params.page ?? 0;
   const size = params.size ?? DEFAULT_SIZE;
-  const sortForApi = ((params.sort ?? 'LATEST').toString().toUpperCase()) as TReviewSort;
+  const sortForApi = (params.sort ?? 'LATEST').toString().toUpperCase() as TReviewSort;
 
   const query = useCoreQuery(
     [QUERY_KEYS.GET_REVIEWS, sortForApi, page, size],

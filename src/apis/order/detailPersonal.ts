@@ -1,4 +1,3 @@
-// src/apis/orders/detailPersonal.ts
 import type { ICommonResponse, IOrderDetailPersonalResult, IOrderProduct } from '@/types/order/detailPersonal';
 
 import { axiosInstance } from '@/apis/axiosInstance';

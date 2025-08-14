@@ -25,6 +25,7 @@ type TMatchStatus = '매칭 중' | '매칭 완료' | '매칭 실패';
 
 const MATCH_TTL_MINUTES = 600;
 
+// PaymentMethod.java: NORMAL, BILLING, BRANDPAY 만 사용
 function formatPayMethod(method: string) {
   switch ((method ?? '').toUpperCase()) {
     case 'NORMAL':
@@ -34,7 +35,7 @@ function formatPayMethod(method: string) {
     case 'BRANDPAY':
       return '브랜드페이';
     default:
-      return method; 
+      return method;
   }
 }
 
@@ -72,7 +73,7 @@ const toOrderStatusLabel = (items: Array<{ status?: string }>): TOrderStatus => 
 
 const toMatchStatusLabel = (items: Array<{ teamStatus?: string; matchingStatus?: string }>): TMatchStatus | undefined => {
   const raw = items.map((i) => (i.teamStatus ?? i.matchingStatus ?? '').toUpperCase()).filter(Boolean);
-  if (raw.length === 0) return undefined; 
+  if (raw.length === 0) return undefined;
   if (raw.some((v) => v === 'MATCHING')) return '매칭 중';
   if (raw.every((v) => v === 'COMPLETED')) return '매칭 완료';
   return '매칭 실패';

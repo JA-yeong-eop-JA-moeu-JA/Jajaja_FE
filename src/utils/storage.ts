@@ -1,5 +1,9 @@
 import { decrypt, encrypt } from '@/utils/crypto';
 
+type TKeywordItem = {
+  id: number;
+  keyword: string;
+};
 class Storage {
   static getAccessToken = () => {
     const accessToken = localStorage.getItem('accessToken');
@@ -22,6 +26,24 @@ class Storage {
   static setServer = () => {
     localStorage.setItem('server', 'set');
   };
+  static setKeyword = (keyword: string) => {
+    const list: TKeywordItem[] = JSON.parse(sessionStorage.getItem('keyword') || '[]');
+    if (list[0]?.keyword === keyword) return;
+    list.unshift({ id: Date.now(), keyword });
+    if (list.length > 10) list.pop();
+    sessionStorage.setItem('keyword', JSON.stringify(list));
+  };
+
+  static getKeyword = (): TKeywordItem[] => {
+    return JSON.parse(sessionStorage.getItem('keyword') || '[]');
+  };
+
+  static deleteKeyword = (id: number) => {
+    const keywords: TKeywordItem[] = JSON.parse(sessionStorage.getItem('keyword') || '[]');
+    const filtered = keywords.filter((item) => item.id !== id);
+    sessionStorage.setItem('keyword', JSON.stringify(filtered));
+  };
+
   static clearStorage = () => {
     localStorage.clear();
   };
