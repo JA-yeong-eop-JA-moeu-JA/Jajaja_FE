@@ -11,11 +11,12 @@ type TOptions = {
 export default function useUserInfo(options?: TOptions) {
   const { enabled = true } = options ?? {};
   const { data, isError, isLoading, refetch } = useCoreQuery(QUERY_KEYS.GET_USER_INFO, () => getUserInfo(), {
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
-    staleTime: 0,
+    retry: (count, err: any) => !err?.authRequired && count < 1,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
+    staleTime: 60 * 1000,
     enabled,
-    retry: false,
   });
   return { data, isError, isLoading, refetch };
 }

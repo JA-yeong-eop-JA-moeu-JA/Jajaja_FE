@@ -5,24 +5,17 @@ import { CATEGORIES } from '@/constants/onBoarding/categoryList';
 
 import Storage from '@/utils/storage';
 
-import useCategory from '@/hooks/onBoarding/useCategory';
-
 import Logo from '@/assets/sizeLogo.svg?react';
 
 export default function OnBoarding() {
-  const { mutate } = useCategory();
   const navigate = useNavigate();
   const [category, setCategory] = useState(1);
   const handleSubmit = () => {
     Storage.setCategory(category);
-    mutate({ businessCategoryId: category });
-
     navigate('/home');
   };
   const handleSkip = () => {
     Storage.setCategory(1);
-    mutate({ businessCategoryId: 1 });
-
     navigate('/home');
   };
   return (

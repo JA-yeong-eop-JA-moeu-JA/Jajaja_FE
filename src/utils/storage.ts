@@ -15,6 +15,13 @@ class Storage {
   static setCategory = (category: number) => {
     localStorage.setItem('category', category.toString());
   };
+  static getServer = () => {
+    const server = localStorage.getItem('server');
+    return server ? server : undefined;
+  };
+  static setServer = () => {
+    localStorage.setItem('server', 'set');
+  };
   static clearStorage = () => {
     localStorage.clear();
   };

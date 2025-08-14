@@ -11,6 +11,7 @@ export type TOrderItem = {
   orderProductId: number;
   status: string | null;
   teamStatus: string | null;
+  teamCreatedAt: string | null;
   product: TOrderItemProduct;
   price: number | null;
 };
@@ -74,6 +75,7 @@ export interface IOrderItem {
 
   orderStatus?: string | null;
   matchStatus?: string | null;
+  teamCreatedAt?: string | null;
 }
 
 export interface IOrder {

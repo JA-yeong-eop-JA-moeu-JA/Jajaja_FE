@@ -5,6 +5,6 @@ import { getRecent } from '@/apis/search/recent';
 import { useCoreQuery } from '@/hooks/customQuery';
 
 export default function useGetRecent() {
-  const { data } = useCoreQuery(QUERY_KEYS.GET_RECENT_SEARCH, () => getRecent());
-  return { data };
+  const { data, refetch } = useCoreQuery(QUERY_KEYS.GET_RECENT_SEARCH, () => getRecent());
+  return { data, refetch };
 }

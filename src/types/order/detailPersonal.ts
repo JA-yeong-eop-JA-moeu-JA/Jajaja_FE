@@ -13,6 +13,7 @@ export interface IOrderProduct {
   status: TOrderStatus;
   teamStatus?: TTeamStatus;
   matchStatus?: '매칭 중' | '매칭 완료' | '매칭 실패';
+  teamCreatedAt?: string | null;
   product: {
     id: number;
     image: string;
