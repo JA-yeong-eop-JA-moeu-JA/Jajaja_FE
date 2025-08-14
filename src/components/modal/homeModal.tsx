@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { useModalStore } from '@/stores/modalStore';
 
@@ -11,14 +12,20 @@ import Point from '@/assets/icons/point.svg?react';
 export default function HomeModal() {
   const [checked, setChecked] = useState(false);
   const { closeModal } = useModalStore();
-
+  const navigate = useNavigate();
   const handleClose = () => {
     if (checked) {
       document.cookie = 'hidePopup=true; max-age=86400; path=/';
     }
     closeModal();
   };
-
+  const handleNavigate = () => {
+    if (checked) {
+      document.cookie = 'hidePopup=true; max-age=86400; path=/';
+    }
+    closeModal();
+    navigate('/mypage/point');
+  };
   return (
     <>
       <div className="relative w-full pt-7 px-4 flex flex-col items-center gap-4">
@@ -39,7 +46,7 @@ export default function HomeModal() {
       </div>
 
       <div className="w-full">
-        <Button kind="basic" variant="solid-orange" className="w-full" onClick={() => closeModal()}>
+        <Button kind="basic" variant="solid-orange" className="w-full" onClick={handleNavigate}>
           기간 한정 포인트 확인하기
         </Button>
       </div>
