@@ -12,19 +12,14 @@ export default function Layout({ children }: PropsWithChildren) {
   const { isModalOpen } = useModalStore();
   const { pathname } = useLocation();
 
-  // BottomBar를 숨길 페이지 정의
-  const hideBottomBarPaths = ['/payment', '/address/add'];
+  const hideBottomBarPaths = ['/payment', '/address/add', '/product'];
 
   const shouldHideBottomBar = hideBottomBarPaths.some((path) => pathname.startsWith(path));
 
   const showBottomBar = !isModalOpen && pathname !== '/' && !shouldHideBottomBar;
 
   useEffect(() => {
-    if (isModalOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
+    document.body.style.overflow = isModalOpen ? 'hidden' : '';
   }, [isModalOpen]);
 
   useEffect(() => {
