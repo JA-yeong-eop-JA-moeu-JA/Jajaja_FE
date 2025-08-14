@@ -10,13 +10,13 @@ export default function ProductHeader() {
   return (
     <header className="w-full h-[56px] flex items-center justify-between bg-white">
       {/* 왼쪽: 뒤로가기 */}
-      <button onClick={() => navigate(-1)} className="p-1">
+      <button onClick={() => navigate(-1)} className="p-3">
         <BackIcon className="w-5 h-5" />
       </button>
 
       <div className="flex-1" />
 
-      <div className="flex items-center gap-4 m-4 p-2">
+      <div className="flex items-center gap-4 p-3.5">
         <SearchIcon className="w-5" onClick={() => navigate('/search')} />
         <CartIcon onClick={() => navigate('/shoppingcart')} />
       </div>

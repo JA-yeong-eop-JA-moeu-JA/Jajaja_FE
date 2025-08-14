@@ -10,6 +10,7 @@ import HorizontalProductCard from '@/components/board/HorizontalProductCard';
 import { PageButton, type TabId } from '@/components/common/button';
 import BottomBar from '@/components/head_bottom/BottomBar';
 import Header from '@/components/head_bottom/HomeHeader';
+import Loading from '@/components/loading';
 import ReviewCard from '@/components/product/reviewCard';
 
 export default function Board() {
@@ -102,7 +103,12 @@ export default function Board() {
 
                 const canPrevReviews = currentPage > 0;
                 const canNextReviews = !!reviewPage?.hasNextPage || total > (currentPage + 1) * REVIEW_PAGE_SIZE;
-
+                if (isLoading)
+                  return (
+                    <div className="w-full h-screen flex items-center justify-center">
+                      <Loading />
+                    </div>
+                  );
                 return (
                   <div className="flex items-center justify-center gap-3 py-4">
                     <button
@@ -131,7 +137,7 @@ export default function Board() {
               {isLoading ? (
                 <p className="text-center text-black-3">팀 모집 목록 로딩 중...</p>
               ) : isError ? (
-                <p className="text-center text-error-3">팀 모집 목록을 불러올 수 없습니다.</p>
+                <p className="text-center text-error-3">모집중인 팀이 없습니다</p>
               ) : (
                 teamList.map((item) => <HorizontalProductCard key={item.teamId} data={item} />)
               )}

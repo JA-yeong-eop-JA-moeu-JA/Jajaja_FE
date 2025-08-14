@@ -131,7 +131,7 @@ export default function OptionModal({ type }: { type?: string }) {
           <div className="flex flex-col gap-3">
             {selectedItems.map(({ id, name, originPrice, unitPrice, quantity }) => (
               <div key={id} className="rounded-sm w-full min-h-22 bg-black-0 px-4 pt-5 pb-4 relative flex flex-col gap-3">
-                <Close className="w-2 h-2 absolute top-2 right-2 cursor-pointer" onClick={() => handleRemove(id)} />
+                <Close className="size-2 absolute top-4 right-4 stroke-2 cursor-pointer" onClick={() => handleRemove(id)} />
                 <p className="text-body-regular">{name}</p>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center w-21 h-6 border border-black-2 bg-white">
@@ -151,7 +151,7 @@ export default function OptionModal({ type }: { type?: string }) {
             <div className="flex justify-between items-center text-small-medium">
               <div className="flex items-center gap-2">
                 <p>총 {totalQuantity}개</p>
-                {isTeam ? (
+                {!isTeam ? (
                   <p className="text-orange">1인 구매보다 {diff.toLocaleString()}원 저렴해요!</p>
                 ) : (
                   <p className="text-orange">팀 구매하면 {diff.toLocaleString()}원 저렴해요!</p>

@@ -1,12 +1,18 @@
 import type { IOrderItem } from '@/mocks/orderData';
 
-export const ORDER_STATUS_COLOR_MAP: Record<NonNullable<IOrderItem['orderStatus']>, string> = {
-  '배송 중': 'text-[color:var(--color-orange)]',
-  '결제 완료': 'text-[color:var(--color-orange)]',
-  '결제 취소': 'text-[color:var(--color-orange)]',
-  '반품 접수': 'text-[color:var(--color-orange)]',
-  '교환 접수': 'text-[color:var(--color-orange)]',
-};
+export const ORDER_STATUS_COLOR_MAP = {
+  '결제 대기': 'text-gray-500',
+  '결제 완료': 'text-blue-500',
+  '결제 취소': 'text-red-500',
+  '결제 실패': 'text-red-500',
+  '거래 취소': 'text-red-500',
+  '배송 중': 'text-green-500',
+  '배송 완료': 'text-green-700',
+  '환불 요청': 'text-orange-500',
+  '환불 실패': 'text-red-500',
+  '환불 완료': 'text-gray-500',
+  '매칭 실패': 'text-red-500',
+} as const;
 
 export const MATCH_STATUS_COLOR_MAP: Record<NonNullable<IOrderItem['matchStatus']>, string> = {
   '매칭 중': 'text-green',
