@@ -5,11 +5,15 @@ import { Toaster } from 'sonner';
 import { useModalStore } from '@/stores/modalStore';
 
 import ModalProvider from '@/components/common/modal';
+import Subscriber from '@/components/Subscriber';
 
 import BottomBar from '../components/head_bottom/BottomBar';
 
+import { useAuth } from '@/context/AuthContext';
+
 export default function Layout({ children }: PropsWithChildren) {
   const { isModalOpen } = useModalStore();
+  const { isLoggedIn } = useAuth();
   const { pathname } = useLocation();
 
   const hideBottomBarPaths = ['/payment', '/address/add', '/product'];
@@ -35,6 +39,7 @@ export default function Layout({ children }: PropsWithChildren) {
         <main className="flex-1 overflow-y-auto">
           {children}
           <Toaster />
+          {isLoggedIn && <Subscriber />}
         </main>
         {showBottomBar && <BottomBar />}
       </div>
