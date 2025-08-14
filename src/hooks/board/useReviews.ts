@@ -6,18 +6,22 @@ import { getReviews } from '@/apis/board/reviewBoard';
 import { useCoreQuery } from '@/hooks/customQuery';
 
 type TUseReviewsParams = {
-  sort?: TReviewSort;
+  sort?: TReviewSort | 'LATEST' | 'RECOMMEND';
   page?: number;
+  size?: number;
+  enabled?: boolean;
 };
 
 export const useReviews = (params: TUseReviewsParams) => {
   const DEFAULT_SIZE = 5;
+  const page = params.page ?? 0;
+  const size = params.size ?? DEFAULT_SIZE;
+  const sortForApi = (params.sort ?? 'LATEST').toString().toUpperCase() as TReviewSort;
 
   const query = useCoreQuery(
-    // ✅ key는 sort/page만 포함 (size는 고정)
-    [QUERY_KEYS.GET_REVIEWS, params.sort ?? 'latest', params.page ?? 0],
+    [QUERY_KEYS.GET_REVIEWS, sortForApi, page, size],
     async () => {
-      const res = await getReviews({ ...params, size: DEFAULT_SIZE });
+      const res = await getReviews({ sort: sortForApi, page, size });
       if (res.isSuccess) return res as TGetReviewsSuccess;
 
       if (!res.isSuccess && res.code === 'REVIEW4001') {
@@ -26,34 +30,22 @@ export const useReviews = (params: TUseReviewsParams) => {
           code: 'COMMON200',
           message: 'empty',
           result: {
-            page: {
-              size: DEFAULT_SIZE, // ✅ 고정값 사용
-              totalElements: 0,
-              currentElements: 0,
-              totalPages: 0,
-              currentPage: params.page ?? 0,
-              hasNextPage: false,
-              hasPreviousPage: (params.page ?? 0) > 0,
-              isLast: true,
-            },
+            page: { size, totalElements: 0, currentElements: 0, totalPages: 0, currentPage: page, hasNextPage: false, hasPreviousPage: page > 0, isLast: true },
             reviews: [],
           },
         } as TGetReviewsSuccess;
       }
-
       throw new Error(res.message || '리뷰 조회 실패');
     },
     {
       staleTime: 30 * 1000,
+      enabled: params.enabled ?? true,
     },
   );
 
-  const reviews = query.data?.result?.reviews ?? [];
-  const page = query.data?.result?.page;
-
   return {
-    reviews,
-    page,
+    reviews: query.data?.result?.reviews ?? [],
+    page: query.data?.result?.page,
     isLoading: query.isLoading,
     isError: query.isError,
     isFetched: query.isFetched,

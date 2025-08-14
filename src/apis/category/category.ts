@@ -27,7 +27,7 @@ export const categoryApi = {
         'params:',
         err.config?.params,
       );
-      throw err; // 상위에서 처리하게 던짐
+      throw err;
     }
   },
 };

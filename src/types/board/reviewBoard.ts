@@ -40,4 +40,4 @@ export type TGetReviewsFail = { isSuccess: false; code: 'REVIEW4001'; message: s
 
 export type TGetReviewsResponse = TGetReviewsSuccess | TGetReviewsFail;
 
-export type TReviewSort = 'latest' | 'recommend';
+export type TReviewSort = 'LATEST' | 'RECOMMEND';
