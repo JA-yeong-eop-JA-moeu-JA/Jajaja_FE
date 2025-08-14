@@ -15,6 +15,7 @@ const convertTCouponToTCoupons = (coupon: TCoupon): TCoupons => ({
     ...coupon.applicableConditions,
     type: coupon.applicableConditions.type as 'ALL' | 'BRAND' | 'CATEGORY' | 'FIRST',
   },
+  discountAmount: undefined,
 });
 
 export const useApplyCoupon = () => {

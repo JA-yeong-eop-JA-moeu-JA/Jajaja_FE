@@ -10,6 +10,7 @@ import { formatPhoneNumberForToss, generateCustomerKey } from '@/utils/paymentUt
 import { useModalStore } from '@/stores/modalStore';
 import { useGetAddresses } from '@/hooks/address/useAddress';
 import { useCartCoupon } from '@/hooks/coupon/useCoupons';
+import useInfiniteCoupons from '@/hooks/coupon/useInfiniteCoupons';
 import useUserInfo from '@/hooks/myPage/useUserInfo';
 import { usePaymentPrepare } from '@/hooks/payment/usePaymentPrepare';
 import { usePaymentWidget } from '@/hooks/payment/usePaymentWidget';
@@ -17,6 +18,7 @@ import useInfinitePoints from '@/hooks/points/useInfinitePoints';
 
 import { Button } from '@/components/common/button';
 import PageHeader from '@/components/head_bottom/PageHeader';
+import Loading from '@/components/loading';
 import OrderItem from '@/components/review/orderItem';
 
 import Down from '@/assets/icons/down.svg?react';
@@ -85,13 +87,28 @@ export default function Payment() {
   const { data: userInfo, isLoading: userLoading } = useUserInfo();
   const { data: addressesData, isLoading: addressesLoading } = useGetAddresses();
   const { data: pointsData, isLoading: pointsLoading } = useInfinitePoints();
-  const { calculateDiscount, getAppliedCoupon } = useCartCoupon();
+  const { data: couponsData, isLoading: couponsLoading } = useInfiniteCoupons();
+  const { calculateDiscount, getAppliedCoupon, isExpired, isApplicable } = useCartCoupon();
   const paymentPrepareMutation = usePaymentPrepare();
 
   const user = userInfo?.result;
   const userPoints = pointsData?.pages[0]?.result?.pointBalance ?? 0;
   const addresses: IAddress[] = Array.isArray(addressesData) ? addressesData : [];
   const appliedCoupon: TCoupons | null = getAppliedCoupon();
+
+  const calculateEstimatedAmount = () => {
+    if (!paymentData?.selectedItems || paymentData.selectedItems.length === 0) return 0;
+
+    return paymentData.selectedItems.reduce((acc, item) => {
+      const price = paymentData.orderType === 'individual' ? item.individualPrice || item.unitPrice : item.teamPrice || item.unitPrice;
+      return acc + price * item.quantity;
+    }, 0);
+  };
+
+  // 사용 가능한 쿠폰 개수 계산
+  const availableCoupons = couponsData?.pages.flatMap((page) => page.result.coupons || []) ?? [];
+  const currentOrderAmount = calculateEstimatedAmount();
+  const couponsCount = availableCoupons.filter((coupon) => !isExpired(coupon) && isApplicable(currentOrderAmount, coupon)).length;
 
   useEffect(() => {
     if (location.state?.selectedAddress) {
@@ -106,15 +123,6 @@ export default function Payment() {
       setSelectedAddress(defaultAddr);
     }
   }, [addresses, location.state, selectedAddress]);
-
-  const calculateEstimatedAmount = () => {
-    if (!paymentData?.selectedItems) return 123122;
-
-    return paymentData.selectedItems.reduce((acc, item) => {
-      const price = paymentData.orderType === 'individual' ? item.individualPrice || item.unitPrice : item.teamPrice || item.unitPrice;
-      return acc + price * item.quantity;
-    }, 0);
-  };
 
   const displayAmount = backendCalculatedAmount
     ? {
@@ -383,11 +391,11 @@ export default function Payment() {
         </div>
         <div className="flex justify-between text-small-medium mb-2">
           <p>할인 금액</p>
-          <p className="text-green">-{discountAmount.toLocaleString()} 원</p>
+          <p className="text-green">{discountAmount === 0 ? '0' : `-${discountAmount.toLocaleString()}`} 원</p>
         </div>
         <div className="flex justify-between text-small-medium mb-2">
           <p>적립금 사용</p>
-          <p className="text-green">-{pointsUsed.toLocaleString()} 원</p>
+          <p className="text-green">{pointsUsed === 0 ? '0' : `-${pointsUsed.toLocaleString()}`} 원</p>
         </div>
         <div className="flex justify-between text-small-medium mb-3">
           <p>배송비</p>
@@ -404,7 +412,7 @@ export default function Payment() {
   function AgreementNoticeSection() {
     return (
       <section className="p-4 text-small-regular text-black-4 leading-5 bg-black-0">
-        <div className="space-y-2 pb-30">
+        <div className="space-y-2 pb-17">
           <p className="underline">서비스 및 이용 약관 동의</p>
           <p className="underline">개인정보 제공 동의</p>
           <p className="underline">결제대행 서비스 이용약관 동의</p>
@@ -415,13 +423,11 @@ export default function Payment() {
     );
   }
 
-  if (userLoading || addressesLoading || pointsLoading) {
+  if (userLoading || addressesLoading || pointsLoading || couponsLoading) {
     return (
       <>
         <PageHeader title="주문 결제" />
-        <div className="flex justify-center items-center h-64">
-          <p>결제 정보를 불러오는 중...</p>
-        </div>
+        <Loading />
       </>
     );
   }
@@ -431,7 +437,7 @@ export default function Payment() {
       <>
         <PageHeader title="주문 결제" />
         <div className="flex justify-center items-center h-64">
-          <p>사용자 정보를 불러올 수 없습니다.</p>
+          <p className="text-body-regular text-black-4">사용자 정보를 불러올 수 없습니다.</p>
         </div>
       </>
     );
@@ -508,7 +514,13 @@ export default function Payment() {
         <div className="flex justify-between items-center border-1 border-black-3 rounded px-4 py-3 mb-3" onClick={() => navigate('/coupon')}>
           <p className="text-body-medium">쿠폰</p>
           <div className="flex items-center gap-3">
-            <p className="text-body-regular">{appliedCoupon ? `${appliedCoupon.couponName} 적용` : '사용 가능한 쿠폰 선택'}</p>
+            <p className="text-body-regular">
+              {appliedCoupon && displayAmount.couponDiscount > 0 ? (
+                <span className="text-green">{displayAmount.couponDiscount.toLocaleString()}원 할인</span>
+              ) : (
+                `사용 가능 ${couponsCount}장`
+              )}
+            </p>
             <Down className="w-4 h-2 mr-1" />
           </div>
         </div>
@@ -528,8 +540,11 @@ export default function Payment() {
               <span className="text-body-regular">원</span>
             </div>
           </div>
-          <button className="px-4 py-2.5 border-1 border-black-3 text-body-regular rounded whitespace-nowrap" onClick={() => setUsedPoints(userPoints)}>
-            모두 사용
+          <button
+            className="px-4 py-2.5 border-1 border-black-3 text-body-regular rounded whitespace-nowrap"
+            onClick={() => setUsedPoints(usedPoints === userPoints ? 0 : userPoints)}
+          >
+            {usedPoints === userPoints ? '사용 취소' : '모두 사용'}
           </button>
         </div>
         <div className="flex justify-end">
@@ -551,7 +566,7 @@ export default function Payment() {
 
       <AgreementNoticeSection />
 
-      <div className="fixed bottom-14 left-0 right-0 w-full max-w-[600px] mx-auto">
+      <div className="fixed bottom-2 left-0 right-0 w-full max-w-[600px] mx-auto">
         <Button
           kind="basic"
           variant="solid-orange"

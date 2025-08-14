@@ -51,7 +51,7 @@ const convertToCartItem = (apiItem: TCartProduct): ICartItem => ({
   unitPrice: apiItem.unitPrice,
   totalPrice: apiItem.totalPrice,
   teamAvailable: apiItem.teamAvailable,
-  productThumbnail: '',
+  productThumbnail: apiItem.productThumbnail,
 });
 
 interface IGroupedCartItem {
@@ -219,7 +219,15 @@ export default function ShoppingCart() {
   }, [cartList, checkedItems, navigate]);
 
   if (isLoading) {
-    return <Loading />;
+    return (
+      <>
+        <header>
+          <PageHeaderBar title="장바구니" />
+        </header>
+        <Loading />
+        <BottomBar />
+      </>
+    );
   }
 
   if (isError) {
