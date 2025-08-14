@@ -3,7 +3,7 @@ import { axiosInstance } from '@/apis/axiosInstance';
 export interface IPaymentConfirmRequest {
   orderId: string;
   paymentKey: string;
-  paidAmount: number;
+  finalAmount: number;
 }
 
 export interface IPaymentConfirmResponse {

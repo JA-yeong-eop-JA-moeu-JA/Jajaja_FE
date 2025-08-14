@@ -92,13 +92,13 @@ export const usePaymentStatus = (): IUsePaymentStatusReturn => {
         console.log('결제 확인 요청 (백엔드 금액 사용):', {
           orderId,
           paymentKey,
-          paidAmount: Number(amount),
+          finalAmount: Number(amount),
         });
 
         const response = await paymentConfirmMutation.mutateAsync({
           orderId,
           paymentKey,
-          paidAmount: Number(amount),
+          finalAmount: Number(amount),
         });
 
         if (response.isSuccess) {
