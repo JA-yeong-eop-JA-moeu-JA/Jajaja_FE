@@ -5,7 +5,7 @@ import type { IReviewResponse } from '@/types/review';
 export const getReviews = async ({
   sort = 'LATEST',
   page = 0,
-  size = 5,
+  size = 6,
   token,
 }: {
   sort?: 'LATEST' | 'RECOMMEND';

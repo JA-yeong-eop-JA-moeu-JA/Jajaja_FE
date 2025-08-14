@@ -30,7 +30,7 @@ const mapToIOrders = (orders?: TOrder[] | null): IOrder[] =>
   }));
 
 export const useMyOrders = (opts?: { page?: number; size?: number; sort?: string }) => {
-  const { page = 0, size = 1, sort } = opts ?? {};
+  const { page = 0, size = 6, sort } = opts ?? {};
 
   return useCoreQuery<IOrder[]>(
     [QUERY_KEYS.GET_MY_ORDERS, page, size, sort],

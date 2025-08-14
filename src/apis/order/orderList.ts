@@ -2,7 +2,7 @@ import type { TGetMyOrdersRequest, TGetMyOrdersResponse } from '@/types/order/or
 
 import axiosInstance from '@/apis/axiosInstance';
 
-export const getMyOrders = async (params: TGetMyOrdersRequest = { page: 0, size: 1, sort: 'createdAt,desc' }): Promise<TGetMyOrdersResponse> => {
+export const getMyOrders = async (params: TGetMyOrdersRequest = { page: 0, size: 6, sort: 'createdAt,desc' }): Promise<TGetMyOrdersResponse> => {
   const { data } = await axiosInstance.get<TGetMyOrdersResponse>('/api/orders/me', { params });
 
   if (!data?.isSuccess) {

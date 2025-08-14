@@ -38,7 +38,7 @@ export default function CategoryPage() {
       subcategoryId: String(id),
       sort: 'NEW',
       page: '0',
-      size: '20',
+      size: '6',
       keyword: label,
     });
     navigate(`/search?${qs.toString()}`);
