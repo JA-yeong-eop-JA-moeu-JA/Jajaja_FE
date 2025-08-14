@@ -71,6 +71,8 @@ export type TDeleteCartItemParams = {
 export type TOrderType = 'individual' | 'team_create' | 'team_join';
 
 export type TPaymentItem = {
+  brand?: string;
+  store?: string;
   id: number; // 장바구니 아이템 ID
   productId: number;
   optionId: number;

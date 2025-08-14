@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import type { IAddress } from '@/types/address/TAddress';
-import type { TPaymentData } from '@/types/cart/TCart';
+import type { TPaymentData, TPaymentItem } from '@/types/cart/TCart';
 import type { TCoupons } from '@/types/coupon/TGetCoupons';
 import type { TPaymentRequestData } from '@/types/toss/tossPayments';
 
@@ -18,9 +18,32 @@ import useInfinitePoints from '@/hooks/points/useInfinitePoints';
 
 import { Button } from '@/components/common/button';
 import PageHeader from '@/components/head_bottom/PageHeader';
+import OrderItem from '@/components/review/orderItem';
 
 import Down from '@/assets/icons/down.svg?react';
 import { orderData } from '@/mocks/orderData';
+
+const convertPaymentItemToCartItem = (item: TPaymentItem, orderType: string) => {
+  const price = orderType === 'individual' ? item.individualPrice || item.unitPrice : item.teamPrice || item.unitPrice;
+
+  return {
+    productId: item.productId,
+    productName: item.productName,
+    store: item.brand || item.store || '브랜드 정보 없음',
+    optionName: item.optionName,
+    quantity: item.quantity,
+    price: price,
+    totalPrice: price * item.quantity,
+    imageUrl: item.productThumbnail,
+    productThumbnail: item.productThumbnail,
+    brand: item.brand || '브랜드 정보 없음',
+    id: item.id,
+    optionId: item.optionId,
+    unitPrice: item.unitPrice,
+    originalPrice: item.unitPrice,
+    teamAvailable: true, // 기본값
+  };
+};
 
 interface IAddressBlockProps {
   name: string;
@@ -395,11 +418,22 @@ export default function Payment() {
 
       <section className="p-4 border-b-4 border-black-1">
         <p className="text-subtitle-medium mb-4">주문 상품 {currentOrderItems.length}개</p>
-        {currentOrderItems.map((item, index) => (
-          <div key={`order-item-${item.productId || 'unknown'}-${index}`} className="mb-5">
-            {/* <OrderItem item={item} show={false} /> */}
-          </div>
-        ))}
+        {currentOrderItems.map((item, index) => {
+          // 디버깅을 위한 로그 추가
+          console.log('원본 item:', item);
+
+          // TPaymentItem을 OrderItem이 기대하는 형태로 변환
+          const convertedItem = convertPaymentItemToCartItem(item, paymentData?.orderType || 'individual');
+
+          // 변환된 데이터 로그
+          console.log('변환된 convertedItem:', convertedItem);
+
+          return (
+            <div key={`order-item-${item.productId || 'unknown'}-${item.optionId || index}`} className="mb-5">
+              <OrderItem item={convertedItem} show={false} showPrice={true} />
+            </div>
+          );
+        })}
       </section>
 
       <section className="p-4 mt-3 border-b-4 border-black-1">
