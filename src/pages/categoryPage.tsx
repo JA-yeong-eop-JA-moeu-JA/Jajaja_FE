@@ -47,6 +47,7 @@ export default function CategoryPage() {
   return (
     <div className="text-body-regular flex flex-col min-h-screen">
       <header className="px-3">
+
         <Header />
       </header>
 

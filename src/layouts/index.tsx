@@ -5,36 +5,43 @@ import { Toaster } from 'sonner';
 import { useModalStore } from '@/stores/modalStore';
 
 import ModalProvider from '@/components/common/modal';
+import Subscriber from '@/components/Subscriber';
 
 import BottomBar from '../components/head_bottom/BottomBar';
 
+import { useAuth } from '@/context/AuthContext';
+
 export default function Layout({ children }: PropsWithChildren) {
   const { isModalOpen } = useModalStore();
-
-  const path = useLocation().pathname;
-  const showBottomBar = !isModalOpen && ['/', '/payment'].includes(path);
+  const { isLoggedIn } = useAuth();
   const { pathname } = useLocation();
+
+  const hideBottomBarPaths = ['/payment', '/address/add', '/product'];
+
+  const shouldHideBottomBar = hideBottomBarPaths.some((path) => pathname.startsWith(path));
+
+  const showBottomBar = !isModalOpen && pathname !== '/' && !shouldHideBottomBar;
+
   useEffect(() => {
-    if (isModalOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
+    document.body.style.overflow = isModalOpen ? 'hidden' : '';
   }, [isModalOpen]);
+
   useEffect(() => {
     if ('scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual';
     }
     window.scrollTo({ top: 0, behavior: 'auto' });
   }, [pathname]);
+
   return (
     <ModalProvider>
       <div className="min-h-screen flex flex-col">
         <main className="flex-1 overflow-y-auto">
           {children}
           <Toaster />
+          {isLoggedIn && <Subscriber />}
         </main>
-        {showBottomBar && path !== '/' && <BottomBar />}
+        {showBottomBar && <BottomBar />}
       </div>
     </ModalProvider>
   );

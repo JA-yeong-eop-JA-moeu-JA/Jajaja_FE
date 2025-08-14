@@ -21,6 +21,8 @@ export const getNotiList = async ({ page, size }: TInfiniteRequest): Promise<TGe
 };
 
 export const getNotiUnread = async (): Promise<TGetNotiUnread> => {
-  const { data } = await axiosInstance.get(`/api/notifications/unread`);
+  const { data } = await axiosInstance.get(`/api/notifications/unread`, {
+    optionalAuth: true,
+  });
   return data;
 };

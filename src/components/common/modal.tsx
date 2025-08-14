@@ -157,7 +157,7 @@ export default function ModalProvider({ children }: IModalProviderProps) {
         </div>
       )}
 
-      {(type === 'alert' || type === 'confirm') && (
+      {type === 'alert' && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center" onClick={closeModal}>
           <div className="bg-white min-h-10 rounded-lg shadow-md max-w-76 w-full" onClick={(e) => e.stopPropagation()}>
             {createElement(modalContent)}
@@ -176,7 +176,7 @@ export default function ModalProvider({ children }: IModalProviderProps) {
           </div>
         </div>
       )}
-      {type === 'login' && (
+      {(type === 'login' || type === 'confirm') && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
           <div className="bg-white min-h-10 rounded-lg shadow-md max-w-76 w-full" onClick={(e) => e.stopPropagation()}>
             {createElement(modalContent, options)}
