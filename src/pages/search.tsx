@@ -6,6 +6,7 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 import type { TCategorySort } from '@/types/category';
 
+import Storage from '@/utils/storage';
 import { formatKoreanDateLabel } from '@/utils/time';
 
 // search 에 카테고리 api 연동을 위해서 추가, 수정 부분은 아이콘으로 표시 해뒀습니다!!
@@ -27,6 +28,10 @@ import NoResult from '@/assets/icons/noResult.svg?react';
 import Up from '@/assets/icons/up.svg?react';
 
 export default function Search() {
+  type TKeywordItem = {
+    id: number;
+    keyword: string;
+  };
   const { data } = useGetKeyword();
   const [searchParams, setSearchParams] = useSearchParams();
   const menuRef = useRef<HTMLDivElement>(null);
@@ -37,6 +42,7 @@ export default function Search() {
   const [inputValue, setValue] = useState('');
   const [isAsc, setIsAsc] = useState(true);
   const { search } = useLocation();
+  const [localKeywords, setLocalKeywords] = useState<TKeywordItem[]>(() => Storage.getKeyword());
 
   const navigate = useNavigate();
   const { data: recent } = useGetRecent();
@@ -132,7 +138,24 @@ export default function Search() {
     if (label !== sortOption) setSortOption(label);
   }, [searchParams]);
 
-  const handleDelete = async (id: number) => mutate(id);
+  const keywordExist = Storage.getKeyword().length > 0 || (recent && recent.result.length > 0);
+  const isLocalData = !recent || recent.result.length === 0;
+  const keywordData = isLocalData ? localKeywords : recent!.result;
+
+  const handleDelete = async (id: number) => {
+    if (isLocalData) {
+      Storage.deleteKeyword(id);
+      setLocalKeywords((prev) => prev.filter((item) => item.id !== id));
+    } else {
+      await mutate(id);
+    }
+  };
+
+  useEffect(() => {
+    if (isLocalData) {
+      setLocalKeywords(Storage.getKeyword());
+    }
+  }, [isLocalData, recent]);
 
   const handleValue = (e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value);
 
@@ -148,6 +171,7 @@ export default function Search() {
       qs.delete('keyword');
     }
     qs.set('page', '0');
+    Storage.setKeyword(keyword);
     setSearchParams(qs, { replace: true });
     setTimeout(() => {
       (document.activeElement as HTMLElement | null)?.blur();
@@ -200,8 +224,8 @@ export default function Search() {
           <section>
             <p className="text-subtitle-medium mb-2">최근 검색</p>
             <ScrollContainer className="flex w-full gap-2 overflow-x-auto cursor-grab pr-5" vertical={false}>
-              {recent?.result.length === 0 && <p className="text-body-regular text-black-4 py-2.5">최근 검색어가 없습니다.</p>}
-              {recent?.result.map(({ id, keyword }) => (
+              {!keywordExist && <p className="text-body-regular text-black-4 py-2.5">최근 검색어가 없습니다.</p>}
+              {keywordData?.map(({ id, keyword }) => (
                 <div key={id} className="shrink-0" onClick={() => handleFilter(keyword)}>
                   <Tag msg={keyword} onDelete={() => handleDelete(id)} />
                 </div>
