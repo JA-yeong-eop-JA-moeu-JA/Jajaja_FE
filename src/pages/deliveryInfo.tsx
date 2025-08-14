@@ -1,5 +1,3 @@
-// src/pages/DeliveryInfo.tsx
-import { useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import useOrderDelivery from '@/hooks/order/useOrderDelivery';
@@ -9,32 +7,27 @@ import PageHeader from '@/components/head_bottom/PageHeader';
 
 import BoxIcon from '@/assets/icons/box.svg?react';
 
-function getTrackingUrl(courier: string, invoice: string): string | null {
-  if (courier.includes('CJ')) {
-    return `https://trace.cjlogistics.com/next/tracking.html?wblNo=${encodeURIComponent(invoice)}`;
+function generateRandomInvoiceNumber(): string {
+  let num = '';
+  for (let i = 0; i < 12; i++) {
+    num += Math.floor(Math.random() * 10);
   }
-  return null;
+  return num;
 }
 
 export default function DeliveryInfo() {
-  // ✅ 모든 훅은 최상단에서 "항상" 호출
   const navigate = useNavigate();
   const params = useParams<{ orderProductId?: string }>();
   const [sp] = useSearchParams();
 
-  // 파라미터/쿼리 둘 다 지원
   const orderProductIdStr = params.orderProductId ?? sp.get('orderProductId') ?? '';
   const orderProductId = Number(orderProductIdStr);
 
-  // ✅ 훅은 무조건 호출하고, 내부에서 enabled로 네트워크 여부 제어
   const { data, isLoading, isError } = useOrderDelivery(orderProductId);
 
-  // ✅ useMemo도 훅이므로 항상 호출 (data 유무에 안전하게 접근)
   const courier = data?.courier ?? '';
-  const invoiceNumber = data?.invoiceNumber ?? '';
-  const trackUrl = useMemo(() => (courier && invoiceNumber ? getTrackingUrl(courier, invoiceNumber) : null), [courier, invoiceNumber]);
+  const invoiceNumber = data?.invoiceNumber ?? generateRandomInvoiceNumber();
 
-  // ⬇️ 여기서부터 분기/리턴 (훅 호출 이후)
   if (!Number.isFinite(orderProductId) || orderProductId <= 0) {
     return <p className="p-4 text-error-3">유효하지 않은 주문상품입니다.</p>;
   }
@@ -128,8 +121,8 @@ export default function DeliveryInfo() {
           variant="outline-orange"
           className="w-full"
           onClick={() => {
-            if (trackUrl) {
-              window.open(trackUrl, '_blank', 'noopener,noreferrer');
+            if (invoiceNumber) {
+              window.open(`https://trace.cjlogistics.com/web/detail.jsp?slipno=${invoiceNumber}`, '_blank', 'noopener,noreferrer');
             } else {
               navigate('/home');
             }

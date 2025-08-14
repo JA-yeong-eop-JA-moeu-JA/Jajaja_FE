@@ -8,7 +8,6 @@ export type TGetSubCategoryResponse = {
   result: { id: number; name: string }[];
 };
 
-// src/types/category.ts
 export interface IGetCategoryProductsResponse {
   isSuccess: boolean;
   code: string;
@@ -36,4 +35,4 @@ export interface IGetCategoryProductsResponse {
     }[];
   };
 }
-export type TCategorySort = 'POPULAR' | 'NEW' | 'LOW_PRICE' | 'REVIEW';
+export type TCategorySort = 'POPULAR' | 'NEW' | 'PRICE_ASC' | 'REVIEW';

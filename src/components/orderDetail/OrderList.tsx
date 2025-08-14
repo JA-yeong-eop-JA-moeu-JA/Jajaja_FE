@@ -1,4 +1,3 @@
-// components/orderDetail/OrderList.tsx
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -12,7 +11,7 @@ import ChevronRight from '@/assets/ChevronRight2.svg';
 
 interface IOrderProps {
   orders: IOrder[];
-  onExpire?: () => void; // 만료 순간 refetch 등을 위해 부모에서 콜백 주입 가능
+  onExpire?: () => void;
 }
 
 type TBEOrderStatus =
@@ -116,7 +115,10 @@ export default function OrderList({ orders, onExpire }: IOrderProps) {
     <div className="w-full flex flex-col">
       {orders.map((order, index) => (
         <section key={order.id} className={`w-full pb-4 mb-4 ${index !== orders.length - 1 ? 'border-b-black-1 border-b-4' : ''}`}>
-          <button className="w-full flex items-center justify-between px-4" onClick={() => navigate(`/mypage/order/orderDetailPersonal?orderId=${order.id}`)}>
+          <button
+            className="w-full flex items-center justify-between pr-2 pl-4"
+            onClick={() => navigate(`/mypage/order/orderDetailPersonal?orderId=${order.id}`)}
+          >
             <p className="text-subtitle-medium text-left">
               {order.createdAt
                 ? new Date(order.createdAt).toLocaleDateString('ko-KR', {
@@ -152,7 +154,7 @@ export default function OrderList({ orders, onExpire }: IOrderProps) {
                 }}
               >
                 {(osLabel || msLabel) && (
-                  <div className="pb-4 flex justify-between items-center text-body-medium">
+                  <div className="pb-2 flex justify-between items-center text-body-medium">
                     {/* 왼쪽: 주문 상태 */}
                     <div>{osLabel && <span className={ORDER_STATUS_COLOR_MAP[osLabel]}>{osLabel}</span>}</div>
 

@@ -9,14 +9,14 @@ import type { TCategorySort } from '@/types/category';
 import Storage from '@/utils/storage';
 import { formatKoreanDateLabel } from '@/utils/time';
 
-// search 에 카테고리 api 연동을 위해서 추가, 수정 부분은 아이콘으로 표시 해뒀습니다!!
-// ⭐ 추가
 import { useCategoryProducts } from '@/hooks/category/useCategoryProduct';
+import useInfiniteObserver from '@/hooks/common/useInfiniteObserver';
 import useDeleteRecent from '@/hooks/search/useDeleteRecent';
 import useGetKeyword from '@/hooks/search/useGetKeyword';
 import useGetRecent from '@/hooks/search/useGetRecent';
 import { useKeywordProducts } from '@/hooks/search/useKeywordProduct';
 
+import InfiniteScrollSentinel from '@/components/common/infiniteScroll';
 import SearchInput from '@/components/common/SearchInput';
 import ProductCard from '@/components/home/productCard';
 import Menu from '@/components/search/menu';
@@ -24,7 +24,6 @@ import Tag from '@/components/search/tag';
 
 import Back from '@/assets/icons/back.svg?react';
 import Down from '@/assets/icons/down.svg?react';
-//import NoResult from '@/assets/icons/noResult.svg?react';
 import Up from '@/assets/icons/up.svg?react';
 
 export default function Search() {
@@ -47,6 +46,7 @@ export default function Search() {
   const navigate = useNavigate();
   const { data: recent } = useGetRecent();
   const { mutate } = useDeleteRecent();
+
   useEffect(() => {
     const keyword = new URLSearchParams(location.search).get('keyword');
     setKeyword(keyword);
@@ -58,10 +58,11 @@ export default function Search() {
 
   const subcategoryId = Number(searchParams.get('subcategoryId') || '');
   const isCategoryMode = !!subcategoryId;
+
   const SORT_ENUM_TO_LABEL: Record<TCategorySort, string> = {
     POPULAR: '인기순',
-    NEW: '최신상품순',
-    LOW_PRICE: '낮은 가격 순',
+    NEW: '신상품순',
+    PRICE_ASC: '낮은 가격 순',
     REVIEW: '리뷰 많은 순',
   };
 
@@ -69,7 +70,7 @@ export default function Search() {
     const s = label.replace(/\s/g, '');
     if (s.includes('인기')) return 'POPULAR';
     if (s.includes('신상품') || s.includes('최신')) return 'NEW';
-    if (s.includes('낮은')) return 'LOW_PRICE';
+    if (s.includes('낮은')) return 'PRICE_ASC';
     if (s.includes('리뷰')) return 'REVIEW';
     return 'NEW';
   };
@@ -115,7 +116,40 @@ export default function Search() {
     tag: '',
   });
 
-  const displayList: TProductCardItem[] = isCategoryMode ? categoryQuery.products.map(mapToProductCard) : keywordQuery.products.map(mapToProductCard);
+  const [accCategory, setAccCategory] = useState<TProductCardItem[]>([]);
+
+  useEffect(() => {
+    if (!isCategoryMode) return;
+    const cur = (categoryQuery.products ?? []).map(mapToProductCard);
+    setAccCategory((prev) => (page === 0 ? cur : [...prev, ...cur]));
+  }, [isCategoryMode, categoryQuery.products, page]);
+
+  useEffect(() => {
+    if (!isCategoryMode) {
+      setAccCategory([]);
+      return;
+    }
+  }, [isCategoryMode, subcategoryId, sort]);
+
+  const pageInfo = categoryQuery?.pageInfo;
+  const hasNextCategory = pageInfo ? (pageInfo.hasNextPage ?? !pageInfo.isLast) : (categoryQuery?.products?.length ?? 0) === size;
+
+  const enableInfiniteCategory = isCategoryMode && hasNextCategory && !categoryQuery.isLoading && accCategory.length >= size;
+
+  const categorySentinelRef = useInfiniteObserver({
+    enabled: enableInfiniteCategory,
+    onIntersect: () => {
+      const qs = new URLSearchParams(searchParams);
+      const cur = Number(qs.get('page') || '0');
+      qs.set('page', String(cur + 1));
+      setSearchParams(qs, { replace: true });
+    },
+    root: null,
+    rootMargin: '0px 0px 400px 0px',
+    threshold: 0,
+  });
+
+  const displayList: TProductCardItem[] = isCategoryMode ? accCategory : (keywordQuery.products ?? []).map(mapToProductCard);
 
   useEffect(() => {
     if (keywordParam) {
@@ -124,6 +158,7 @@ export default function Search() {
     }
     if (isCategoryMode) setChange(true);
   }, [keywordParam, isCategoryMode]);
+
   useEffect(() => {
     if (!isCategoryMode) return;
     const labelFromUrl = searchParams.get('keyword') || searchParams.get('subcategoryName');
@@ -210,6 +245,7 @@ export default function Search() {
       navigate(-1);
     }
   };
+
   return (
     <>
       <header className="w-full pr-4 py-1 flex items-center">
@@ -253,7 +289,7 @@ export default function Search() {
       )}
 
       {change && (
-        <section className="w-full px-4 pb-7">
+        <section className="w-full px-4 pb-10">
           <div ref={menuRef} className="py-4 relative w-fit ml-auto text-small-medium">
             <div onClick={() => setIsAsc((prev) => !prev)} className="flex items-center gap-2 cursor-pointer">
               <p>{sortOption}</p>
@@ -280,6 +316,8 @@ export default function Search() {
               />
             ))}
           </div>
+
+          {isCategoryMode && <InfiniteScrollSentinel ref={categorySentinelRef} style={{ height: 1 }} />}
         </section>
       )}
     </>
