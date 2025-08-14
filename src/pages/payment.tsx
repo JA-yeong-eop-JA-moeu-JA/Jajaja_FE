@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 import type { IAddress } from '@/types/address/TAddress';
 import type { TPaymentData, TPaymentItem } from '@/types/cart/TCart';
@@ -445,138 +446,146 @@ export default function Payment() {
 
   return (
     <>
-      <PageHeader title="주문 결제" />
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        transition={{ duration: 0.3 }}
+        className="min-h-screen"
+      >
+        <PageHeader title="주문 결제" />
 
-      {paymentData?.orderType !== 'individual' && (
-        <section className="p-4 border-b-4 border-black-1">
-          <p className="text-subtitle-medium mb-4">팀 구매 정보</p>
-          <div className="bg-orange-50 p-3 rounded">
-            {paymentData.orderType === 'team_create' && (
-              <>
-                <p className="text-body-regular">팀을 생성하고 있습니다</p>
-                <p className="text-body-regular">
-                  결제 완료 직후부터 <span className="text-orange">30분간</span> 팀 매칭이 진행됩니다
-                </p>
-              </>
-            )}
-            {paymentData.orderType === 'team_join' && (
-              <>
-                <p className="text-small-medium">팀 구매에 참여하고 있습니다.</p>
-                <p className="text-small-regular">결제 확인 후 팀 매칭이 완료됩니다.</p>
-              </>
+        {paymentData?.orderType !== 'individual' && (
+          <section className="p-4 border-b-4 border-black-1">
+            <p className="text-subtitle-medium mb-4">팀 구매 정보</p>
+            <div className="bg-orange-50 p-3 rounded">
+              {paymentData.orderType === 'team_create' && (
+                <>
+                  <p className="text-body-regular">팀을 생성하고 있습니다</p>
+                  <p className="text-body-regular">
+                    결제 완료 직후부터 <span className="text-orange">30분간</span> 팀 매칭이 진행됩니다
+                  </p>
+                </>
+              )}
+              {paymentData.orderType === 'team_join' && (
+                <>
+                  <p className="text-small-medium">팀 구매에 참여하고 있습니다.</p>
+                  <p className="text-small-regular">결제 확인 후 팀 매칭이 완료됩니다.</p>
+                </>
+              )}
+            </div>
+          </section>
+        )}
+
+        <section className="border-b-4 border-black-1">
+          <div className="w-full">
+            {selectedAddress ? (
+              <AddressSection
+                name={selectedAddress.name}
+                phone={selectedAddress.phone}
+                address={`${selectedAddress.address} ${selectedAddress.addressDetail}`.trim()}
+              />
+            ) : (
+              <div className="p-4">
+                <div className="flex justify-between items-center mb-2">
+                  <p className="text-subtitle-medium">배송지</p>
+                  <button className="text-orange text-small-medium" onClick={handleAddressChangeClick}>
+                    변경하기
+                  </button>
+                </div>
+                <div className="text-center py-8">
+                  <p className="text-body-regular text-black-4 mb-4">등록된 배송지가 없습니다</p>
+                  <Button kind="basic" variant="solid-orange" onClick={() => navigate('/address/add')} className="px-6 py-2">
+                    배송지 추가
+                  </Button>
+                </div>
+              </div>
             )}
           </div>
         </section>
-      )}
 
-      <section className="border-b-4 border-black-1">
-        <div className="w-full">
-          {selectedAddress ? (
-            <AddressSection
-              name={selectedAddress.name}
-              phone={selectedAddress.phone}
-              address={`${selectedAddress.address} ${selectedAddress.addressDetail}`.trim()}
-            />
-          ) : (
-            <div className="p-4">
-              <div className="flex justify-between items-center mb-2">
-                <p className="text-subtitle-medium">배송지</p>
-                <button className="text-orange text-small-medium" onClick={handleAddressChangeClick}>
-                  변경하기
-                </button>
+        <section className="p-4 border-b-4 border-black-1">
+          <p className="text-subtitle-medium mb-4">주문 상품 {currentOrderItems.length}개</p>
+          {currentOrderItems.map((item, index) => {
+            const convertedItem = convertPaymentItemToCartItem(item, paymentData?.orderType || 'individual');
+
+            return (
+              <div key={`order-item-${item.productId || 'unknown'}-${item.optionId || index}`} className="mb-5">
+                <OrderItem item={convertedItem} show={false} showPrice={true} />
               </div>
-              <div className="text-center py-8">
-                <p className="text-body-regular text-black-4 mb-4">등록된 배송지가 없습니다</p>
-                <Button kind="basic" variant="solid-orange" onClick={() => navigate('/address/add')} className="px-6 py-2">
-                  배송지 추가
-                </Button>
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
+            );
+          })}
+        </section>
 
-      <section className="p-4 border-b-4 border-black-1">
-        <p className="text-subtitle-medium mb-4">주문 상품 {currentOrderItems.length}개</p>
-        {currentOrderItems.map((item, index) => {
-          const convertedItem = convertPaymentItemToCartItem(item, paymentData?.orderType || 'individual');
-
-          return (
-            <div key={`order-item-${item.productId || 'unknown'}-${item.optionId || index}`} className="mb-5">
-              <OrderItem item={convertedItem} show={false} showPrice={true} />
-            </div>
-          );
-        })}
-      </section>
-
-      <section className="p-4 mt-3 border-b-4 border-black-1">
-        <p className="text-subtitle-medium mb-4">할인 혜택</p>
-        <div className="flex justify-between items-center border-1 border-black-3 rounded px-4 py-3 mb-3" onClick={() => navigate('/coupon')}>
-          <p className="text-body-medium">쿠폰</p>
-          <div className="flex items-center gap-3">
-            <p className="text-body-regular">
-              {appliedCoupon && displayAmount.couponDiscount > 0 ? (
-                <span className="text-green">{displayAmount.couponDiscount.toLocaleString()}원 할인</span>
-              ) : (
-                `사용 가능 ${couponsCount}장`
-              )}
-            </p>
-            <Down className="w-4 h-2 mr-1" />
-          </div>
-        </div>
-        <div className="flex gap-2 mb-2">
-          <div className="flex-1 flex justify-between items-center border-1 border-black-3 rounded px-4 py-3">
-            <p className="text-body-medium">적립금</p>
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                className="w-16 text-right text-body-regular bg-transparent outline-none"
-                placeholder="0"
-                value={usedPoints || ''}
-                onChange={(e) => handlePointsChange(Number(e.target.value) || 0)}
-                min="0"
-                max={userPoints}
-              />
-              <span className="text-body-regular">원</span>
+        <section className="p-4 mt-3 border-b-4 border-black-1">
+          <p className="text-subtitle-medium mb-4">할인 혜택</p>
+          <div className="flex justify-between items-center border-1 border-black-3 rounded px-4 py-3 mb-3" onClick={() => navigate('/coupon')}>
+            <p className="text-body-medium">쿠폰</p>
+            <div className="flex items-center gap-3">
+              <p className="text-body-regular">
+                {appliedCoupon && displayAmount.couponDiscount > 0 ? (
+                  <span className="text-green">{displayAmount.couponDiscount.toLocaleString()}원 할인</span>
+                ) : (
+                  `사용 가능 ${couponsCount}장`
+                )}
+              </p>
+              <Down className="w-4 h-2 mr-1" />
             </div>
           </div>
-          <button
-            className="px-4 py-2.5 border-1 border-black-3 text-body-regular rounded whitespace-nowrap"
-            onClick={() => setUsedPoints(usedPoints === userPoints ? 0 : userPoints)}
+          <div className="flex gap-2 mb-2">
+            <div className="flex-1 flex justify-between items-center border-1 border-black-3 rounded px-4 py-3">
+              <p className="text-body-medium">적립금</p>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  className="w-16 text-right text-body-regular bg-transparent outline-none"
+                  placeholder="0"
+                  value={usedPoints || ''}
+                  onChange={(e) => handlePointsChange(Number(e.target.value) || 0)}
+                  min="0"
+                  max={userPoints}
+                />
+                <span className="text-body-regular">원</span>
+              </div>
+            </div>
+            <button
+              className="px-4 py-2.5 border-1 border-black-3 text-body-regular rounded whitespace-nowrap"
+              onClick={() => setUsedPoints(usedPoints === userPoints ? 0 : userPoints)}
+            >
+              {usedPoints === userPoints ? '사용 취소' : '모두 사용'}
+            </button>
+          </div>
+          <div className="flex justify-end">
+            <p className="text-small-medium text-black-4">보유 적립금: {userPoints.toLocaleString()} 원</p>
+          </div>
+        </section>
+
+        <section className="border-b-4 border-black-1">
+          <div id="payment-methods" className="min-h-[200px]" ref={paymentMethodsRef} />
+        </section>
+
+        <PaymentSummarySection
+          total={displayAmount.originalAmount}
+          discount={displayAmount.couponDiscount}
+          pointsUsed={displayAmount.pointDiscount}
+          shippingFee={displayAmount.shippingFee}
+          finalAmount={displayAmount.finalAmount}
+        />
+
+        <AgreementNoticeSection />
+
+        <div className="fixed bottom-2 left-0 right-0 w-full max-w-[600px] mx-auto">
+          <Button
+            kind="basic"
+            variant="solid-orange"
+            disabled={displayAmount.finalAmount <= 0 || isProcessingPayment || paymentPrepareMutation.isPending || !selectedAddress}
+            onClick={handlePayment}
+            className="w-full"
           >
-            {usedPoints === userPoints ? '사용 취소' : '모두 사용'}
-          </button>
+            {isProcessingPayment || paymentPrepareMutation.isPending ? '결제 처리 중...' : `${displayAmount.finalAmount.toLocaleString()}원 결제하기`}
+          </Button>
         </div>
-        <div className="flex justify-end">
-          <p className="text-small-medium text-black-4">보유 적립금: {userPoints.toLocaleString()} 원</p>
-        </div>
-      </section>
-
-      <section className="border-b-4 border-black-1">
-        <div id="payment-methods" className="min-h-[200px]" ref={paymentMethodsRef} />
-      </section>
-
-      <PaymentSummarySection
-        total={displayAmount.originalAmount}
-        discount={displayAmount.couponDiscount}
-        pointsUsed={displayAmount.pointDiscount}
-        shippingFee={displayAmount.shippingFee}
-        finalAmount={displayAmount.finalAmount}
-      />
-
-      <AgreementNoticeSection />
-
-      <div className="fixed bottom-2 left-0 right-0 w-full max-w-[600px] mx-auto">
-        <Button
-          kind="basic"
-          variant="solid-orange"
-          disabled={displayAmount.finalAmount <= 0 || isProcessingPayment || paymentPrepareMutation.isPending || !selectedAddress}
-          onClick={handlePayment}
-          className="w-full"
-        >
-          {isProcessingPayment || paymentPrepareMutation.isPending ? '결제 처리 중...' : `${displayAmount.finalAmount.toLocaleString()}원 결제하기`}
-        </Button>
-      </div>
+      </motion.div>
     </>
   );
 }

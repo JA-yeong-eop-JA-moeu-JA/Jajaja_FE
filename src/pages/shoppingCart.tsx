@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 
 import type { TCartProduct, TPaymentData, TPaymentItem } from '@/types/cart/TCart';
@@ -251,89 +252,97 @@ export default function ShoppingCart() {
 
   return (
     <>
-      <header>
-        <PageHeaderBar title="장바구니" />
-      </header>
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        transition={{ duration: 0.3 }}
+        className="min-h-screen"
+      >
+        <header>
+          <PageHeaderBar title="장바구니" />
+        </header>
 
-      <div className="w-full bg-white text-black pb-32">
-        {isCartEmpty ? (
-          <section className="flex flex-col items-center justify-center h-[calc(100vh-56px-56px)] pt-20 pb-10 px-4">
-            <img src={EmptyCartImage} alt="장바구니 비어 있음" className="w-40 h-40 mb-6" />
-            <p className="text-subtitle-medium mb-2">장바구니에 담긴 상품이 없습니다.</p>
-            <p className="text-body-regular text-black-4">원하는 상품을 찾아 장바구니를 채워보세요.</p>
-          </section>
-        ) : (
-          <>
-            <section className="flex items-center px-4 py-3 border-b-4 border-black-1">
-              <BaseCheckbox checked={isAllChecked()} onClick={handleToggleAll} message="전체 선택" textClassName="text-small-medium" disabled={isCartEmpty} />
-              <button
-                className="ml-auto text-body-regular text-black disabled:text-black-3"
-                disabled={!isAnyChecked || isDeletingMultiple}
-                onClick={handleDeleteAlert}
-              >
-                {isDeletingMultiple ? '삭제 중...' : '선택 삭제'}
-              </button>
+        <div className="w-full bg-white text-black pb-32">
+          {isCartEmpty ? (
+            <section className="flex flex-col items-center justify-center h-[calc(100vh-56px-56px)] pt-20 pb-10 px-4">
+              <img src={EmptyCartImage} alt="장바구니 비어 있음" className="w-40 h-40 mb-6" />
+              <p className="text-subtitle-medium mb-2">장바구니에 담긴 상품이 없습니다.</p>
+              <p className="text-body-regular text-black-4">원하는 상품을 찾아 장바구니를 채워보세요.</p>
             </section>
+          ) : (
+            <>
+              <section className="flex items-center px-4 py-3 border-b-4 border-black-1">
+                <BaseCheckbox checked={isAllChecked()} onClick={handleToggleAll} message="전체 선택" textClassName="text-small-medium" disabled={isCartEmpty} />
+                <button
+                  className="ml-auto text-body-regular text-black disabled:text-black-3"
+                  disabled={!isAnyChecked || isDeletingMultiple}
+                  onClick={handleDeleteAlert}
+                >
+                  {isDeletingMultiple ? '삭제 중...' : '선택 삭제'}
+                </button>
+              </section>
 
-            {groupedCartItems.map((group) => {
-              const groupTotalPrice = group.options.reduce((acc, option) => acc + option.totalPrice, 0);
-              const groupTotalQuantity = group.options.reduce((acc, option) => acc + option.quantity, 0);
+              {groupedCartItems.map((group) => {
+                const groupTotalPrice = group.options.reduce((acc, option) => acc + option.totalPrice, 0);
+                const groupTotalQuantity = group.options.reduce((acc, option) => acc + option.quantity, 0);
 
-              return (
-                <section key={group.productId} className="w-full border-b-4 border-black-0">
-                  {group.options.map((product, index) => {
-                    const itemKey = `${product.productId}-${product.optionId}`;
-                    const isChecked = checkedItems[itemKey] || false;
+                return (
+                  <section key={group.productId} className="w-full border-b-4 border-black-0">
+                    {group.options.map((product, index) => {
+                      const itemKey = `${product.productId}-${product.optionId}`;
+                      const isChecked = checkedItems[itemKey] || false;
 
-                    return (
-                      <div key={itemKey} className={`px-4 py-5 ${index < group.options.length - 1 ? 'border-b border-black-1' : ''}`}>
-                        <div className="flex items-start gap-3">
-                          <BaseCheckbox checked={isChecked} onClick={() => handleToggleItem(product.productId, product.optionId)} />
-                          <div className="flex-1">
-                            <OrderItem item={product} show={false} showPrice={false} />
+                      return (
+                        <div key={itemKey} className={`px-4 py-5 ${index < group.options.length - 1 ? 'border-b border-black-1' : ''}`}>
+                          <div className="flex items-start gap-3">
+                            <BaseCheckbox checked={isChecked} onClick={() => handleToggleItem(product.productId, product.optionId)} />
+                            <div className="flex-1">
+                              <OrderItem item={product} show={false} showPrice={false} />
+                            </div>
                           </div>
                         </div>
+                      );
+                    })}
+
+                    <div className="px-4 pb-3">
+                      <div className="flex w-full gap-2">
+                        <Button
+                          kind="select-content"
+                          variant={group.options.some((option) => option.teamAvailable) ? 'outline-orange' : 'outline-gray'}
+                          className={`flex-1 py-1 ${!group.options.some((option) => option.teamAvailable) ? 'border-black-1 text-black-2' : ''}`}
+                          onClick={() => handleTeamJoin(group.productId)}
+                          disabled={!group.options.some((option) => option.teamAvailable) || isJoiningTeam}
+                        >
+                          {isJoiningTeam ? '참여 중...' : '팀 참여'}
+                        </Button>
+                        <Button kind="select-content" variant="outline-gray" className="flex-1 py-1" onClick={() => handleOptionChange(group.options[0])}>
+                          옵션 변경
+                        </Button>
                       </div>
-                    );
-                  })}
-
-                  <div className="px-4 pb-3">
-                    <div className="flex w-full gap-2">
-                      <Button
-                        kind="select-content"
-                        variant={group.options.some((option) => option.teamAvailable) ? 'outline-orange' : 'outline-gray'}
-                        className={`flex-1 py-1 ${!group.options.some((option) => option.teamAvailable) ? 'border-black-1 text-black-2' : ''}`}
-                        onClick={() => handleTeamJoin(group.productId)}
-                        disabled={!group.options.some((option) => option.teamAvailable) || isJoiningTeam}
-                      >
-                        {isJoiningTeam ? '참여 중...' : '팀 참여'}
-                      </Button>
-                      <Button kind="select-content" variant="outline-gray" className="flex-1 py-1" onClick={() => handleOptionChange(group.options[0])}>
-                        옵션 변경
-                      </Button>
                     </div>
-                  </div>
 
-                  <div className="px-4 py-3 flex justify-between items-center">
-                    <p className="text-small-medium text-black-4">총 {groupTotalQuantity}개</p>
-                    <p className="text-body-medium">{groupTotalPrice.toLocaleString()} 원</p>
-                  </div>
-                </section>
-              );
-            })}
-          </>
-        )}
-      </div>
-
-      {!isCartEmpty && (
-        <div className="fixed bottom-14 left-0 right-0 w-full max-w-[600px] mx-auto">
-          <Button kind="basic" variant="solid-orange" className="w-full" disabled={totalPrice === 0} onClick={handleIndividualPurchase}>
-            {totalPrice.toLocaleString()} 원 1인 구매하기
-          </Button>
+                    <div className="px-4 py-3 flex justify-between items-center">
+                      <p className="text-small-medium text-black-4">총 {groupTotalQuantity}개</p>
+                      <p className="text-body-medium">{groupTotalPrice.toLocaleString()} 원</p>
+                    </div>
+                  </section>
+                );
+              })}
+            </>
+          )}
         </div>
-      )}
 
-      <BottomBar />
+        {!isCartEmpty && (
+          <div className="fixed bottom-14 left-0 right-0 w-full max-w-[600px] mx-auto">
+            <Button kind="basic" variant="solid-orange" className="w-full" disabled={totalPrice === 0} onClick={handleIndividualPurchase}>
+              {totalPrice.toLocaleString()} 원 1인 구매하기
+            </Button>
+          </div>
+        )}
+
+        <BottomBar />
+      </motion.div>
     </>
   );
 }
