@@ -45,6 +45,7 @@ export type TCartSummary = {
 export type TCartResult = {
   products: TCartProduct[];
   appliedCoupon: TCoupon | null;
+  availableCouponsCount: number;
   summary: TCartSummary;
   totalCount: number;
 };
@@ -69,7 +70,9 @@ export type TDeleteCartItemParams = {
 export type TOrderType = 'individual' | 'team_create' | 'team_join';
 
 export type TPaymentItem = {
-  id: number;
+  brand?: string;
+  store?: string;
+  id: number; // 장바구니 아이템 ID
   productId: number;
   optionId: number;
   quantity: number;

@@ -87,7 +87,7 @@ export default function Home() {
                     max-w-[600px] mx-auto
                     ${scrollDir === 'down' ? '-translate-y-[104px] opacity-0 pointer-events-none' : 'translate-y-0 opacity-100 pointer-events-auto'}`}
       >
-        <header className="px-4">
+        <header className="px-2">
           <Header showSearch={false} />
         </header>
         <header className="pb-2.5 px-4">

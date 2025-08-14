@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { TCartItemRequest, TDeleteCartItemParams } from '@/types/cart/TCart';
 import { QUERY_KEYS } from '@/constants/querykeys/queryKeys';
 
+import { mergeMultipleCartItems } from '@/utils/cartUtils';
 import { addOrUpdateCartItems, deleteCartItem, deleteMultipleCartItems, getCartItems } from '@/apis/cart/cart';
 
 import { useCoreMutation, useCoreQuery } from '@/hooks/customQuery';
@@ -23,6 +24,31 @@ export const useAddCartMutation = () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.GET_CART_ITEMS });
     },
   });
+};
+
+// 병합 로직 추가
+export const useAddCartWithMergeMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useCoreMutation(
+    async (newItems: TCartItemRequest[]) => {
+      try {
+        const currentCartResponse = await getCartItems();
+        const currentItems = currentCartResponse.result.products;
+
+        const mergedItems = mergeMultipleCartItems(currentItems, newItems);
+
+        return await addOrUpdateCartItems(mergedItems);
+      } catch {
+        return await addOrUpdateCartItems(newItems);
+      }
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.GET_CART_ITEMS });
+      },
+    },
+  );
 };
 
 export const useDeleteCartMutation = () => {
@@ -48,14 +74,15 @@ export const useDeleteMultipleCartMutation = () => {
 export const useCart = () => {
   const cartQuery = useCartQuery();
   const addMutation = useAddCartMutation();
+  const addWithMergeMutation = useAddCartWithMergeMutation();
   const deleteMutation = useDeleteCartMutation();
   const deleteMultipleMutation = useDeleteMultipleCartMutation();
 
   const addItem = useCallback(
     (item: TCartItemRequest): Promise<any> => {
-      return addMutation.mutateAsync([item]);
+      return addWithMergeMutation.mutateAsync([item]);
     },
-    [addMutation],
+    [addWithMergeMutation],
   );
 
   const updateItem = useCallback(
@@ -79,6 +106,21 @@ export const useCart = () => {
     [deleteMultipleMutation],
   );
 
+  // OptionModal용 아이템 추가 함수
+  const addMultipleItems = useCallback(
+    (items: TCartItemRequest[]): Promise<any> => {
+      return addWithMergeMutation.mutateAsync(items);
+    },
+    [addWithMergeMutation],
+  );
+
+  const addMultipleItemsAsync = useCallback(
+    (items: TCartItemRequest[]): Promise<any> => {
+      return addWithMergeMutation.mutateAsync(items);
+    },
+    [addWithMergeMutation],
+  );
+
   return {
     cartData: cartQuery.data?.result,
     isLoading: cartQuery.isLoading,
@@ -89,6 +131,10 @@ export const useCart = () => {
     updateItem,
     deleteItem,
     deleteSelectedItems,
+
+    addMultipleItems,
+    addMultipleItemsAsync,
+    isAddingMultiple: addWithMergeMutation.isPending,
 
     isAdding: addMutation.isPending,
     isDeleting: deleteMutation.isPending,

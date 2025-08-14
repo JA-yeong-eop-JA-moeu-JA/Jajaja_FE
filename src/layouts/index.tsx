@@ -14,23 +14,25 @@ import { useAuth } from '@/context/AuthContext';
 export default function Layout({ children }: PropsWithChildren) {
   const { isModalOpen } = useModalStore();
   const { isLoggedIn } = useAuth();
-
-  const path = useLocation().pathname;
-  const showBottomBar = !isModalOpen && ['/', '/payment'].includes(path);
   const { pathname } = useLocation();
+
+  const hideBottomBarPaths = ['/payment', '/address/add', '/product'];
+
+  const shouldHideBottomBar = hideBottomBarPaths.some((path) => pathname.startsWith(path));
+
+  const showBottomBar = !isModalOpen && pathname !== '/' && !shouldHideBottomBar;
+
   useEffect(() => {
-    if (isModalOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
+    document.body.style.overflow = isModalOpen ? 'hidden' : '';
   }, [isModalOpen]);
+
   useEffect(() => {
     if ('scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual';
     }
     window.scrollTo({ top: 0, behavior: 'auto' });
   }, [pathname]);
+
   return (
     <ModalProvider>
       <div className="min-h-screen flex flex-col">
@@ -39,7 +41,7 @@ export default function Layout({ children }: PropsWithChildren) {
           <Toaster />
           {isLoggedIn && <Subscriber />}
         </main>
-        {showBottomBar && path !== '/' && <BottomBar />}
+        {showBottomBar && <BottomBar />}
       </div>
     </ModalProvider>
   );

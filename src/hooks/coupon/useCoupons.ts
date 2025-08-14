@@ -15,6 +15,7 @@ const convertTCouponToTCoupons = (coupon: TCoupon): TCoupons => ({
     ...coupon.applicableConditions,
     type: coupon.applicableConditions.type as 'ALL' | 'BRAND' | 'CATEGORY' | 'FIRST',
   },
+  discountAmount: undefined,
 });
 
 export const useApplyCoupon = () => {
@@ -106,7 +107,10 @@ export const useCartCoupon = () => {
     const targetCoupon = coupon || getCartAppliedCoupon() || getAppliedCoupon();
     if (!targetCoupon) return 0;
 
-    if (targetCoupon.applicableConditions.minOrderAmount > orderAmount) {
+    if (!targetCoupon.applicableConditions) return 0;
+
+    const minOrderAmount = targetCoupon.applicableConditions.minOrderAmount || 0;
+    if (minOrderAmount > orderAmount) {
       return 0;
     }
 
@@ -119,13 +123,20 @@ export const useCartCoupon = () => {
 
   const isApplicable = (orderAmount: number, coupon?: TCoupons): boolean => {
     const targetCoupon = coupon || getCartAppliedCoupon() || getAppliedCoupon();
-    if (!targetCoupon) return false;
-    return targetCoupon.applicableConditions.minOrderAmount <= orderAmount;
+
+    if (!targetCoupon || !targetCoupon.applicableConditions) return false;
+
+    const minOrderAmount = targetCoupon.applicableConditions.minOrderAmount || 0;
+    return minOrderAmount <= orderAmount;
   };
 
   const isExpired = (coupon?: TCoupons): boolean => {
     const targetCoupon = coupon || getCartAppliedCoupon() || getAppliedCoupon();
-    if (!targetCoupon) return false;
+
+    if (!targetCoupon || !targetCoupon.applicableConditions || !targetCoupon.applicableConditions.expireAt) {
+      return false;
+    }
+
     const expireDate = new Date(targetCoupon.applicableConditions.expireAt);
     const now = new Date();
     return now > expireDate;
