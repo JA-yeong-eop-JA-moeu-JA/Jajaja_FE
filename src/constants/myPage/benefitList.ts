@@ -13,7 +13,7 @@ export const BENEFIT_LIST = [
   },
   {
     id: 4,
-    content: '3만원 이상 구매하고 500원 받기',
+    content: '리뷰 추천하고 100원 받기',
   },
   {
     id: 5,
