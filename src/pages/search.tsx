@@ -23,7 +23,7 @@ import Tag from '@/components/search/tag';
 
 import Back from '@/assets/icons/back.svg?react';
 import Down from '@/assets/icons/down.svg?react';
-import NoResult from '@/assets/icons/noResult.svg?react';
+//import NoResult from '@/assets/icons/noResult.svg?react';
 import Up from '@/assets/icons/up.svg?react';
 
 export default function Search() {
@@ -180,8 +180,6 @@ export default function Search() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const isLoading = isCategoryMode ? categoryQuery.isLoading : keywordQuery.isLoading;
-  const isError = isCategoryMode ? categoryQuery.isError : keywordQuery.isError;
   const hasKeyword = new URLSearchParams(search).has('keyword');
   const handleNavigate = () => {
     if (hasKeyword) {
@@ -247,35 +245,19 @@ export default function Search() {
             )}
           </div>
 
-          {/* 로딩/에러/결과 */}
-          {isLoading ? (
-            <div className="w-full flex items-center justify-center h-[calc(100vh-144px)]">
-              <p className="text-subtitle-medium">로딩 중…</p>
-            </div>
-          ) : isError ? (
-            <div className="w-full flex items-center justify-center h-[calc(100vh-144px)]">
-              <p className="text-subtitle-medium text-error-3">불러오기에 실패했습니다.</p>
-            </div>
-          ) : displayList.length === 0 ? (
-            <div className="w-full flex flex-col items-center justify-center h-[calc(100vh-144px)] gap-3">
-              <NoResult />
-              <p className="text-subtitle-medium">찾으시는 상품이 없습니다.</p>
-            </div>
-          ) : (
-            <div className="w-full grid grid-cols-2 gap-x-2 gap-y-6.5 items-center justify-center ">
-              {displayList.map((item) => (
-                <ProductCard
-                  key={item.id}
-                  {...{
-                    ...item,
-                    store: item.store ?? '',
-                    rating: item.rating ?? 0,
-                    reviewCount: item.reviewCount ?? 0,
-                  }}
-                />
-              ))}
-            </div>
-          )}
+          <div className="w-full grid grid-cols-2 gap-x-2 gap-y-6.5 items-center justify-center ">
+            {displayList.map((item) => (
+              <ProductCard
+                key={item.id}
+                {...{
+                  ...item,
+                  store: item.store ?? '',
+                  rating: item.rating ?? 0,
+                  reviewCount: item.reviewCount ?? 0,
+                }}
+              />
+            ))}
+          </div>
         </section>
       )}
     </>

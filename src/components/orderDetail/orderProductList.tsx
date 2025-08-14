@@ -44,14 +44,14 @@ export default function OrderProductList({ items, parentOrderId, orderDate }: IO
   return (
     <section className="px-2 pb-4 border-b border-b-4 border-b-black-1 flex flex-col gap-4">
       {items.map((item) => {
-        const itemOrderStatus = (item.orderStatus ?? '결제 완료') as TOrderStatusKey;
+        const itemOrderStatus = item.orderStatus as TOrderStatusKey | undefined;
         const itemMatchStatus = item.matchStatus as TMatchStatusKey | undefined;
 
         return (
           <div key={`${item.orderId}-${item.productId}`}>
             {/* 상품별 상태 배지 */}
             <div className="flex justify-between items-center px-4 pb-2">
-              <span className={`text-body-medium ${ORDER_STATUS_COLOR_MAP[itemOrderStatus]}`}>{itemOrderStatus}</span>
+              {itemOrderStatus && <span className={`text-body-medium ${ORDER_STATUS_COLOR_MAP[itemOrderStatus]}`}>{itemOrderStatus}</span>}
               {itemMatchStatus && <span className={`text-body-medium ${MATCH_STATUS_COLOR_MAP[itemMatchStatus]}`}>{itemMatchStatus}</span>}
             </div>
 

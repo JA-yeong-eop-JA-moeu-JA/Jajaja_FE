@@ -15,13 +15,53 @@ interface IOrderProps {
   onExpire?: () => void; // 만료 순간 refetch 등을 위해 부모에서 콜백 주입 가능
 }
 
+type TBEOrderStatus =
+  | 'READY'
+  | 'DONE'
+  | 'CANCELED'
+  | 'ABORTED'
+  | 'EXPIRED'
+  | 'SHIPPING'
+  | 'DELIVERED'
+  | 'REFUND_REQUESTED'
+  | 'REFUND_FAILED'
+  | 'REFUNDED'
+  | 'TEAM_MATCHING_FAILED';
+
+type TTOSKey =
+  | '결제 대기'
+  | '결제 완료'
+  | '결제 취소'
+  | '결제 실패'
+  | '거래 취소'
+  | '배송 중'
+  | '배송 완료'
+  | '환불 요청'
+  | '환불 실패'
+  | '환불 완료'
+  | '매칭 실패';
+
+const ORDER_STATUS_LABEL_MAP: Record<TBEOrderStatus, TTOSKey> = {
+  READY: '결제 대기',
+  DONE: '결제 완료',
+  CANCELED: '결제 취소',
+  ABORTED: '결제 실패',
+  EXPIRED: '거래 취소',
+  SHIPPING: '배송 중',
+  DELIVERED: '배송 완료',
+  REFUND_REQUESTED: '환불 요청',
+  REFUND_FAILED: '환불 실패',
+  REFUNDED: '환불 완료',
+  TEAM_MATCHING_FAILED: '매칭 실패',
+};
+
 /** 팀 매칭 유효시간(분) — BE와 합의된 값으로 변경 */
 const MATCH_TTL_MINUTES = 600;
 
 /** BE 상태(영문) → UI 라벨(한글) 매핑 */
-const MATCH_STATUS_LABEL_MAP: Record<'MATCHING' | 'MATCHED' | 'FAILED', keyof typeof MATCH_STATUS_COLOR_MAP> = {
+const MATCH_STATUS_LABEL_MAP: Record<'MATCHING' | 'COMPLETED' | 'FAILED', keyof typeof MATCH_STATUS_COLOR_MAP> = {
   MATCHING: '매칭 중',
-  MATCHED: '매칭 완료',
+  COMPLETED: '매칭 완료',
   FAILED: '매칭 실패',
 };
 
@@ -76,11 +116,16 @@ export default function OrderList({ orders, onExpire }: IOrderProps) {
     <div className="w-full flex flex-col">
       {orders.map((order, index) => (
         <section key={order.id} className={`w-full pb-4 mb-4 ${index !== orders.length - 1 ? 'border-b-black-1 border-b-4' : ''}`}>
-          <button
-            className="w-full flex items-center justify-between pb-2 px-4"
-            onClick={() => navigate(`/mypage/order/orderDetailPersonal?orderId=${order.id}`)}
-          >
-            <p className="text-subtitle-medium text-left">{order.createdAt?.trim() || '25.12.12'}</p>
+          <button className="w-full flex items-center justify-between px-4" onClick={() => navigate(`/mypage/order/orderDetailPersonal?orderId=${order.id}`)}>
+            <p className="text-subtitle-medium text-left">
+              {order.createdAt
+                ? new Date(order.createdAt).toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                  })
+                : '25.12.12'}
+            </p>
             <img src={ChevronRight} alt=">" className="w-2 h-4" />
           </button>
 
@@ -89,13 +134,11 @@ export default function OrderList({ orders, onExpire }: IOrderProps) {
             type TOSKey = keyof typeof ORDER_STATUS_COLOR_MAP;
             type TMSKey = keyof typeof MATCH_STATUS_COLOR_MAP;
 
-            const DEFAULT_OS: TOSKey = '결제 완료';
-            const DEFAULT_MS: TMSKey = '매칭 완료';
+            const beOs = (item as any).orderStatus as TBEOrderStatus | null | undefined;
+            const osLabel = beOs ? (ORDER_STATUS_LABEL_MAP[beOs] as TOSKey) : undefined;
 
-            const osLabel = ((item as any).orderStatus ?? DEFAULT_OS) as TOSKey | undefined;
-
-            const beMs = (item as any).matchStatus as 'MATCHING' | 'MATCHED' | 'FAILED' | null | undefined;
-            const msLabel = (beMs ? MATCH_STATUS_LABEL_MAP[beMs] : DEFAULT_MS) as TMSKey | undefined;
+            const beMs = (item as any).matchStatus as 'MATCHING' | 'COMPLETED' | 'FAILED' | null | undefined;
+            const msLabel = beMs ? (MATCH_STATUS_LABEL_MAP[beMs] as TMSKey) : undefined;
 
             const isMatching = beMs === 'MATCHING';
 
