@@ -91,7 +91,6 @@ export default function Home() {
           <Header showSearch={false} />
         </header>
 
-
         <header className="w-full pb-2.5 px-5 max-w-screen-sm mx-auto">
           <SearchInput value={''} onFocus={() => navigate('/search')} />
         </header>

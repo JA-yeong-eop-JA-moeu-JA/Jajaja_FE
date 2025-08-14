@@ -3,8 +3,8 @@ type TRefundInfoProps = {
     amount: number;
     discount: number;
     pointsUsed: number;
-    deliveryFee: number; // +면 고객 부담, 0이면 무료
-    method: string; // 'KAKAO' | 'CARD' 등
+    deliveryFee: number;
+    method: string;
     reason: string;
     address: string;
   };
@@ -16,10 +16,9 @@ const KRW = new Intl.NumberFormat('ko-KR');
 const formatKRW = (n: number) => `${KRW.format(n)} 원`;
 
 const METHOD_LABEL: Record<string, string> = {
-  KAKAO: '카카오페이',
-  CARD: '신용/체크카드',
-  NAVER: '네이버페이',
-  TOSS: '토스페이',
+  NORMAL: '일반 결제',
+  BILLING: '자동 결제',
+  BRANDPAY: '간편결제',
 };
 
 function getRegionByAddress(address?: string): TRegion {
