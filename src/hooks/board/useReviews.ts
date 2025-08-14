@@ -13,7 +13,7 @@ type TUseReviewsParams = {
 };
 
 export const useReviews = (params: TUseReviewsParams) => {
-  const DEFAULT_SIZE = 5;
+  const DEFAULT_SIZE = 6;
   const page = params.page ?? 0;
   const size = params.size ?? DEFAULT_SIZE;
   const sortForApi = (params.sort ?? 'LATEST').toString().toUpperCase() as TReviewSort;

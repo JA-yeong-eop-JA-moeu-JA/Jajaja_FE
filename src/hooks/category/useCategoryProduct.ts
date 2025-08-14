@@ -12,7 +12,7 @@ type TSort = (typeof SORTS)[number];
 const getSafeSort = (s?: string): TCategorySort => ((SORTS as readonly string[]).includes(s ?? '') ? (s as TSort) : 'NEW');
 
 export function useCategoryProducts(opts: { subcategoryId?: number; sort?: string; page?: number; size?: number }) {
-  const { subcategoryId, sort, page = 0, size = 20 } = opts;
+  const { subcategoryId, sort, page = 0, size = 6 } = opts;
   const safeSort = getSafeSort(sort);
 
   const q = useCoreQuery(

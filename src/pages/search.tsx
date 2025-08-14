@@ -43,6 +43,7 @@ export default function Search() {
   const { search } = useLocation();
   const [localKeywords, setLocalKeywords] = useState<TKeywordItem[]>(() => Storage.getKeyword());
 
+  const PAGE_SIZE = 6;
   const navigate = useNavigate();
   const { data: recent } = useGetRecent();
   const { mutate } = useDeleteRecent();
@@ -76,7 +77,7 @@ export default function Search() {
   };
 
   const page = Number(searchParams.get('page') || '0');
-  const size = searchParams.get('size') ? Number(searchParams.get('size')) : 20;
+  const size = searchParams.get('size') ? Number(searchParams.get('size')) : PAGE_SIZE;
 
   const categoryQuery = useCategoryProducts({
     subcategoryId: isCategoryMode ? subcategoryId : undefined,
@@ -142,14 +143,23 @@ export default function Search() {
       const qs = new URLSearchParams(searchParams);
       const cur = Number(qs.get('page') || '0');
       qs.set('page', String(cur + 1));
+      qs.set('size', String(PAGE_SIZE));     // ★ 유지
       setSearchParams(qs, { replace: true });
     },
     root: null,
-    rootMargin: '0px 0px 400px 0px',
-    threshold: 0,
+    rootMargin: '0px',
+    threshold: 1,
   });
 
   const displayList: TProductCardItem[] = isCategoryMode ? accCategory : (keywordQuery.products ?? []).map(mapToProductCard);
+
+  useEffect(() => {
+    if (!searchParams.get('size')) {
+      const qs = new URLSearchParams(searchParams);
+      qs.set('size', String(PAGE_SIZE));
+      setSearchParams(qs, { replace: true });
+    }
+  }, []);
 
   useEffect(() => {
     if (keywordParam) {
@@ -206,11 +216,10 @@ export default function Search() {
       qs.delete('keyword');
     }
     qs.set('page', '0');
+    qs.set('size', String(PAGE_SIZE));   // ★ 추가
     Storage.setKeyword(keyword);
     setSearchParams(qs, { replace: true });
-    setTimeout(() => {
-      (document.activeElement as HTMLElement | null)?.blur();
-    }, 0);
+    setTimeout(() => (document.activeElement as HTMLElement | null)?.blur(), 0);
   };
 
   const handleSortSelect = (value?: string) => {
@@ -222,6 +231,7 @@ export default function Search() {
     const qs = new URLSearchParams(searchParams);
     qs.set('sort', nextSort);
     qs.set('page', '0');
+    qs.set('size', String(PAGE_SIZE));   // ★ 추가
     setSearchParams(qs, { replace: true });
     setIsAsc(true);
     setChange(true);

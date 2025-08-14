@@ -16,7 +16,7 @@ type TSort = (typeof SORTS)[number];
 const getSafeSort = (s?: string): TCategorySort => ((SORTS as readonly string[]).includes(s ?? '') ? (s as TSort) : 'POPULAR');
 
 export function useKeywordProducts(opts: { keyword?: string; sort?: string; page?: number; size?: number }) {
-  const { keyword, sort, page = 0, size = 20 } = opts;
+  const { keyword, sort, page = 0, size = 6 } = opts;
   const safeSort: TCategorySort = getSafeSort(sort);
   const q = useCoreQuery([QUERY_KEYS.GET_KEYWORD_PRODUCTS, keyword, safeSort, page, size], () => getProductsByKeyword(keyword ?? '', safeSort, page, size), {
     enabled: !!keyword,
