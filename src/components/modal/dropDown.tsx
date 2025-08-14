@@ -13,7 +13,7 @@ type TProps = {
 export default function DropDown({ options, value, onChange }: TProps) {
   const optionList = [{ id: 0, name: '옵션 선택' }, ...(options ?? [])];
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState<number>(value ?? 0);
+  const [, setSelectedId] = useState<number>(value ?? 0);
 
   useEffect(() => {
     if (value !== undefined) {
@@ -26,12 +26,11 @@ export default function DropDown({ options, value, onChange }: TProps) {
       setIsOpen(true);
     } else {
       setIsOpen(false);
-      setSelectedId(id);
       onChange?.({ id });
     }
   };
 
-  const renderList = isOpen ? optionList : [optionList.find((o) => o.id === selectedId) ?? optionList[0]];
+  const renderList = isOpen ? optionList : [optionList[0]];
 
   return (
     <div className="border border-black-3 rounded-sm overflow-hidden">
