@@ -92,7 +92,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="w-full h-screen flex flex-col items-center justify-between">
+    <div className="w-full min-h-screen flex flex-col items-center justify-between">
       <div className="w-full">
         <PageHeaderBar title="프로필 수정" />
 
@@ -129,7 +129,7 @@ export default function Profile() {
                 value={phone}
                 onChange={(e) => setPhone(formatPhone(e.target.value))}
                 className="w-full border border-black-1 px-3 py-2.5 rounded text-body-regular text-black"
-                placeholder="휴대폰 번호"
+                placeholder="010-0000-0000"
               />
             </div>
             <div className="w-full flex flex-col items-start justify-center gap-3">
