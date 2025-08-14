@@ -16,15 +16,18 @@ export type TCoupons = {
   applicableConditions: TApplicableConditions;
 };
 
-export type TGetCouponsResponse = TCommonResponse<{
+export type TGetCouponsInfiniteResponse = TCommonResponse<{
   page: TPage;
   coupons: TCoupons[];
 }>;
 
 export type TApplyCouponResponse = TCommonResponse<{
-  data: TCoupons;
+  cartId: number;
+  couponId: number;
+  couponName: string;
+  originalAmount: number;
+  discountAmount: number;
+  finalAmount: number;
 }>;
 
-export type TCancelCouponRequest = {
-  id: number;
-};
+export type TCancelCouponResponse = TCommonResponse<string>;

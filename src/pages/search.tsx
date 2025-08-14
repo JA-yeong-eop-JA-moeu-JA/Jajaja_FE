@@ -25,7 +25,6 @@ import Back from '@/assets/icons/back.svg?react';
 import Down from '@/assets/icons/down.svg?react';
 import NoResult from '@/assets/icons/noResult.svg?react';
 import Up from '@/assets/icons/up.svg?react';
-import { useAuth } from '@/context/AuthContext';
 
 export default function Search() {
   const { data } = useGetKeyword();
@@ -40,14 +39,8 @@ export default function Search() {
   const { search } = useLocation();
 
   const navigate = useNavigate();
-  const { isError: authError } = useAuth();
-  const { data: recent, refetch } = useGetRecent();
+  const { data: recent } = useGetRecent();
   const { mutate } = useDeleteRecent();
-  useEffect(() => {
-    if (!authError) {
-      refetch();
-    }
-  }, [authError, refetch]);
   useEffect(() => {
     const keyword = new URLSearchParams(location.search).get('keyword');
     setKeyword(keyword);
@@ -205,7 +198,7 @@ export default function Search() {
           <section>
             <p className="text-subtitle-medium mb-2">최근 검색</p>
             <ScrollContainer className="flex w-full gap-2 overflow-x-auto cursor-grab pr-5" vertical={false}>
-              {(!recent || recent?.result.length === 0) && <p className="text-body-regular text-black-4 py-2.5">최근 검색어가 없습니다.</p>}
+              {recent?.result.length === 0 && <p className="text-body-regular text-black-4 py-2.5">최근 검색어가 없습니다.</p>}
               {recent?.result.map(({ id, keyword }) => (
                 <div key={id} className="shrink-0" onClick={() => handleFilter(keyword)}>
                   <Tag msg={keyword} onDelete={() => handleDelete(id)} />

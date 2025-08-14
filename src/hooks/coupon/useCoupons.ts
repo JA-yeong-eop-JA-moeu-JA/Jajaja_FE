@@ -1,17 +1,21 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import type { TCoupon } from '@/types/cart/TCart';
 import type { TCoupons } from '@/types/coupon/TGetCoupons';
 import { QUERY_KEYS } from '@/constants/querykeys/queryKeys';
 
-import { applyCoupon, cancelCoupon, getCoupons } from '@/apis/coupon/getCoupons';
+import { applyCoupon, cancelCoupon } from '@/apis/coupon/getCoupons';
 
-export const useCoupons = () => {
-  return useQuery({
-    queryKey: [QUERY_KEYS.GET_COUPONS],
-    queryFn: getCoupons,
-    staleTime: 5 * 60 * 1000, // 5분
-  });
-};
+const convertTCouponToTCoupons = (coupon: TCoupon): TCoupons => ({
+  couponId: coupon.couponId,
+  couponName: coupon.couponName,
+  discountType: coupon.discountType as 'PERCENTAGE' | 'FIXED_AMOUNT',
+  discountValue: coupon.discountValue,
+  applicableConditions: {
+    ...coupon.applicableConditions,
+    type: coupon.applicableConditions.type as 'ALL' | 'BRAND' | 'CATEGORY' | 'FIRST',
+  },
+});
 
 export const useApplyCoupon = () => {
   const queryClient = useQueryClient();
@@ -19,9 +23,25 @@ export const useApplyCoupon = () => {
   return useMutation({
     mutationFn: applyCoupon,
     onSuccess: (data) => {
-      localStorage.setItem('appliedCoupon', JSON.stringify(data.result.data));
+      const couponData = {
+        couponId: data.result.couponId,
+        couponName: data.result.couponName,
+        cartId: data.result.cartId,
+        originalAmount: data.result.originalAmount,
+        discountAmount: data.result.discountAmount,
+        finalAmount: data.result.finalAmount,
+        appliedAt: new Date().toISOString(),
+      };
+      localStorage.setItem('appliedCoupon', JSON.stringify(couponData));
 
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_COUPONS] });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.GET_COUPONS_INFINITE],
+        exact: false,
+      });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.GET_CART_ITEMS,
+        exact: false,
+      });
     },
     onError: (error) => {
       console.error('쿠폰 적용 실패:', error);
@@ -29,7 +49,7 @@ export const useApplyCoupon = () => {
   });
 };
 
-export const useCancelCoupon = () => {
+export const useUnapplyCoupon = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -37,7 +57,14 @@ export const useCancelCoupon = () => {
     onSuccess: () => {
       localStorage.removeItem('appliedCoupon');
 
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_COUPONS] });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.GET_COUPONS_INFINITE],
+        exact: false,
+      });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.GET_CART_ITEMS,
+        exact: false,
+      });
     },
     onError: (error) => {
       console.error('쿠폰 적용 취소 실패:', error);
@@ -45,7 +72,19 @@ export const useCancelCoupon = () => {
   });
 };
 
-export const useAppliedCoupon = () => {
+export const useCartCoupon = () => {
+  const queryClient = useQueryClient();
+
+  const getCartAppliedCoupon = (): TCoupons | null => {
+    const cartData = queryClient.getQueryData(QUERY_KEYS.GET_CART_ITEMS) as any;
+    const cartCoupon: TCoupon | null = cartData?.result?.appliedCoupon || null;
+
+    if (cartCoupon) {
+      return convertTCouponToTCoupons(cartCoupon);
+    }
+    return null;
+  };
+
   const getAppliedCoupon = (): TCoupons | null => {
     const savedCoupon = localStorage.getItem('appliedCoupon');
     if (savedCoupon) {
@@ -64,7 +103,7 @@ export const useAppliedCoupon = () => {
   };
 
   const calculateDiscount = (orderAmount: number, coupon?: TCoupons): number => {
-    const targetCoupon = coupon || getAppliedCoupon();
+    const targetCoupon = coupon || getCartAppliedCoupon() || getAppliedCoupon();
     if (!targetCoupon) return 0;
 
     if (targetCoupon.applicableConditions.minOrderAmount > orderAmount) {
@@ -79,13 +118,13 @@ export const useAppliedCoupon = () => {
   };
 
   const isApplicable = (orderAmount: number, coupon?: TCoupons): boolean => {
-    const targetCoupon = coupon || getAppliedCoupon();
+    const targetCoupon = coupon || getCartAppliedCoupon() || getAppliedCoupon();
     if (!targetCoupon) return false;
     return targetCoupon.applicableConditions.minOrderAmount <= orderAmount;
   };
 
   const isExpired = (coupon?: TCoupons): boolean => {
-    const targetCoupon = coupon || getAppliedCoupon();
+    const targetCoupon = coupon || getCartAppliedCoupon() || getAppliedCoupon();
     if (!targetCoupon) return false;
     const expireDate = new Date(targetCoupon.applicableConditions.expireAt);
     const now = new Date();
@@ -93,10 +132,13 @@ export const useAppliedCoupon = () => {
   };
 
   return {
-    getAppliedCoupon,
+    getAppliedCoupon: getCartAppliedCoupon,
+    getLocalAppliedCoupon: getAppliedCoupon,
     clearAppliedCoupon,
     calculateDiscount,
     isApplicable,
     isExpired,
   };
 };
+
+export const useAppliedCoupon = useCartCoupon;

@@ -55,8 +55,7 @@ export const updateAddress = (addressId: number, request: IUpdateAddressRequest)
 };
 
 export const deleteAddress = (addressId: number, request: IDeleteAddressRequest): Promise<TDeleteAddressResponse> => {
-  const params = new URLSearchParams();
-  params.append('deliveryId', String(request.id));
-
-  return axiosInstance.delete(`/api/addresses/${addressId}?${params.toString()}`);
+  return axiosInstance.delete(`/api/addresses/${addressId}`, {
+    params: { deliveryId: request.id },
+  });
 };

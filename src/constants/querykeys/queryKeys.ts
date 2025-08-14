@@ -6,7 +6,7 @@ export const QUERY_KEYS = {
   GET_SEARCH_KEYWORD: ['getSearchKeyword'],
   GET_CATEGORY_PRODUCTS: ['CATEGORY_PRODUCTS'],
   GET_PRODUCT_DETAIL: ['getProductDetail'],
-  GET_COUPONS: ['getCoupons'],
+  GET_COUPONS_INFINITE: ['getCouponsInfinite'],
   GET_NOTI_LIST: ['getNotiList'],
   GET_NOTI_UNREAD: ['getNotiUnread'],
   GET_PRODUCT_REVIEW: ['getProductReview'],
