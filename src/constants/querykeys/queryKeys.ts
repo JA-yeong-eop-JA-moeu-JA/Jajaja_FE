@@ -23,4 +23,5 @@ export const QUERY_KEYS = {
   GET_CART_ITEMS: ['cartItems'],
   GET_PRODUCT_OPTIONS: (productId: number) => ['productOptions', productId],
   GET_KEYWORD_PRODUCTS: ['GET_KEYWORD_PRODUCTS'],
+  GET_CART: ['getCart'],
 };
