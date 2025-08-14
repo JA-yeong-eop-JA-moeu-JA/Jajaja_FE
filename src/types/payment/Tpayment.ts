@@ -11,7 +11,7 @@ export interface ITPaymentRequest {
 export interface ITPaymentConfirmRequest {
   orderId: string;
   paymentKey: string;
-  paidAmount: number;
+  finalAmount: number;
 }
 
 export interface ITPaymentConfirmResponse {

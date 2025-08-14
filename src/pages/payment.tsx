@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
@@ -13,8 +13,8 @@ import { useGetAddresses } from '@/hooks/address/useAddress';
 import { useCartCoupon } from '@/hooks/coupon/useCoupons';
 import useInfiniteCoupons from '@/hooks/coupon/useInfiniteCoupons';
 import useUserInfo from '@/hooks/myPage/useUserInfo';
+import { usePayment } from '@/hooks/payment/usePayment';
 import { usePaymentPrepare } from '@/hooks/payment/usePaymentPrepare';
-import { usePaymentWidget } from '@/hooks/payment/usePaymentWidget';
 import useInfinitePoints from '@/hooks/points/useInfinitePoints';
 
 import { Button } from '@/components/common/button';
@@ -66,9 +66,6 @@ export default function Payment() {
   const location = useLocation();
   const { openModal } = useModalStore();
 
-  const isWidgetRendered = useRef(false);
-  const paymentMethodsRef = useRef<HTMLDivElement>(null);
-
   const paymentData = location.state as TPaymentData;
   const currentOrderItems = paymentData?.selectedItems || orderData[0].items;
 
@@ -106,7 +103,6 @@ export default function Payment() {
     }, 0);
   };
 
-  // 사용 가능한 쿠폰 개수 계산
   const availableCoupons = couponsData?.pages.flatMap((page) => page.result.coupons || []) ?? [];
   const currentOrderAmount = calculateEstimatedAmount();
   const couponsCount = availableCoupons.filter((coupon) => !isExpired(coupon) && isApplicable(currentOrderAmount, coupon)).length;
@@ -144,57 +140,12 @@ export default function Payment() {
   const customerKey = generateCustomerKey(user?.id?.toString() || 'anonymous');
 
   const {
-    paymentWidget,
-    isLoading: widgetLoading,
-    renderPaymentMethods,
-    renderAgreement,
+    payment,
+    isLoading: paymentLoading,
     requestPayment,
-  } = usePaymentWidget({
+  } = usePayment({
     customerKey,
-    amount: displayAmount.finalAmount,
   });
-
-  useEffect(() => {
-    if (!widgetLoading && paymentWidget && displayAmount.finalAmount > 0 && user && !isWidgetRendered.current) {
-      const timer = setTimeout(() => {
-        try {
-          const paymentMethodsElement = document.querySelector('#payment-methods');
-          const agreementElement = document.querySelector('#payment-agreement');
-
-          if (paymentMethodsElement && paymentMethodsElement.children.length === 0) {
-            renderPaymentMethods('#payment-methods');
-            isWidgetRendered.current = true;
-          }
-
-          if (agreementElement && agreementElement.children.length === 0) {
-            renderAgreement('#payment-agreement');
-          }
-        } catch (error) {
-          console.error('위젯 렌더링 중 오류:', error);
-        }
-      }, 100);
-
-      return () => {
-        clearTimeout(timer);
-      };
-    }
-  }, [widgetLoading, paymentWidget, renderPaymentMethods, renderAgreement, displayAmount.finalAmount, user]);
-
-  useEffect(() => {
-    return () => {
-      isWidgetRendered.current = false;
-      const paymentMethodsElement = document.querySelector('#payment-methods');
-      const agreementElement = document.querySelector('#payment-agreement');
-
-      if (paymentMethodsElement) {
-        paymentMethodsElement.innerHTML = '';
-      }
-
-      if (agreementElement) {
-        agreementElement.innerHTML = '';
-      }
-    };
-  }, []);
 
   const handlePointsChange = (value: number) => {
     const numValue = Number(value) || 0;
@@ -240,8 +191,7 @@ export default function Payment() {
       alert('선택된 배송지에 휴대폰 번호가 없습니다. 배송지를 변경하거나 수정해주세요.');
       return;
     }
-
-    if (!paymentWidget) {
+    if (!payment) {
       alert('결제 시스템을 초기화하고 있습니다. 잠시 후 다시 시도해주세요.');
       return;
     }
@@ -283,41 +233,43 @@ export default function Payment() {
         throw new Error('결제 준비 응답 데이터가 없습니다.');
       }
 
-      const { orderId, orderName, finalAmount: backendFinalAmount } = responseData;
+      const { orderId, orderName, finalAmount } = responseData;
 
-      if (!orderId || !orderName || typeof backendFinalAmount === 'undefined') {
+      if (!orderId || !orderName || typeof finalAmount === 'undefined') {
         throw new Error('결제 준비 응답에 필수 데이터가 누락되었습니다.');
       }
+
+      sessionStorage.setItem('finalAmount', finalAmount.toString());
 
       setBackendCalculatedAmount({
         totalAmount: responseData.totalAmount,
         discountAmount: responseData.discountAmount,
         pointDiscount: responseData.pointDiscount,
         shippingFee: responseData.shippingFee,
-        finalAmount: backendFinalAmount,
+        finalAmount,
       });
 
-      if (backendFinalAmount <= 0) {
+      if (finalAmount <= 0) {
         alert('결제 금액이 0원입니다. 쿠폰 또는 포인트 사용을 조정해주세요.');
         setIsProcessingPayment(false);
         return;
       }
 
-      await paymentWidget.setAmount({
-        currency: 'KRW',
-        value: backendFinalAmount,
-      });
-
       const baseUrl = window.location.origin;
 
       await requestPayment({
+        method: 'CARD',
+        amount: {
+          currency: 'KRW',
+          value: finalAmount,
+        },
         orderId: String(orderId),
         orderName,
         customerEmail: user.email || '',
         customerName: selectedAddress.name,
         customerMobilePhone: formattedPhoneNumber,
-        successUrl: `${baseUrl}/payment/success`,
-        failUrl: `${baseUrl}/payment/fail`,
+        successUrl: `${baseUrl}/payment/confirm`,
+        failUrl: `${baseUrl}/payment/confirm`,
       });
     } catch (error) {
       let errorMessage = '결제 처리 중 오류가 발생했습니다.';
@@ -560,10 +512,6 @@ export default function Payment() {
           </div>
         </section>
 
-        <section className="border-b-4 border-black-1">
-          <div id="payment-methods" className="min-h-[200px]" ref={paymentMethodsRef} />
-        </section>
-
         <PaymentSummarySection
           total={displayAmount.originalAmount}
           discount={displayAmount.couponDiscount}
@@ -578,7 +526,7 @@ export default function Payment() {
           <Button
             kind="basic"
             variant="solid-orange"
-            disabled={displayAmount.finalAmount <= 0 || isProcessingPayment || paymentPrepareMutation.isPending || !selectedAddress}
+            disabled={displayAmount.finalAmount <= 0 || isProcessingPayment || paymentPrepareMutation.isPending || !selectedAddress || paymentLoading}
             onClick={handlePayment}
             className="w-full"
           >

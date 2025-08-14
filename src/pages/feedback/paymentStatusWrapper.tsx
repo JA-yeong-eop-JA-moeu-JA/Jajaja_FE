@@ -1,30 +1,39 @@
-import { useParams } from 'react-router-dom';
+import axios from 'axios';
+
+import { usePaymentStatus } from '@/hooks/payment/usePaymentStatus';
+
+import Loading from '@/components/loading';
 
 import PaymentStatusPage from './paymentStatus';
-import { usePaymentStatus } from './PaymentStatusHandler';
 
 export default function PaymentStatusWrapper() {
-  const { status } = useParams<{ status: 'success' | 'fail' }>();
-  const { isConfirming, error } = usePaymentStatus();
+  const { isConfirming, confirmResult, error } = usePaymentStatus();
 
-  if (status !== 'success' && status !== 'fail') {
-    return <div>잘못된 접근입니다.</div>;
+  if (isConfirming) {
+    return <Loading />;
   }
 
-  if (status === 'success' && isConfirming) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange mx-auto mb-4" />
-          <p className="text-body-regular">결제를 확인하고 있습니다...</p>
-        </div>
-      </div>
-    );
+  if (error) {
+    let errorMessage = '알 수 없는 오류가 발생했습니다.';
+
+    if (error instanceof Error) {
+      if (axios.isAxiosError(error) && error.response) {
+        errorMessage = error.response.data.message || error.message;
+      } else {
+        errorMessage = error.message;
+      }
+    }
+
+    return <PaymentStatusPage status="fail" errorMessage={errorMessage} />;
   }
 
-  if (status === 'success' && error) {
-    return <PaymentStatusPage status="fail" />;
+  if (confirmResult) {
+    if (confirmResult.isSuccess) {
+      return <PaymentStatusPage status="success" />;
+    } else {
+      return <PaymentStatusPage status="fail" errorMessage={confirmResult.message} />;
+    }
   }
 
-  return <PaymentStatusPage status={status} />;
+  return <Loading />;
 }
