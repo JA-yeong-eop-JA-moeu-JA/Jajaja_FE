@@ -120,12 +120,19 @@ export default function ApplyReturnOrExchange() {
   const isFormValid = selectedType !== null && selectedReason !== '' && !!selectedOrderItem;
   const reasonOptions: TOptionBase[] = selectedType === '반품' ? RETURN_REASONS : EXCHANGE_REASONS;
 
+  type TPaymentMethod = 'NORMAL' | 'BILLING' | 'BRANDPAY';
+
+  const METHOD_LABEL: Record<TPaymentMethod, string> = {
+    NORMAL: '일반 결제',
+    BILLING: '자동 결제',
+    BRANDPAY: '간편결제',
+  };
   const refundInfo = {
     amount: selectedOrderItem?.price ?? payment.finalAmount,
     discount: payment.discount,
     pointsUsed: payment.pointUsed,
     deliveryFee: payment.shippingFee,
-    method: payment.method === 'KAKAO' ? '카카오페이' : payment.method,
+    method: METHOD_LABEL[payment.method as TPaymentMethod] ?? payment.method,
     reason: selectedReason || '',
     address: delivery.address,
   };
