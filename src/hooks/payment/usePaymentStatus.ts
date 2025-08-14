@@ -1,33 +1,28 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-import { usePaymentConfirm } from '@/hooks/payment/usePaymentConfirm';
+import { usePaymentConfirm } from './usePaymentConfirm';
 
 interface IPaymentConfirmResponse {
   isSuccess: boolean;
   code: string;
   message: string;
-  result: {
-    orderId: string;
-    orderName: string;
-    status: string;
-  };
+  result: any;
 }
 
 interface IUsePaymentStatusReturn {
   isConfirming: boolean;
   confirmResult: IPaymentConfirmResponse | null;
-  error: string | null;
+  error: unknown;
 }
 
 export const usePaymentStatus = (): IUsePaymentStatusReturn => {
   const [searchParams] = useSearchParams();
   const [isConfirming, setIsConfirming] = useState(true);
   const [confirmResult, setConfirmResult] = useState<IPaymentConfirmResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
 
   const paymentConfirmMutation = usePaymentConfirm();
-
   const didEffectRun = useRef(false);
 
   useEffect(() => {
@@ -40,11 +35,10 @@ export const usePaymentStatus = (): IUsePaymentStatusReturn => {
       const paymentKey = searchParams.get('paymentKey');
       const orderId = searchParams.get('orderId');
       const amount = searchParams.get('amount');
-
       const expectedFinalAmount = sessionStorage.getItem('finalAmount');
 
       if (!paymentKey || !orderId || !amount) {
-        setError('결제 정보가 올바르지 않습니다.');
+        setError(new Error('결제 정보가 올바르지 않습니다.'));
         setIsConfirming(false);
         return;
       }
@@ -60,16 +54,10 @@ export const usePaymentStatus = (): IUsePaymentStatusReturn => {
           setConfirmResult(response);
           sessionStorage.removeItem('finalAmount');
         } else {
-          setError(response.message || '결제 승인에 실패했습니다.');
+          setError(new Error(response.message || '결제 승인에 실패했습니다.'));
         }
-      } catch (err: any) {
-        if (err.response?.data?.code === 'ORDER4001') {
-          setError(`주문을 찾을 수 없습니다. orderId: ${orderId}`);
-        } else if (err.response?.data?.code === 'PAYMENT4004') {
-          setError(`결제 금액이 일치하지 않습니다. 확인된 금액: ${amount}원`);
-        } else {
-          setError(err.response?.data?.message || '결제 승인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
-        }
+      } catch (err: unknown) {
+        setError(err);
       } finally {
         setIsConfirming(false);
       }
@@ -79,7 +67,7 @@ export const usePaymentStatus = (): IUsePaymentStatusReturn => {
   }, []);
 
   return {
-    isConfirming: isConfirming || paymentConfirmMutation.isPending,
+    isConfirming,
     confirmResult,
     error,
   };

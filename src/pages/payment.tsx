@@ -233,21 +233,23 @@ export default function Payment() {
         throw new Error('결제 준비 응답 데이터가 없습니다.');
       }
 
-      const { orderId, orderName, finalAmount: backendFinalAmount } = responseData;
+      const { orderId, orderName, finalAmount } = responseData;
 
-      if (!orderId || !orderName || typeof backendFinalAmount === 'undefined') {
+      if (!orderId || !orderName || typeof finalAmount === 'undefined') {
         throw new Error('결제 준비 응답에 필수 데이터가 누락되었습니다.');
       }
+
+      sessionStorage.setItem('finalAmount', finalAmount.toString());
 
       setBackendCalculatedAmount({
         totalAmount: responseData.totalAmount,
         discountAmount: responseData.discountAmount,
         pointDiscount: responseData.pointDiscount,
         shippingFee: responseData.shippingFee,
-        finalAmount: backendFinalAmount,
+        finalAmount,
       });
 
-      if (backendFinalAmount <= 0) {
+      if (finalAmount <= 0) {
         alert('결제 금액이 0원입니다. 쿠폰 또는 포인트 사용을 조정해주세요.');
         setIsProcessingPayment(false);
         return;
@@ -259,15 +261,15 @@ export default function Payment() {
         method: 'CARD',
         amount: {
           currency: 'KRW',
-          value: backendFinalAmount,
+          value: finalAmount,
         },
         orderId: String(orderId),
         orderName,
         customerEmail: user.email || '',
         customerName: selectedAddress.name,
         customerMobilePhone: formattedPhoneNumber,
-        successUrl: `${baseUrl}/payment/success`,
-        failUrl: `${baseUrl}/payment/fail`,
+        successUrl: `${baseUrl}/payment/confirm`,
+        failUrl: `${baseUrl}/payment/confirm`,
       });
     } catch (error) {
       let errorMessage = '결제 처리 중 오류가 발생했습니다.';

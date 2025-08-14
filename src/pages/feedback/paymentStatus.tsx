@@ -8,11 +8,14 @@ type TPaymentStatus = 'success' | 'fail';
 
 interface IPaymentStatusPageProps {
   status: TPaymentStatus;
+  errorMessage?: string;
 }
 
-export default function PaymentStatusPage({ status }: IPaymentStatusPageProps) {
+export default function PaymentStatusPage({ status, errorMessage }: IPaymentStatusPageProps) {
   const navigate = useNavigate();
   const isSuccess = status === 'success';
+
+  const subtitle = isSuccess ? undefined : errorMessage || '잠시 후 다시 시도해주세요.';
 
   return (
     <>
@@ -27,7 +30,7 @@ export default function PaymentStatusPage({ status }: IPaymentStatusPageProps) {
           <FeedbackPage
             iconSrc={isSuccess ? '/src/assets/paymentComplete.svg' : '/src/assets/paymentFail.svg'}
             title={isSuccess ? '주문이 완료됐습니다.' : '일시적 오류로 결제에 실패했어요.'}
-            subtitle={isSuccess ? undefined : '잠시 후 다시 시도해주세요.'}
+            subtitle={subtitle}
           />
 
           <div className="fixed bottom-0 left-0 right-0 pb-2 flex justify-center">
@@ -39,7 +42,7 @@ export default function PaymentStatusPage({ status }: IPaymentStatusPageProps) {
                 leftVariant="left-outline"
                 rightVariant="right-orange"
                 onLeftClick={() => {
-                  navigate(isSuccess ? '/주문 내역' : '/shoppingcart');
+                  navigate(isSuccess ? '/주문목록' : '/shoppingcart');
                 }}
                 onRightClick={() => {
                   navigate('/home');
