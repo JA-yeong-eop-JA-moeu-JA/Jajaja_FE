@@ -149,6 +149,9 @@ export default function Search() {
     }
     qs.set('page', '0');
     setSearchParams(qs, { replace: true });
+    setTimeout(() => {
+      (document.activeElement as HTMLElement | null)?.blur();
+    }, 0);
   };
 
   const handleSortSelect = (value?: string) => {
@@ -161,11 +164,6 @@ export default function Search() {
     qs.set('sort', nextSort);
     qs.set('page', '0');
     setSearchParams(qs, { replace: true });
-    setTimeout(() => {
-      const el = document.activeElement as HTMLElement | null;
-      el?.blur();
-      window.scrollTo(0, 0);
-    }, 0);
     setIsAsc(true);
     setChange(true);
   };
