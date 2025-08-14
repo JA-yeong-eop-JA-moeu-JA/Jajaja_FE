@@ -1,12 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import type { IAddress } from '@/types/address/TAddress';
-import type { TPaymentData } from '@/types/cart/TCart';
+import type { TPaymentData, TPaymentItem } from '@/types/cart/TCart';
 import type { TCoupons } from '@/types/coupon/TGetCoupons';
-import type { TPaymentRequestData } from '@/types/toss/tossPayments';
 
-import { calculateFinalAmount, formatPhoneNumber, generateCustomerKey } from '@/utils/paymentUtils';
+import { formatPhoneNumberForToss, generateCustomerKey } from '@/utils/paymentUtils';
 
 import { useModalStore } from '@/stores/modalStore';
 import { useGetAddresses } from '@/hooks/address/useAddress';
@@ -18,9 +17,32 @@ import useInfinitePoints from '@/hooks/points/useInfinitePoints';
 
 import { Button } from '@/components/common/button';
 import PageHeader from '@/components/head_bottom/PageHeader';
+import OrderItem from '@/components/review/orderItem';
 
 import Down from '@/assets/icons/down.svg?react';
 import { orderData } from '@/mocks/orderData';
+
+const convertPaymentItemToCartItem = (item: TPaymentItem, orderType: string) => {
+  const price = orderType === 'individual' ? item.individualPrice || item.unitPrice : item.teamPrice || item.unitPrice;
+
+  return {
+    productId: item.productId,
+    productName: item.productName,
+    store: item.brand || item.store || '브랜드 정보 없음',
+    optionName: item.optionName,
+    quantity: item.quantity,
+    price: price,
+    totalPrice: price * item.quantity,
+    imageUrl: item.productThumbnail,
+    productThumbnail: item.productThumbnail,
+    brand: item.brand || '브랜드 정보 없음',
+    id: item.id,
+    optionId: item.optionId,
+    unitPrice: item.unitPrice,
+    originalPrice: item.unitPrice,
+    teamAvailable: true,
+  };
+};
 
 interface IAddressBlockProps {
   name: string;
@@ -41,6 +63,9 @@ export default function Payment() {
   const location = useLocation();
   const { openModal } = useModalStore();
 
+  const isWidgetRendered = useRef(false);
+  const paymentMethodsRef = useRef<HTMLDivElement>(null);
+
   const paymentData = location.state as TPaymentData;
   const currentOrderItems = paymentData?.selectedItems || orderData[0].items;
 
@@ -48,6 +73,14 @@ export default function Payment() {
   const [selectedDeliveryRequest, setSelectedDeliveryRequest] = useState<string>('');
   const [usedPoints, setUsedPoints] = useState<number>(0);
   const [isProcessingPayment, setIsProcessingPayment] = useState<boolean>(false);
+
+  const [backendCalculatedAmount, setBackendCalculatedAmount] = useState<{
+    totalAmount: number;
+    discountAmount: number;
+    pointDiscount: number;
+    shippingFee: number;
+    finalAmount: number;
+  } | null>(null);
 
   const { data: userInfo, isLoading: userLoading } = useUserInfo();
   const { data: addressesData, isLoading: addressesLoading } = useGetAddresses();
@@ -74,7 +107,7 @@ export default function Payment() {
     }
   }, [addresses, location.state, selectedAddress]);
 
-  const calculateAmount = () => {
+  const calculateEstimatedAmount = () => {
     if (!paymentData?.selectedItems) return 123122;
 
     return paymentData.selectedItems.reduce((acc, item) => {
@@ -83,10 +116,21 @@ export default function Payment() {
     }, 0);
   };
 
-  const originalAmount = calculateAmount();
-  const couponDiscount = calculateDiscount(originalAmount, appliedCoupon || undefined);
-  const shippingFee = 0;
-  const finalAmount = calculateFinalAmount(originalAmount, couponDiscount, usedPoints, shippingFee);
+  const displayAmount = backendCalculatedAmount
+    ? {
+        originalAmount: backendCalculatedAmount.totalAmount,
+        couponDiscount: backendCalculatedAmount.discountAmount,
+        pointDiscount: backendCalculatedAmount.pointDiscount,
+        shippingFee: backendCalculatedAmount.shippingFee,
+        finalAmount: backendCalculatedAmount.finalAmount,
+      }
+    : {
+        originalAmount: calculateEstimatedAmount(),
+        couponDiscount: calculateDiscount(calculateEstimatedAmount(), appliedCoupon || undefined),
+        pointDiscount: usedPoints,
+        shippingFee: 0,
+        finalAmount: Math.max(0, calculateEstimatedAmount() - calculateDiscount(calculateEstimatedAmount(), appliedCoupon || undefined) - usedPoints),
+      };
 
   const customerKey = generateCustomerKey(user?.id?.toString() || 'anonymous');
 
@@ -98,23 +142,26 @@ export default function Payment() {
     requestPayment,
   } = usePaymentWidget({
     customerKey,
-    amount: finalAmount,
+    amount: displayAmount.finalAmount,
   });
 
   useEffect(() => {
-    if (!widgetLoading && paymentWidget && finalAmount > 0 && user) {
+    if (!widgetLoading && paymentWidget && displayAmount.finalAmount > 0 && user && !isWidgetRendered.current) {
       const timer = setTimeout(() => {
-        const paymentMethodsElement = document.querySelector('#payment-methods');
-        const agreementElement = document.querySelector('#payment-agreement');
+        try {
+          const paymentMethodsElement = document.querySelector('#payment-methods');
+          const agreementElement = document.querySelector('#payment-agreement');
 
-        if (paymentMethodsElement) {
-          paymentMethodsElement.innerHTML = '';
-          renderPaymentMethods('#payment-methods');
-        }
+          if (paymentMethodsElement && paymentMethodsElement.children.length === 0) {
+            renderPaymentMethods('#payment-methods');
+            isWidgetRendered.current = true;
+          }
 
-        if (agreementElement) {
-          agreementElement.innerHTML = '';
-          renderAgreement('#payment-agreement');
+          if (agreementElement && agreementElement.children.length === 0) {
+            renderAgreement('#payment-agreement');
+          }
+        } catch (error) {
+          console.error('위젯 렌더링 중 오류:', error);
         }
       }, 100);
 
@@ -122,7 +169,23 @@ export default function Payment() {
         clearTimeout(timer);
       };
     }
-  }, [widgetLoading, paymentWidget, renderPaymentMethods, renderAgreement, finalAmount, user]);
+  }, [widgetLoading, paymentWidget, renderPaymentMethods, renderAgreement, displayAmount.finalAmount, user]);
+
+  useEffect(() => {
+    return () => {
+      isWidgetRendered.current = false;
+      const paymentMethodsElement = document.querySelector('#payment-methods');
+      const agreementElement = document.querySelector('#payment-agreement');
+
+      if (paymentMethodsElement) {
+        paymentMethodsElement.innerHTML = '';
+      }
+
+      if (agreementElement) {
+        agreementElement.innerHTML = '';
+      }
+    };
+  }, []);
 
   const handlePointsChange = (value: number) => {
     const numValue = Number(value) || 0;
@@ -164,13 +227,13 @@ export default function Payment() {
       return;
     }
 
-    if (!paymentWidget) {
-      alert('결제 시스템을 초기화하고 있습니다. 잠시 후 다시 시도해주세요.');
+    if (!selectedAddress.phone) {
+      alert('선택된 배송지에 휴대폰 번호가 없습니다. 배송지를 변경하거나 수정해주세요.');
       return;
     }
 
-    if (finalAmount <= 0) {
-      alert('결제 금액이 올바르지 않습니다.');
+    if (!paymentWidget) {
+      alert('결제 시스템을 초기화하고 있습니다. 잠시 후 다시 시도해주세요.');
       return;
     }
 
@@ -180,12 +243,20 @@ export default function Payment() {
 
     setIsProcessingPayment(true);
 
+    const formattedPhoneNumber = formatPhoneNumberForToss(selectedAddress.phone);
+
+    if (!/^\d{10,11}$/.test(formattedPhoneNumber)) {
+      alert('선택된 배송지의 휴대폰 번호 형식이 올바르지 않습니다.');
+      setIsProcessingPayment(false);
+      return;
+    }
+
     try {
       const prepareData = {
-        items: paymentData?.selectedItems.map((item) => item.id) || [1, 2, 3],
-        addressId: selectedAddress?.id || 1,
+        items: paymentData?.selectedItems.map((item) => item.id) || [],
+        addressId: selectedAddress.id,
         deliveryRequest: selectedDeliveryRequest || '현관문 앞에 놓아주세요.',
-        appliedCouponId: appliedCoupon?.couponId || 0,
+        ...(appliedCoupon?.couponId && { appliedCouponId: appliedCoupon.couponId }),
         point: usedPoints,
         orderType: paymentData?.orderType === 'individual' ? 'PERSONAL' : 'TEAM',
         ...(paymentData?.teamId && { teamId: paymentData.teamId }),
@@ -197,24 +268,48 @@ export default function Payment() {
         throw new Error(prepareResult.message || '결제 준비에 실패했습니다.');
       }
 
-      const { orderId, orderName, finalAmount: preparedAmount } = prepareResult.data;
+      const responseData = prepareResult.result;
+
+      if (!responseData) {
+        throw new Error('결제 준비 응답 데이터가 없습니다.');
+      }
+
+      const { orderId, orderName, finalAmount: backendFinalAmount } = responseData;
+
+      if (!orderId || !orderName || typeof backendFinalAmount === 'undefined') {
+        throw new Error('결제 준비 응답에 필수 데이터가 누락되었습니다.');
+      }
+
+      setBackendCalculatedAmount({
+        totalAmount: responseData.totalAmount,
+        discountAmount: responseData.discountAmount,
+        pointDiscount: responseData.pointDiscount,
+        shippingFee: responseData.shippingFee,
+        finalAmount: backendFinalAmount,
+      });
+
+      if (backendFinalAmount <= 0) {
+        alert('결제 금액이 0원입니다. 쿠폰 또는 포인트 사용을 조정해주세요.');
+        setIsProcessingPayment(false);
+        return;
+      }
 
       await paymentWidget.setAmount({
         currency: 'KRW',
-        value: preparedAmount,
+        value: backendFinalAmount,
       });
 
       const baseUrl = window.location.origin;
 
       await requestPayment({
-        orderId: orderId.toString(),
+        orderId: String(orderId),
         orderName,
-        customerEmail: user.email,
-        customerName: user.name,
-        customerMobilePhone: formatPhoneNumber(user.phone),
+        customerEmail: user.email || '',
+        customerName: selectedAddress.name,
+        customerMobilePhone: formattedPhoneNumber,
         successUrl: `${baseUrl}/payment/success`,
         failUrl: `${baseUrl}/payment/fail`,
-      } as TPaymentRequestData);
+      });
     } catch (error) {
       let errorMessage = '결제 처리 중 오류가 발생했습니다.';
 
@@ -397,11 +492,15 @@ export default function Payment() {
 
       <section className="p-4 border-b-4 border-black-1">
         <p className="text-subtitle-medium mb-4">주문 상품 {currentOrderItems.length}개</p>
-        {currentOrderItems.map((item, index) => (
-          <div key={`order-item-${item.productId || 'unknown'}-${index}`} className="mb-5">
-            {/* <OrderItem item={item} show={false} /> */}
-          </div>
-        ))}
+        {currentOrderItems.map((item, index) => {
+          const convertedItem = convertPaymentItemToCartItem(item, paymentData?.orderType || 'individual');
+
+          return (
+            <div key={`order-item-${item.productId || 'unknown'}-${item.optionId || index}`} className="mb-5">
+              <OrderItem item={convertedItem} show={false} showPrice={true} />
+            </div>
+          );
+        })}
       </section>
 
       <section className="p-4 mt-3 border-b-4 border-black-1">
@@ -439,10 +538,16 @@ export default function Payment() {
       </section>
 
       <section className="border-b-4 border-black-1">
-        <div id="payment-methods" className="min-h-[200px]" />
+        <div id="payment-methods" className="min-h-[200px]" ref={paymentMethodsRef} />
       </section>
 
-      <PaymentSummarySection total={originalAmount} discount={couponDiscount} pointsUsed={usedPoints} shippingFee={shippingFee} finalAmount={finalAmount} />
+      <PaymentSummarySection
+        total={displayAmount.originalAmount}
+        discount={displayAmount.couponDiscount}
+        pointsUsed={displayAmount.pointDiscount}
+        shippingFee={displayAmount.shippingFee}
+        finalAmount={displayAmount.finalAmount}
+      />
 
       <AgreementNoticeSection />
 
@@ -450,11 +555,11 @@ export default function Payment() {
         <Button
           kind="basic"
           variant="solid-orange"
-          disabled={finalAmount <= 0 || isProcessingPayment || paymentPrepareMutation.isPending || !selectedAddress}
+          disabled={displayAmount.finalAmount <= 0 || isProcessingPayment || paymentPrepareMutation.isPending || !selectedAddress}
           onClick={handlePayment}
           className="w-full"
         >
-          {isProcessingPayment || paymentPrepareMutation.isPending ? '결제 처리 중...' : `${finalAmount.toLocaleString()}원 결제하기`}
+          {isProcessingPayment || paymentPrepareMutation.isPending ? '결제 처리 중...' : `${displayAmount.finalAmount.toLocaleString()}원 결제하기`}
         </Button>
       </div>
     </>

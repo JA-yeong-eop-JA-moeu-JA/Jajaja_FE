@@ -161,7 +161,11 @@ export default function Search() {
     qs.set('sort', nextSort);
     qs.set('page', '0');
     setSearchParams(qs, { replace: true });
-
+    setTimeout(() => {
+      const el = document.activeElement as HTMLElement | null;
+      el?.blur();
+      window.scrollTo(0, 0);
+    }, 0);
     setIsAsc(true);
     setChange(true);
   };
@@ -190,7 +194,7 @@ export default function Search() {
     <>
       <header className="w-full pr-4 py-1 flex items-center">
         <Back onClick={handleNavigate} />
-        <SearchInput value={inputValue} autoFocus onChange={handleValue} onEnter={handleFilter} onClick={handleFilter} />
+        <SearchInput value={inputValue} autoFocus={!change} onChange={handleValue} onEnter={handleFilter} onClick={handleFilter} />
       </header>
 
       {!change && (

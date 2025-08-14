@@ -29,7 +29,7 @@ export interface IPaymentPrepareResponse {
   isSuccess: boolean;
   code: string;
   message: string;
-  data: {
+  result: {
     orderId: number;
     orderName: string;
     totalAmount: number;

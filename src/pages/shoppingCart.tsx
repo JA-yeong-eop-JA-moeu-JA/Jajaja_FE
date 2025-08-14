@@ -207,6 +207,7 @@ export default function ShoppingCart() {
       productName: item.productName,
       optionName: item.optionName,
       productThumbnail: item.imageUrl,
+      brand: item.brand,
     }));
 
     const paymentData: TPaymentData = {
