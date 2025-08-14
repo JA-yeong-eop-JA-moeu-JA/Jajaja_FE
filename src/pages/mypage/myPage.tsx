@@ -19,7 +19,7 @@ export default function MyPage() {
   const navigate = useNavigate();
   return (
     <div className="w-full h-screen">
-      <header className="px-2">
+      <header className="px-3">
         <Header />
       </header>
       <div className="w-full bg-white text-black">
