@@ -62,7 +62,7 @@ export default function Board() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className='px-2'>
+      <header className="px-2">
         <Header />
       </header>
       <PageButton items={['review', 'team']} selected={selectedTop1} onSelect={setSelectedTop1} />
