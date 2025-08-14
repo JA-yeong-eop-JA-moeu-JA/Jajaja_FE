@@ -18,7 +18,7 @@ export default function ProductHeader() {
 
       <div className="flex items-center gap-4 m-4 p-2">
         <SearchIcon className="w-5" onClick={() => navigate('/search')} />
-        <CartIcon />
+        <CartIcon onClick={() => navigate('/shoppingcart')} />
       </div>
     </header>
   );

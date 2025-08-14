@@ -3,15 +3,24 @@ import type { TCoupons } from '@/types/coupon/TGetCoupons';
 interface IProps {
   coupon: TCoupons;
   isSelected?: boolean;
-  onClick?: () => void;
+  onClick: () => void;
+  disabled?: boolean;
 }
 
-export default function CouponCard({ coupon, isSelected, onClick }: IProps) {
+export default function CouponCard({ coupon, isSelected, onClick, disabled = false }: IProps) {
+  const handleClick = () => {
+    if (!disabled) {
+      onClick();
+    }
+  };
+
   return (
     <div
-      onClick={onClick}
-      className={`w-full border rounded px-5 py-3 transition flex flex-col gap-2
-      ${isSelected ? 'border-green' : 'border-black-1'}`}
+      onClick={handleClick}
+      className={`w-full border rounded px-5 py-3 transition flex flex-col gap-2 cursor-pointer
+        ${isSelected ? 'border-green' : 'border-black-1 hover:border-black-3'}
+        ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+      `}
     >
       <p className="text-orange text-title-medium">{coupon.discountType === 'PERCENTAGE' ? `${coupon.discountValue}%` : `${coupon.discountValue} 원`}</p>
       <p className="text-black text-body-regular">

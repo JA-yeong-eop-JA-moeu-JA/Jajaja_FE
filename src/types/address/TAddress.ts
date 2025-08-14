@@ -38,13 +38,13 @@ export interface IDeleteAddressRequest {
 }
 
 export type TCommonResponse<T = void> = {
+  data: any;
   isSuccess: boolean;
   code: string;
   message: string;
   result?: T;
 };
 
-// 수정: 실제 API 응답에 맞게 타입 정의 변경
 export type TGetAddressesResponse = TCommonResponse<TAddress[]>;
 
 export type TAddAddressResponse = TCommonResponse<TAddress>;

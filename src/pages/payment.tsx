@@ -1,14 +1,20 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
+import type { IAddress } from '@/types/address/TAddress';
 import type { TPaymentData } from '@/types/cart/TCart';
+import type { TCoupons } from '@/types/coupon/TGetCoupons';
 import type { TPaymentRequestData } from '@/types/toss/tossPayments';
 
 import { calculateFinalAmount, formatPhoneNumber, generateCustomerKey } from '@/utils/paymentUtils';
 
 import { useModalStore } from '@/stores/modalStore';
+import { useGetAddresses } from '@/hooks/address/useAddress';
+import { useCartCoupon } from '@/hooks/coupon/useCoupons';
+import useUserInfo from '@/hooks/myPage/useUserInfo';
 import { usePaymentPrepare } from '@/hooks/payment/usePaymentPrepare';
 import { usePaymentWidget } from '@/hooks/payment/usePaymentWidget';
+import useInfinitePoints from '@/hooks/points/useInfinitePoints';
 
 import { Button } from '@/components/common/button';
 import PageHeader from '@/components/head_bottom/PageHeader';
@@ -38,12 +44,35 @@ export default function Payment() {
   const paymentData = location.state as TPaymentData;
   const currentOrderItems = paymentData?.selectedItems || orderData[0].items;
 
+  const [selectedAddress, setSelectedAddress] = useState<IAddress | null>(null);
   const [selectedDeliveryRequest, setSelectedDeliveryRequest] = useState<string>('');
   const [usedPoints, setUsedPoints] = useState<number>(0);
-  const [userPoints] = useState<number>(1382);
   const [isProcessingPayment, setIsProcessingPayment] = useState<boolean>(false);
 
+  const { data: userInfo, isLoading: userLoading } = useUserInfo();
+  const { data: addressesData, isLoading: addressesLoading } = useGetAddresses();
+  const { data: pointsData, isLoading: pointsLoading } = useInfinitePoints();
+  const { calculateDiscount, getAppliedCoupon } = useCartCoupon();
   const paymentPrepareMutation = usePaymentPrepare();
+
+  const user = userInfo?.result;
+  const userPoints = pointsData?.pages[0]?.result?.pointBalance ?? 0;
+  const addresses: IAddress[] = Array.isArray(addressesData) ? addressesData : [];
+  const appliedCoupon: TCoupons | null = getAppliedCoupon();
+
+  useEffect(() => {
+    if (location.state?.selectedAddress) {
+      setSelectedAddress(location.state.selectedAddress);
+    } else if (location.state?.updatedAddressId && addresses.length > 0) {
+      const updatedAddress = addresses.find((addr: IAddress) => addr.id === location.state.updatedAddressId);
+      if (updatedAddress) {
+        setSelectedAddress(updatedAddress);
+      }
+    } else if (addresses.length > 0 && !selectedAddress) {
+      const defaultAddr = addresses.find((addr: IAddress) => addr.isDefault) || addresses[0];
+      setSelectedAddress(defaultAddr);
+    }
+  }, [addresses, location.state, selectedAddress]);
 
   const calculateAmount = () => {
     if (!paymentData?.selectedItems) return 123122;
@@ -55,11 +84,11 @@ export default function Payment() {
   };
 
   const originalAmount = calculateAmount();
-  const discount = 1239;
+  const couponDiscount = calculateDiscount(originalAmount, appliedCoupon || undefined);
   const shippingFee = 0;
-  const finalAmount = calculateFinalAmount(originalAmount, discount, usedPoints, shippingFee);
+  const finalAmount = calculateFinalAmount(originalAmount, couponDiscount, usedPoints, shippingFee);
 
-  const customerKey = generateCustomerKey('user123');
+  const customerKey = generateCustomerKey(user?.id?.toString() || 'anonymous');
 
   const {
     paymentWidget,
@@ -73,31 +102,38 @@ export default function Payment() {
   });
 
   useEffect(() => {
-    if (!widgetLoading && paymentWidget) {
+    if (!widgetLoading && paymentWidget && finalAmount > 0 && user) {
       const timer = setTimeout(() => {
         const paymentMethodsElement = document.querySelector('#payment-methods');
         const agreementElement = document.querySelector('#payment-agreement');
 
         if (paymentMethodsElement) {
+          paymentMethodsElement.innerHTML = '';
           renderPaymentMethods('#payment-methods');
         }
 
         if (agreementElement) {
+          agreementElement.innerHTML = '';
           renderAgreement('#payment-agreement');
         }
       }, 100);
 
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+      };
     }
-  }, [widgetLoading, paymentWidget, renderPaymentMethods, renderAgreement]);
+  }, [widgetLoading, paymentWidget, renderPaymentMethods, renderAgreement, finalAmount, user]);
 
   const handlePointsChange = (value: number) => {
-    if (value > userPoints) {
+    const numValue = Number(value) || 0;
+
+    if (numValue > userPoints) {
       setUsedPoints(userPoints);
-    } else if (value < 0) {
+      alert(`사용 가능한 적립금은 최대 ${userPoints.toLocaleString()}원입니다.`);
+    } else if (numValue < 0) {
       setUsedPoints(0);
     } else {
-      setUsedPoints(value);
+      setUsedPoints(numValue);
     }
   };
 
@@ -107,7 +143,27 @@ export default function Payment() {
     });
   };
 
+  const handleAddressChangeClick = () => {
+    navigate('/address/change', {
+      state: {
+        returnPath: '/payment',
+        paymentData,
+        selectedAddress,
+      },
+    });
+  };
+
   const handlePayment = async () => {
+    if (!user) {
+      alert('사용자 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+
+    if (!selectedAddress) {
+      alert('배송지를 선택해주세요.');
+      return;
+    }
+
     if (!paymentWidget) {
       alert('결제 시스템을 초기화하고 있습니다. 잠시 후 다시 시도해주세요.');
       return;
@@ -127,12 +183,10 @@ export default function Payment() {
     try {
       const prepareData = {
         items: paymentData?.selectedItems.map((item) => item.id) || [1, 2, 3],
-        addressId: 1,
+        addressId: selectedAddress?.id || 1,
         deliveryRequest: selectedDeliveryRequest || '현관문 앞에 놓아주세요.',
-        appliedCouponId: 5,
-        point: usedPoints > 0 ? usedPoints : 1000,
-
-        // 팀 구매 관련 필드 추가
+        appliedCouponId: appliedCoupon?.couponId || 0,
+        point: usedPoints,
         orderType: paymentData?.orderType === 'individual' ? 'PERSONAL' : 'TEAM',
         ...(paymentData?.teamId && { teamId: paymentData.teamId }),
       };
@@ -155,23 +209,44 @@ export default function Payment() {
       await requestPayment({
         orderId: orderId.toString(),
         orderName,
-        customerEmail: 'customer@example.com',
-        customerName: '이한비',
-        customerMobilePhone: formatPhoneNumber('010-2812-1241'),
+        customerEmail: user.email,
+        customerName: user.name,
+        customerMobilePhone: formatPhoneNumber(user.phone),
         successUrl: `${baseUrl}/payment/success`,
         failUrl: `${baseUrl}/payment/fail`,
       } as TPaymentRequestData);
     } catch (error) {
       let errorMessage = '결제 처리 중 오류가 발생했습니다.';
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
 
       if (error && typeof error === 'object' && 'response' in error) {
         const axiosError = error as any;
-        if (axiosError.response?.data?.message) {
+
+        if (axiosError.response?.data?.code) {
+          switch (axiosError.response.data.code) {
+            case 'POINT4002':
+              errorMessage = '사용 가능한 적립금을 초과했습니다. 적립금을 확인해주세요.';
+              setUsedPoints(0);
+              break;
+            case 'COUPON4003':
+              errorMessage = '선택한 쿠폰을 사용할 수 없습니다.\n쿠폰이 만료되었거나 이미 사용되었을 수 있습니다.\n쿠폰을 다시 선택해주세요.';
+              break;
+            case 'COUPON_INVALID':
+              errorMessage = '선택한 쿠폰을 사용할 수 없습니다.';
+              break;
+            case 'ADDRESS_NOT_FOUND':
+              errorMessage = '배송지 정보를 확인할 수 없습니다.';
+              break;
+            case 'ITEM_NOT_AVAILABLE':
+              errorMessage = '주문하신 상품이 품절되었습니다.';
+              break;
+            default:
+              errorMessage = axiosError.response.data.message || errorMessage;
+          }
+        } else if (axiosError.response?.data?.message) {
           errorMessage = axiosError.response.data.message;
         }
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
       }
 
       alert(errorMessage + ' 다시 시도해주세요.');
@@ -185,7 +260,7 @@ export default function Payment() {
       <section className="p-4">
         <div className="flex justify-between items-center mb-2">
           <p className="text-subtitle-medium">배송지</p>
-          <button className="text-orange text-small-medium" onClick={() => navigate('/addresschange')}>
+          <button className="text-orange text-small-medium" onClick={handleAddressChangeClick}>
             변경하기
           </button>
         </div>
@@ -231,15 +306,45 @@ export default function Payment() {
     );
   }
 
+  function AgreementNoticeSection() {
+    return (
+      <section className="p-4 text-small-regular text-black-4 leading-5 bg-black-0">
+        <div className="space-y-2 pb-30">
+          <p className="underline">서비스 및 이용 약관 동의</p>
+          <p className="underline">개인정보 제공 동의</p>
+          <p className="underline">결제대행 서비스 이용약관 동의</p>
+          <p className="mt-3">자자자는 통신판매중개자로, 업체 배송 상품의 상품/상품정보/거래 등에 대한 책임은 자자자가 아닌 판매자에게 있습니다.</p>
+          <p className="mt-3">위 내용을 확인하였으며 결제에 동의합니다.</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (userLoading || addressesLoading || pointsLoading) {
+    return (
+      <>
+        <PageHeader title="주문 결제" />
+        <div className="flex justify-center items-center h-64">
+          <p>결제 정보를 불러오는 중...</p>
+        </div>
+      </>
+    );
+  }
+
+  if (!user) {
+    return (
+      <>
+        <PageHeader title="주문 결제" />
+        <div className="flex justify-center items-center h-64">
+          <p>사용자 정보를 불러올 수 없습니다.</p>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <PageHeader title="주문 결제" />
-
-      <section className="border-b-4 border-black-1">
-        <div className="w-full">
-          <AddressSection name="이한비" phone="010-2812-1241" address="서울특별시 강서구 낙섬서로12번길 3-12" />
-        </div>
-      </section>
 
       {paymentData?.orderType !== 'individual' && (
         <section className="p-4 border-b-4 border-black-1">
@@ -247,24 +352,53 @@ export default function Payment() {
           <div className="bg-orange-50 p-3 rounded">
             {paymentData.orderType === 'team_create' && (
               <>
-                <p className="text-small-medium">팀을 생성하고 있습니다</p>
-                <p className="text-small-regular">결제 완료 후 30분간 팀원 모집이 시작됩니다</p>
+                <p className="text-body-regular">팀을 생성하고 있습니다</p>
+                <p className="text-body-regular">
+                  결제 완료 직후부터 <span className="text-orange">30분간</span> 팀 매칭이 진행됩니다
+                </p>
               </>
             )}
             {paymentData.orderType === 'team_join' && (
               <>
-                <p className="text-small-medium">팀 구매에 참여합니다</p>
-                <p className="text-small-regular">팀 구매가로 할인받으세요!</p>
+                <p className="text-small-medium">팀 구매에 참여하고 있습니다.</p>
+                <p className="text-small-regular">결제 확인 후 팀 매칭이 완료됩니다.</p>
               </>
             )}
           </div>
         </section>
       )}
 
+      <section className="border-b-4 border-black-1">
+        <div className="w-full">
+          {selectedAddress ? (
+            <AddressSection
+              name={selectedAddress.name}
+              phone={selectedAddress.phone}
+              address={`${selectedAddress.address} ${selectedAddress.addressDetail}`.trim()}
+            />
+          ) : (
+            <div className="p-4">
+              <div className="flex justify-between items-center mb-2">
+                <p className="text-subtitle-medium">배송지</p>
+                <button className="text-orange text-small-medium" onClick={handleAddressChangeClick}>
+                  변경하기
+                </button>
+              </div>
+              <div className="text-center py-8">
+                <p className="text-body-regular text-black-4 mb-4">등록된 배송지가 없습니다</p>
+                <Button kind="basic" variant="solid-orange" onClick={() => navigate('/address/add')} className="px-6 py-2">
+                  배송지 추가
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
       <section className="p-4 border-b-4 border-black-1">
         <p className="text-subtitle-medium mb-4">주문 상품 {currentOrderItems.length}개</p>
         {currentOrderItems.map((item, index) => (
-          <div key={item.productId || index} className="mb-5">
+          <div key={`order-item-${item.productId || 'unknown'}-${index}`} className="mb-5">
             {/* <OrderItem item={item} show={false} /> */}
           </div>
         ))}
@@ -275,13 +409,13 @@ export default function Payment() {
         <div className="flex justify-between items-center border-1 border-black-3 rounded px-4 py-3 mb-3" onClick={() => navigate('/coupon')}>
           <p className="text-body-medium">쿠폰</p>
           <div className="flex items-center gap-3">
-            <p className="text-body-regular">사용 가능 2장</p>
+            <p className="text-body-regular">{appliedCoupon ? `${appliedCoupon.couponName} 적용` : '사용 가능한 쿠폰 선택'}</p>
             <Down className="w-4 h-2 mr-1" />
           </div>
         </div>
         <div className="flex gap-2 mb-2">
           <div className="flex-1 flex justify-between items-center border-1 border-black-3 rounded px-4 py-3">
-            <p className="text-body-medium">포인트</p>
+            <p className="text-body-medium">적립금</p>
             <div className="flex items-center gap-2">
               <input
                 type="number"
@@ -300,26 +434,23 @@ export default function Payment() {
           </button>
         </div>
         <div className="flex justify-end">
-          <p className="text-small-medium text-black-4">보유 포인트: {userPoints.toLocaleString()} 원</p>
+          <p className="text-small-medium text-black-4">보유 적립금: {userPoints.toLocaleString()} 원</p>
         </div>
       </section>
 
-      <section className="p-4 border-b-4 border-black-1">
-        <p className="text-subtitle-medium py-3 mb-4">결제 수단</p>
+      <section className="border-b-4 border-black-1">
         <div id="payment-methods" className="min-h-[200px]" />
       </section>
 
-      <PaymentSummarySection total={originalAmount} discount={discount} pointsUsed={usedPoints} shippingFee={shippingFee} finalAmount={finalAmount} />
+      <PaymentSummarySection total={originalAmount} discount={couponDiscount} pointsUsed={usedPoints} shippingFee={shippingFee} finalAmount={finalAmount} />
 
-      <section className="p-4 bg-black-0">
-        <div id="payment-agreement" className="min-h-[100px]" />
-      </section>
+      <AgreementNoticeSection />
 
       <div className="fixed bottom-14 left-0 right-0 w-full max-w-[600px] mx-auto">
         <Button
           kind="basic"
           variant="solid-orange"
-          disabled={finalAmount <= 0 || isProcessingPayment || paymentPrepareMutation.isPending}
+          disabled={finalAmount <= 0 || isProcessingPayment || paymentPrepareMutation.isPending || !selectedAddress}
           onClick={handlePayment}
           className="w-full"
         >
