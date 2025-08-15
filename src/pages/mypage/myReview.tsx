@@ -58,7 +58,7 @@ export default function MyReview() {
   }
 
   return (
-    <div className="w-full h-screen relative">
+    <div className="w-full min-h-screen relative">
       <PageHeader title="리뷰" />
       <PageButton items={['writeReview', 'myReview']} selected={selectedTop1} onSelect={setSelectedTop1} />
       {selectedTop1 === 'writeReview' ? (

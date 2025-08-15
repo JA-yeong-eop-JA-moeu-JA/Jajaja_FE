@@ -89,3 +89,26 @@ export type TPaymentData = {
   selectedItems: TPaymentItem[];
   teamId?: number;
 };
+
+export type TLocalCartItem = {
+  id: string; // 로컬에서 생성하는 임시 id
+  productId: number;
+  productName: string;
+  brand: string;
+  optionId: number;
+  optionName: string;
+  quantity: number;
+  productThumbnail: string;
+  unitPrice: number;
+  totalPrice: number;
+  teamAvailable: boolean;
+  teamPrice?: number;
+  individualPrice?: number;
+  discountRate?: number;
+  addedAt: string;
+};
+
+export type TLocalCartStorage = {
+  items: TLocalCartItem[];
+  lastUpdated: string;
+};

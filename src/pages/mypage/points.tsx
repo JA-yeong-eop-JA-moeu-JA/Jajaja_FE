@@ -31,7 +31,7 @@ export default function Points() {
   }
 
   return (
-    <div className="w-full h-screen">
+    <div className="w-full min-h-screen">
       <PageHeader title="적립금" />
       <div className="w-full flex flex-col items-center justify-center gap-6 px-4 mb-9">
         <div className="flex flex-col items-center justify-center gap-1 w-full border border-black-1 rounded py-4">

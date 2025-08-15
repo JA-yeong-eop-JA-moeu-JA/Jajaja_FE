@@ -1,4 +1,8 @@
+import type { TLocalCartStorage } from '@/types/cart/TCart';
+
 import { decrypt, encrypt } from '@/utils/crypto';
+
+import { LocalCartStorage } from './cartStorage';
 
 type TKeywordItem = {
   id: number;
@@ -9,6 +13,15 @@ class Storage {
     const accessToken = localStorage.getItem('accessToken');
     return accessToken ? decrypt(accessToken) : undefined;
   };
+  static getLocalCart = (): TLocalCartStorage => LocalCartStorage.get();
+  static setLocalCart = (cart: TLocalCartStorage) => LocalCartStorage.set(cart);
+  static clearLocalCart = () => LocalCartStorage.clear();
+
+  // 로그인 시 로컬 데이터 정리
+  static clearLocalDataOnLogin = () => {
+    sessionStorage.removeItem('keyword');
+  };
+
   static setAccessToken = (accessToken: string) => {
     localStorage.setItem('accessToken', encrypt(accessToken));
   };

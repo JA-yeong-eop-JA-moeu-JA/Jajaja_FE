@@ -3,7 +3,11 @@ import type { TCartItemRequest, TCartMutationResponse, TDeleteCartItemParams, TG
 import { axiosInstance } from '@/apis/axiosInstance';
 
 export const getCartItems = async (): Promise<TGetCartResponse> => {
-  const response = await axiosInstance.get<TGetCartResponse>('/api/carts/');
+  const response = await axiosInstance.get<TGetCartResponse>('/api/carts/', {
+    // 401 오류 시 로그인 모달을 띄우지 않음
+    optionalAuth: true,
+    validateStatus: (status: number) => (status >= 200 && status < 300) || status === 401,
+  });
   return response.data;
 };
 
