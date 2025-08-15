@@ -102,7 +102,6 @@ export default function OrderList({ orders, onExpire }: IOrderProps) {
   const navigate = useNavigate();
 
   const toReviewable = (order: IOrder, item: IOrderItem): TReviewableOrderItem => {
-
     const anyItem = item as any;
     return {
       ...anyItem, // 먼저 펼치고(뒤에서 필요한 값들로 덮어쓰기)
@@ -123,7 +122,6 @@ export default function OrderList({ orders, onExpire }: IOrderProps) {
         '',
     } as TReviewableOrderItem;
   };
-
 
   return (
     <div className="w-full flex flex-col">
