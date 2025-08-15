@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router-dom';
+
 import { AGREEMENT } from '@/constants/myPage/agreementList';
 
 import { useAgreementCheckboxStore } from '@/stores/agreementCheckboxStore';
@@ -12,6 +14,7 @@ import Right from '@/assets/right.svg?react';
 export default function Agreement() {
   const { mutate } = usePostAgree();
   const { checkedItems } = useAgreementCheckboxStore();
+  const navigate = useNavigate();
   const requiredKeys = ['terms-service', 'terms-privacy', 'terms-age', 'terms-financial'] as const;
   const isAllRequiredChecked = requiredKeys.every((key) => checkedItems[key]);
   const isSubmitEnabled = checkedItems['agree-all'] || isAllRequiredChecked;
@@ -19,6 +22,7 @@ export default function Agreement() {
   const handleSubmit = () => {
     if (!isSubmitEnabled) return;
     mutate(null);
+    navigate('/home');
   };
 
   return (

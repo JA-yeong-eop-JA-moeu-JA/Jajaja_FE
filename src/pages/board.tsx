@@ -5,7 +5,6 @@ import type { TReviewItem } from '@/types/board/reviewBoard';
 import { useReviews } from '@/hooks/board/useReviews';
 import { useTeamProducts } from '@/hooks/board/useTeamProducts';
 import useInfiniteObserver from '@/hooks/common/useInfiniteObserver';
-import useUserInfo from '@/hooks/members/useUserInfo';
 
 import HorizontalProductCard from '@/components/board/HorizontalProductCard';
 import { PageButton, type TabId } from '@/components/common/button';
@@ -43,10 +42,6 @@ export default function Board() {
 
   const { data: teamData, isLoading, isError, isFetched } = useTeamProducts(pageTeam);
 
-  const { data: userInfo } = useUserInfo();
-  useEffect(() => {
-    if (userInfo) console.log('[유저 정보 응답]', userInfo);
-  }, [userInfo]);
   useEffect(() => {
     if (isFetchedReviews) console.log('[리뷰 API 요청 완료]', reviews, reviewPage);
   }, [isFetchedReviews, reviews, reviewPage]);
