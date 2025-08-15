@@ -281,7 +281,7 @@ export default function OptionModal({ type, teamId, mode }: IOptionModalProps) {
 
         {isTeamJoin ? (
           <button
-            className="w-full h-12 flex justify-center items-center rounded-sm text-body-medium text-white bg-green-500"
+            className="w-full h-12 flex justify-center items-center rounded-sm text-body-medium text-white bg-orange"
             onClick={handleTeamJoin}
             disabled={isAddingMultiple}
           >

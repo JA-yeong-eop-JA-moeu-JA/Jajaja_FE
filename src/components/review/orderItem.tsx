@@ -39,6 +39,9 @@ export default function OrderItem({ item, show, showPrice = true }: IOrderDataPr
         quantity: orderItem.quantity,
         price: orderItem.price ?? 0,
         isReviewWritten: orderItem.isReviewWritten,
+        teamPrice: undefined,
+        individualPrice: undefined,
+        discountRate: undefined,
       };
     } else if (isCartItem(orderItem)) {
       return {
@@ -49,6 +52,9 @@ export default function OrderItem({ item, show, showPrice = true }: IOrderDataPr
         quantity: orderItem.quantity,
         price: showPrice ? orderItem.totalPrice || orderItem.price * orderItem.quantity : 0,
         isReviewWritten: false,
+        teamPrice: orderItem.teamPrice,
+        individualPrice: orderItem.individualPrice,
+        discountRate: orderItem.discountRate,
       };
     }
 
@@ -60,10 +66,44 @@ export default function OrderItem({ item, show, showPrice = true }: IOrderDataPr
       quantity: 0,
       price: 0,
       isReviewWritten: false,
+      teamPrice: undefined,
+      individualPrice: undefined,
+      discountRate: undefined,
     };
   };
 
   const displayData = getDisplayData(item);
+
+  // 가격 표시 컴포넌트
+  function PriceDisplay() {
+    if (!showPrice) return null;
+
+    // 장바구니 아이템인 경우 팀구매가와 개별구매가 모두 표시
+    if (isCartItem(item) && displayData.teamPrice && displayData.individualPrice) {
+      return (
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <span className="text-orange text-small-medium">{(displayData.teamPrice * displayData.quantity).toLocaleString('ko-KR')} 원</span>
+            <span className="text-xs text-orange bg-orange-1 px-1 py-0.5 rounded">팀구매가</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-black-3 text-small-regular line-through">
+              {(displayData.individualPrice * displayData.quantity).toLocaleString('ko-KR')} 원
+            </span>
+            <span className="text-xs text-black-3">개별구매가</span>
+          </div>
+          {displayData.discountRate && <span className="text-orange text-xs font-medium">{displayData.discountRate}% 할인</span>}
+        </div>
+      );
+    }
+
+    // 기존 가격 표시 (리뷰 아이템 등)
+    if (displayData.price > 0) {
+      return <p className="text-black text-small-medium">{displayData.price.toLocaleString('ko-KR')} 원</p>;
+    }
+
+    return null;
+  }
 
   return !displayData.isReviewWritten ? (
     <div className="w-full flex flex-col items-center justify-center">
@@ -76,7 +116,7 @@ export default function OrderItem({ item, show, showPrice = true }: IOrderDataPr
             {displayData.optionName}
             <span> / {displayData.quantity}개</span>
           </p>
-          {showPrice && displayData.price > 0 && <p className="text-black text-small-medium">{displayData.price.toLocaleString('ko-KR')} 원</p>}
+          <PriceDisplay />
         </div>
       </div>
       {show && (
