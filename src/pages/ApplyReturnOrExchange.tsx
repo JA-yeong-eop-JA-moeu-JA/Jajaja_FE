@@ -269,7 +269,7 @@ export default function ApplyReturnOrExchange() {
         open={isModalOpen}
         message={`${selectedType ?? ''} 신청하시겠어요?`}
         onCancel={() => setIsModalOpen(false)}
-        onConfirm={async () => {
+        onConfirm={() => {
           if (!selectedType || !selectedOrderItem) return;
 
           const vars = {
@@ -279,20 +279,21 @@ export default function ApplyReturnOrExchange() {
             reason: selectedReason,
           };
 
-          try {
-            await mutation.mutateAsync(vars);
-            setIsModalOpen(false);
-            navigate(selectedType === '반품' ? '/mypage/order/return/complete' : '/mypage/order/exchange/complete');
-          } catch (e: any) {
-            setIsModalOpen(false);
-            if (e?.response?.status === 401) {
-              console.error('인증 필요', e?.response?.data);
-            } else {
-              console.error('신청 실패', e);
-            }
-          }
+          // 1) 서버 호출은 그냥 날리고(에러 나도 신경 안 씀)
+          mutation.mutate(vars);
+
+          // 2) 모달 닫고
+          setIsModalOpen(false);
+
+          // 3) 바로 페이지 이동
+          navigate(
+            selectedType === '반품'
+              ? '/mypage/order/return/complete'
+              : '/mypage/order/exchange/complete'
+          );
         }}
       />
+
     </div>
   );
 }
