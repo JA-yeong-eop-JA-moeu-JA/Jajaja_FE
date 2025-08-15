@@ -17,8 +17,9 @@ export const useCartQuery = () => {
 
   return useCoreQuery(QUERY_KEYS.GET_CART_ITEMS, getCartItems, {
     enabled: isLoggedIn, // 로그인 상태에서만 활성화
-    staleTime: 1000 * 60 * 5, // 5분
-    retry: 1,
+    staleTime: 1000 * 60 * 5,
+    retry: false,
+    throwOnError: false,
   });
 };
 
@@ -76,18 +77,22 @@ export const useDeleteMultipleCartMutation = () => {
   });
 };
 
+// 기존 useCart 훅을 완전히 대체하는 새로운 useCart
 export const useCart = () => {
   const { isLoggedIn } = useAuth();
 
+  // 서버 관련 훅들
   const cartQuery = useCartQuery();
   const addMutation = useAddCartMutation();
   const addWithMergeMutation = useAddCartWithMergeMutation();
   const deleteMutation = useDeleteCartMutation();
   const deleteMultipleMutation = useDeleteMultipleCartMutation();
 
+  // 로컬 장바구니 상태
   const [localCart, setLocalCart] = useState(() => LocalCartStorage.get());
   const [isSyncing, setIsSyncing] = useState(false);
 
+  // 동기화 함수를 useCallback으로 선언 (hoisting 문제 해결)
   const syncLocalCartToServer = useCallback(async () => {
     if (isSyncing) return;
 
@@ -107,6 +112,7 @@ export const useCart = () => {
     }
   }, [isSyncing, addWithMergeMutation]);
 
+  // 로컬스토리지 변경 감지
   useEffect(() => {
     const handleStorageChange = () => {
       setLocalCart(LocalCartStorage.get());
@@ -125,18 +131,20 @@ export const useCart = () => {
     };
   }, []);
 
+  // 로그인 시 로컬 장바구니를 서버로 동기화
   useEffect(() => {
     if (isLoggedIn && localCart.items.length > 0 && !isSyncing) {
       syncLocalCartToServer();
     }
   }, [isLoggedIn, localCart.items.length, isSyncing, syncLocalCartToServer]);
 
+  // 기존 함수들 - 로그인 상태에 따라 다르게 처리
   const addItem = useCallback(
     async (item: TCartItemRequest): Promise<any> => {
       if (isLoggedIn) {
         return addWithMergeMutation.mutateAsync([item]);
       } else {
-        // 비회원의 경우 로컬에 저장
+        // 비로그인 시에는 기본값으로 로컬에 저장
         LocalCartStorage.addItem({
           ...item,
           productName: '',
@@ -173,6 +181,7 @@ export const useCart = () => {
     async (params: TDeleteCartItemParams | { id: string }): Promise<any> => {
       if (isLoggedIn) {
         if ('id' in params) {
+          // 서버에서는 productId, optionId로 삭제해야 함
           const serverItem = cartQuery.data?.result.products.find((p) => p.id.toString() === params.id);
           if (serverItem) {
             return deleteMutation.mutateAsync({
@@ -200,6 +209,7 @@ export const useCart = () => {
     async (items: TDeleteCartItemParams[] | string[]): Promise<any> => {
       if (isLoggedIn) {
         if (typeof items[0] === 'string') {
+          // id 배열인 경우 서버 형식으로 변환
           const serverItems: TDeleteCartItemParams[] = [];
           (items as string[]).forEach((id) => {
             const serverItem = cartQuery.data?.result.products.find((p) => p.id.toString() === id);
@@ -256,6 +266,7 @@ export const useCart = () => {
     [addMultipleItems],
   );
 
+  // 현재 장바구니 데이터 반환
   const cartData = isLoggedIn
     ? cartQuery.data?.result
     : {
@@ -297,6 +308,8 @@ export const useCart = () => {
           setLocalCart(LocalCartStorage.get());
           window.dispatchEvent(new CustomEvent('localCartUpdate'));
         },
+
+    // 추가 정보
     isLoggedIn,
   };
 };

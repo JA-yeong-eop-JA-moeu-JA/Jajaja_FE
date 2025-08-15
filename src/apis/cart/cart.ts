@@ -4,7 +4,9 @@ import { axiosInstance } from '@/apis/axiosInstance';
 
 export const getCartItems = async (): Promise<TGetCartResponse> => {
   const response = await axiosInstance.get<TGetCartResponse>('/api/carts/', {
-    // 권한이 필요한 api이므로 옵션 설정하지 X, 기본값 사용
+    // 401 오류 시 로그인 모달을 띄우지 않음
+    optionalAuth: true,
+    validateStatus: (status: number) => (status >= 200 && status < 300) || status === 401,
   });
   return response.data;
 };
