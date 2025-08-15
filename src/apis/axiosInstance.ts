@@ -4,15 +4,6 @@ import { openLoginModal } from '@/stores/modalStore';
 
 import { reissue } from './auth/auth';
 
-const getCookieValue = (name: string): string | null => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) {
-    return parts.pop()?.split(';').shift() || null;
-  }
-  return null;
-};
-
 export const axiosInstance = axios.create({
   // 프록시 사용 시 baseURL을 빈 문자열로 설정 (또는 조건부 설정)
   baseURL: import.meta.env.VITE_API_BASE_URL,
