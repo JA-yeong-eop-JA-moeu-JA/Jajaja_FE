@@ -8,12 +8,12 @@ import { PageButton, type TabId } from '@/components/common/button';
 import PageHeader from '@/components/head_bottom/PageHeader';
 import Loading from '@/components/loading';
 import OrderReviewList from '@/components/review/orderReviewList';
+import OrderReviewListSkeleton from '@/components/review/orderReviewListSkeleton';
 import ReviewItemSkeleton from '@/components/review/reviewItemSkeleton';
 
 import ReviewItem from '../../components/review/reviewItem';
 
 import Receipt from '@/assets/myPage/review/receipt.svg?react';
-import OrderReviewListSkeleton from '@/components/review/orderReviewListSkeleton';
 
 export default function MyReview() {
   const {
