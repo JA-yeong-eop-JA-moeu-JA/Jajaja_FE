@@ -1,37 +1,49 @@
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
-import type { TPaymentData } from '@/types/cart/TCart';
+import type { TPaymentData, TPaymentItem } from '@/types/cart/TCart';
 
 import { joinTeamFromCart } from '@/apis/team/teamCart';
 
 import { useCoreMutation } from '@/hooks/customQuery';
 
+interface ITeamJoinFromCartParams {
+  productId: number;
+  selectedItems: TPaymentItem[];
+}
+
 export const useTeamJoinFromCart = () => {
   const navigate = useNavigate();
 
-  return useCoreMutation(joinTeamFromCart, {
-    onSuccess: () => {
-      toast.success('팀 매칭이 완료되었습니다! 곧 배송이 시작됩니다.'); // 모달로 수정
+  return useCoreMutation(
+    // ✅ 전체 객체를 받되, API 호출 시에는 productId만 사용
+    (params: ITeamJoinFromCartParams) => joinTeamFromCart(params.productId),
+    {
+      onSuccess: (_data, variables) => {
+        // ✅ variables 타입 명시적 지정
+        const { selectedItems } = variables as ITeamJoinFromCartParams;
 
-      // 팀 매칭 완료 시 장바구니에서 자동 제거됨
-      const paymentData: TPaymentData = {
-        orderType: 'team_join',
-        selectedItems: [],
-      };
+        toast.success('팀에 참여했습니다! 결제를 진행해주세요.');
 
-      navigate('/payment', { state: paymentData });
+        const paymentData: TPaymentData = {
+          orderType: 'team_join',
+          selectedItems: selectedItems, // ✅ 실제 선택된 아이템들 전달
+          // teamId는 가장 먼저 생성된 팀으로 자동 매칭
+        };
+
+        navigate('/payment', { state: paymentData });
+      },
+      onError: (error) => {
+        console.error('Team join failed:', error);
+
+        if (error?.response?.data?.message) {
+          toast.error(error.response.data.message);
+        } else if (error?.response?.data?.error) {
+          toast.error(error.response.data.error);
+        } else {
+          toast.error('팀 참여에 실패했습니다');
+        }
+      },
     },
-    onError: (error) => {
-      console.error('Team join failed:', error);
-
-      if (error?.response?.data?.message) {
-        toast.error(error.response.data.message);
-      } else if (error?.response?.data?.error) {
-        toast.error(error.response.data.error);
-      } else {
-        toast.error('팀 참여에 실패했습니다');
-      }
-    },
-  });
+  );
 };

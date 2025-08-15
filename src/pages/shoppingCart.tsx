@@ -34,6 +34,9 @@ export interface ICartItem {
   unitPrice: number;
   totalPrice: number;
   teamAvailable: boolean;
+  teamPrice?: number;
+  individualPrice?: number;
+  discountRate?: number;
 }
 
 const convertToCartItem = (apiItem: TCartProduct): ICartItem => ({
@@ -42,8 +45,8 @@ const convertToCartItem = (apiItem: TCartProduct): ICartItem => ({
   productName: apiItem.productName,
   optionName: apiItem.optionName,
   quantity: apiItem.quantity,
-  price: apiItem.unitPrice,
-  originalPrice: apiItem.unitPrice,
+  price: apiItem.individualPrice || apiItem.unitPrice, // 개별구매가
+  originalPrice: apiItem.individualPrice || apiItem.unitPrice,
   imageUrl: apiItem.productThumbnail,
   store: apiItem.brand,
   brand: apiItem.brand,
@@ -51,7 +54,10 @@ const convertToCartItem = (apiItem: TCartProduct): ICartItem => ({
   unitPrice: apiItem.unitPrice,
   totalPrice: apiItem.totalPrice,
   teamAvailable: apiItem.teamAvailable,
-  productThumbnail: '',
+  productThumbnail: apiItem.productThumbnail,
+  teamPrice: apiItem.teamPrice,
+  individualPrice: apiItem.individualPrice,
+  discountRate: apiItem.discountRate,
 });
 
 interface IGroupedCartItem {
@@ -179,7 +185,24 @@ export default function ShoppingCart() {
         return;
       }
 
-      joinTeamFromCartMutation(productId);
+      // 선택된 옵션들을 TPaymentItem 형식으로 변환
+      const paymentItems: TPaymentItem[] = selectedOptions.map((item) => ({
+        id: item.id,
+        productId: item.productId,
+        optionId: item.optionId,
+        quantity: item.quantity,
+        unitPrice: item.teamPrice || item.unitPrice, // 팀 구매가 사용
+        teamPrice: item.teamPrice || item.unitPrice,
+        individualPrice: item.individualPrice || item.price,
+        productName: item.productName,
+        optionName: item.optionName,
+        productThumbnail: item.imageUrl,
+        brand: item.brand,
+        store: item.brand,
+      }));
+
+      // joinTeamFromCartMutation에 선택된 아이템 정보도 함께 전달
+      joinTeamFromCartMutation({ productId, selectedItems: paymentItems });
     },
     [groupedCartItems, checkedItems, joinTeamFromCartMutation],
   );
@@ -289,7 +312,7 @@ export default function ShoppingCart() {
                         <div className="flex items-start gap-3">
                           <BaseCheckbox checked={isChecked} onClick={() => handleToggleItem(product.productId, product.optionId)} />
                           <div className="flex-1">
-                            <OrderItem item={product} show={false} showPrice={false} />
+                            <OrderItem item={product} show={false} showPrice={true} />
                           </div>
                         </div>
                       </div>
