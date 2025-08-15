@@ -41,8 +41,6 @@ export const usePaymentStatus = (): IUsePaymentStatusReturn => {
       const orderId = searchParams.get('orderId');
       const amount = searchParams.get('amount');
 
-      const expectedFinalAmount = sessionStorage.getItem('finalAmount');
-
       if (!paymentKey || !orderId || !amount) {
         setError('결제 정보가 올바르지 않습니다.');
         setIsConfirming(false);
@@ -53,12 +51,11 @@ export const usePaymentStatus = (): IUsePaymentStatusReturn => {
         const response = await paymentConfirmMutation.mutateAsync({
           orderId: orderId,
           paymentKey,
-          finalAmount: Number(expectedFinalAmount),
+          paidAmount: Number(amount),
         });
 
         if (response.isSuccess) {
           setConfirmResult(response);
-          sessionStorage.removeItem('finalAmount');
         } else {
           setError(response.message || '결제 승인에 실패했습니다.');
         }

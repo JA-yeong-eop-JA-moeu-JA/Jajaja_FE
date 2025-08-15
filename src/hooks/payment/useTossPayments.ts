@@ -104,4 +104,4 @@ export const useTossPayments = (): IUseTossPaymentsReturn => {
   return { tossPayments, isLoading, error };
 };
 
-export type { IAgreementWidget, IPaymentInstance, IPaymentMethodWidget, IPaymentWidgetInstance, ITossPaymentsInstance };
+export type { IAgreementWidget, IPaymentMethodWidget, IPaymentWidgetInstance, ITossPaymentsInstance };
