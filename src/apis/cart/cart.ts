@@ -3,7 +3,9 @@ import type { TCartItemRequest, TCartMutationResponse, TDeleteCartItemParams, TG
 import { axiosInstance } from '@/apis/axiosInstance';
 
 export const getCartItems = async (): Promise<TGetCartResponse> => {
-  const response = await axiosInstance.get<TGetCartResponse>('/api/carts/');
+  const response = await axiosInstance.get<TGetCartResponse>('/api/carts/', {
+    // 권한이 필요한 api이므로 옵션 설정하지 X, 기본값 사용
+  });
   return response.data;
 };
 
