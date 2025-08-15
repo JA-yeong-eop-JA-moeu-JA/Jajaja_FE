@@ -102,25 +102,25 @@ export default function OrderList({ orders, onExpire }: IOrderProps) {
   const navigate = useNavigate();
 
   const toReviewable = (order: IOrder, item: IOrderItem): TReviewableOrderItem => {
-   const anyItem = item as any;
-   return {
-     ...(anyItem), // 먼저 펼치고(뒤에서 필요한 값들로 덮어쓰기)
-     orderId: order.id,
-     orderDate: order.createdAt ?? '',
-     orderProductId: anyItem.orderProductId ?? item.productId,
-     productId: item.productId,
-     productName: item.name,
-     store: item.company,
-     optionName: item.option,
-     quantity: item.quantity,
-     price: item.price,
-     isReviewWritten: item.reviewed,
+    const anyItem = item as any;
+    return {
+      ...anyItem, // 먼저 펼치고(뒤에서 필요한 값들로 덮어쓰기)
+      orderId: order.id,
+      orderDate: order.createdAt ?? '',
+      orderProductId: anyItem.orderProductId ?? item.productId,
+      productId: item.productId,
+      productName: item.name,
+      store: item.company,
+      optionName: item.option,
+      quantity: item.quantity,
+      price: item.price,
+      isReviewWritten: item.reviewed,
       imageUrl:
-       anyItem.imageUrl ??
-       anyItem.image ??                // IOrderItem.image
-       anyItem.product?.image ??       // 혹시 product.image로만 오는 경우
-       '',
-   } as TReviewableOrderItem;
+        anyItem.imageUrl ??
+        anyItem.image ?? // IOrderItem.image
+        anyItem.product?.image ?? // 혹시 product.image로만 오는 경우
+        '',
+    } as TReviewableOrderItem;
   };
 
   return (
