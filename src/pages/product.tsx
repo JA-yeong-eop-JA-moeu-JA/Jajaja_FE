@@ -177,12 +177,11 @@ export default function Product() {
           </div>
         </>
       )}
-
       <footer className="px-4 py-2 fixed bottom-0 max-w-[600px] bg-white w-full h-16 flex justify-center gap-2 items-center text-body-medium text-white">
-        <button className="rounded-sm h-12 bg-black py-2.5 w-full" onClick={() => openModal('bottom-drawer-team')}>
+        <button className="rounded-sm h-12 bg-black py-2.5 w-full" onClick={() => openModal('bottom-drawer-team', { mode: 'individual' })}>
           1인 구매하기
         </button>
-        <button className="rounded-sm h-12 bg-orange py-2.5 w-full" onClick={() => openModal('bottom-drawer')}>
+        <button className="rounded-sm h-12 bg-orange py-2.5 w-full" onClick={() => openModal('bottom-drawer', { mode: 'team_create' })}>
           팀 생성하기
         </button>
       </footer>

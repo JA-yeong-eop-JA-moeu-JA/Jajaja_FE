@@ -64,7 +64,14 @@ export const useModalStore = create<IModalStore>((set) => ({
               item: options.item,
               onUpdate: options.onUpdate,
             })
-        : () => createElement(ModalComponent, options);
+        : type === 'bottom-drawer' || type === 'bottom-drawer-team'
+          ? () =>
+              createElement(ModalComponent, {
+                teamId: options.teamId,
+                mode: options.mode,
+                ...options,
+              })
+          : () => createElement(ModalComponent, options);
 
     set({
       isModalOpen: true,

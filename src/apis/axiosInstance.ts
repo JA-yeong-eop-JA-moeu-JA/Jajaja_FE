@@ -26,24 +26,6 @@ axiosInstance.interceptors.request.use((config) => {
   return config;
 });
 
-// 결제 준비용 - Authorization 헤더 자동 설정
-axiosInstance.interceptors.request.use(
-  (config) => {
-    // 쿠키에서 accessToken 가져오기 (삭제X)
-    const accessToken = getCookieValue('accessToken');
-
-    if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
-    } else {
-      console.warn('액세스 토큰이 쿠키에 없습니다.');
-    }
-
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  },
-);
 axiosInstance.interceptors.response.use(
   (response) => {
     return response;

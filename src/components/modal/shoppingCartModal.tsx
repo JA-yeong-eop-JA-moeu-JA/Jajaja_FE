@@ -136,19 +136,18 @@ export default function ShoppingCart() {
 
   const handleOptionChange = useCallback(
     (item: ICartItem) => {
-      openModal('cart-option', {
+      openModal('bottom-drawer', {
         item,
         onUpdate: () => {
           refetch();
         },
+        mode: 'cart',
       });
     },
     [openModal, refetch],
   );
 
-  const handleToggleAll = useCallback(() => {
-    toggleAll(!isAllChecked());
-  }, [toggleAll, isAllChecked]);
+  const handleToggleAll = useCallback(() => {}, [toggleAll, isAllChecked]);
 
   const handleToggleItem = useCallback(
     (productId: number, optionId: number) => {
@@ -179,7 +178,6 @@ export default function ShoppingCart() {
         return;
       }
 
-      // 팀 참여 API 호출 (성공 시 자동으로 결제 페이지 이동)
       joinTeamFromCartMutation(productId);
     },
     [groupedCartItems, checkedItems, joinTeamFromCartMutation],
