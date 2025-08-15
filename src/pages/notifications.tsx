@@ -67,7 +67,7 @@ export default function Notifications() {
   }
 
   return (
-    <div className="w-full h-screen bg-white">
+    <div className="w-full min-h-screen bg-white">
       <PageHeader title="알림" />
       <div className="w-full flex items-center justify-between px-4 text-small-medium">
         <button className="py-3.5 text-orange disabled:text-black-4" disabled={!hasUnread}>

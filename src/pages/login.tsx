@@ -15,7 +15,7 @@ export default function Login() {
   };
 
   return (
-    <div className="w-full h-screen flex flex-col justify-between">
+    <div className="w-full min-h-screen flex flex-col justify-between">
       <div>
         <header className="px-2">
           <Header showLogo={false} />
