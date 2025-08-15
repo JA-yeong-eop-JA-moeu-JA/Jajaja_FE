@@ -286,14 +286,9 @@ export default function ApplyReturnOrExchange() {
           setIsModalOpen(false);
 
           // 3) 바로 페이지 이동
-          navigate(
-            selectedType === '반품'
-              ? '/mypage/order/return/complete'
-              : '/mypage/order/exchange/complete'
-          );
+          navigate(selectedType === '반품' ? '/mypage/order/return/complete' : '/mypage/order/exchange/complete');
         }}
       />
-
     </div>
   );
 }
