@@ -1,15 +1,14 @@
 import { useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+//import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { TOptionBase } from '@/types/optionApply';
 import type { IOrderItem } from '@/types/order/orderItem';
 import type { TOption } from '@/types/product/option';
 import type { TReviewableOrderItem } from '@/types/review/myReview';
-import { QUERY_KEYS } from '@/constants/querykeys/queryKeys';
 
-import { axiosInstance } from '@/apis/axiosInstance';
-
+//import { QUERY_KEYS } from '@/constants/querykeys/queryKeys';
+//import { axiosInstance } from '@/apis/axiosInstance';
 import useOrderDetailPersonal from '@/hooks/order/useOrderDetailPersonal';
 
 import { Button, SelectButton } from '@/components/common/button';
@@ -57,17 +56,17 @@ const toOrderStatusLabel = (items: Array<{ status?: string }>): TOrderStatus => 
 };
 */
 
-type TMutationVars = {
-  orderId: number;
-  orderProductId: number;
-  type: TApplyType;
-  reason: string;
-};
+// type TMutationVars = {
+//   orderId: number;
+//   orderProductId: number;
+//   type: TApplyType;
+//   reason: string;
+// };
 
-async function submitAfterSales({ orderId, orderProductId, type, reason }: TMutationVars) {
-  const path = type === '반품' ? 'returns' : 'exchanges';
-  return axiosInstance.post(`/api/orders/${orderId}/${path}`, { orderProductId, reason });
-}
+// async function submitAfterSales({ orderId, orderProductId, type, reason }: TMutationVars) {
+//   const path = type === '반품' ? 'returns' : 'exchanges';
+//   return axiosInstance.post(`/api/orders/${orderId}/${path}`, { orderProductId, reason });
+// }
 
 export default function ApplyReturnOrExchange() {
   const params = useParams<{ orderId?: string; orderProductId?: string }>();
@@ -77,7 +76,7 @@ export default function ApplyReturnOrExchange() {
   const id = Number(orderIdStr);
 
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  //const queryClient = useQueryClient();
 
   const [selectedType, setSelectedType] = useState<TApplyType | null>(null);
   const [selectedReason, setSelectedReason] = useState('');
@@ -150,39 +149,39 @@ export default function ApplyReturnOrExchange() {
     isReviewWritten: it.reviewed,
   });
 
-  const mutation = useMutation({
-    mutationFn: submitAfterSales,
-    onMutate: async (vars: TMutationVars) => {
-      const key = [...QUERY_KEYS.GET_ORDER_DETAIL_PERSONAL, id] as const;
-      await queryClient.cancelQueries({ queryKey: key });
+  // const mutation = useMutation({
+  //   mutationFn: submitAfterSales,
+  //   onMutate: async (vars: TMutationVars) => {
+  //     const key = [...QUERY_KEYS.GET_ORDER_DETAIL_PERSONAL, id] as const;
+  //     await queryClient.cancelQueries({ queryKey: key });
 
-      const prev = queryClient.getQueryData(key);
+  //     const prev = queryClient.getQueryData(key);
 
-      queryClient.setQueryData(key, (current: any) => {
-        const base = current ?? data;
-        if (!base || !Array.isArray(base.items)) return base ?? current;
-        const nextItems = base.items.map((it: any) =>
-          it.orderProductId === vars.orderProductId
-            ? {
-                ...it,
-                status: vars.type === '반품' ? 'RETURN_REQUESTED' : 'EXCHANGE_REQUESTED',
-                teamStatus: '',
-              }
-            : it,
-        );
-        return { ...base, items: nextItems };
-      });
+  //     queryClient.setQueryData(key, (current: any) => {
+  //       const base = current ?? data;
+  //       if (!base || !Array.isArray(base.items)) return base ?? current;
+  //       const nextItems = base.items.map((it: any) =>
+  //         it.orderProductId === vars.orderProductId
+  //           ? {
+  //               ...it,
+  //               status: vars.type === '반품' ? 'RETURN_REQUESTED' : 'EXCHANGE_REQUESTED',
+  //               teamStatus: '',
+  //             }
+  //           : it,
+  //       );
+  //       return { ...base, items: nextItems };
+  //     });
 
-      return { prev, key };
-    },
-    onError: (_err, _vars, ctx) => {
-      if (ctx?.prev && ctx?.key) queryClient.setQueryData(ctx.key, ctx.prev);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.GET_ORDER_DETAIL_PERSONAL, id] });
-      queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.GET_MY_ORDERS] });
-    },
-  });
+  //     return { prev, key };
+  //   },
+  //   onError: (_err, _vars, ctx) => {
+  //     if (ctx?.prev && ctx?.key) queryClient.setQueryData(ctx.key, ctx.prev);
+  //   },
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.GET_ORDER_DETAIL_PERSONAL, id] });
+  //     queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.GET_MY_ORDERS] });
+  //   },
+  // });
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -271,21 +270,7 @@ export default function ApplyReturnOrExchange() {
         onCancel={() => setIsModalOpen(false)}
         onConfirm={() => {
           if (!selectedType || !selectedOrderItem) return;
-
-          const vars = {
-            orderId: id,
-            orderProductId: (selectedOrderItem as any).orderProductId,
-            type: selectedType,
-            reason: selectedReason,
-          };
-
-          // 1) 서버 호출은 그냥 날리고(에러 나도 신경 안 씀)
-          mutation.mutate(vars);
-
-          // 2) 모달 닫고
           setIsModalOpen(false);
-
-          // 3) 바로 페이지 이동
           navigate(selectedType === '반품' ? '/mypage/order/return/complete' : '/mypage/order/exchange/complete');
         }}
       />
