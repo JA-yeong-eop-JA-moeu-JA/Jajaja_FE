@@ -1,339 +1,240 @@
-import { useCallback, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
-import type { TCartProduct, TPaymentData, TPaymentItem } from '@/types/cart/TCart';
+import { QUERY_KEYS } from '@/constants/querykeys/queryKeys';
+
+import { getOptionList } from '@/apis/product/option';
 
 import { useModalStore } from '@/stores/modalStore';
-import { useProductCheckboxStore } from '@/stores/productCheckboxStore';
 import { useCart } from '@/hooks/cart/useCartQuery';
-import { useTeamJoinFromCart } from '@/hooks/team/useTeamJoinCart';
+import { useCoreQuery } from '@/hooks/customQuery';
 
-import { Button } from '@/components/common/button';
-import BaseCheckbox from '@/components/common/checkbox';
-import BottomBar from '@/components/head_bottom/BottomBar';
-import PageHeaderBar from '@/components/head_bottom/PageHeader';
-import Loading from '@/components/loading';
-import OrderItem from '@/components/review/orderItem';
+import { SelectButton } from '@/components/common/button/selectButton';
 
-import EmptyCartImage from '@/assets/shoppingCart.svg';
+import DropDown from './dropDown';
 
-export interface ICartItem {
-  productThumbnail: string;
-  productId: number;
-  productName: string;
-  optionName: string;
-  quantity: number;
-  price: number;
-  originalPrice: number;
-  imageUrl: string;
-  store: string;
-  id: number;
-  brand: string;
+import Close from '@/assets/icons/close.svg?react';
+import Minus from '@/assets/icons/minus.svg?react';
+import Plus from '@/assets/icons/plus.svg?react';
+import type { ICartItem } from '@/pages/shoppingCart';
+
+interface ICartModalProps {
+  item: ICartItem;
+  onUpdate?: (item: ICartItem) => void;
+}
+
+interface ISelectedOption {
   optionId: number;
+  optionName: string;
   unitPrice: number;
-  totalPrice: number;
-  teamAvailable: boolean;
+  quantity: number;
 }
 
-const convertToCartItem = (apiItem: TCartProduct): ICartItem => ({
-  id: apiItem.id,
-  productId: apiItem.productId,
-  productName: apiItem.productName,
-  optionName: apiItem.optionName,
-  quantity: apiItem.quantity,
-  price: apiItem.unitPrice,
-  originalPrice: apiItem.unitPrice,
-  imageUrl: apiItem.productThumbnail,
-  store: apiItem.brand,
-  brand: apiItem.brand,
-  optionId: apiItem.optionId,
-  unitPrice: apiItem.unitPrice,
-  totalPrice: apiItem.totalPrice,
-  teamAvailable: apiItem.teamAvailable,
-  productThumbnail: '',
-});
+const useCartProductOptions = (productId: number) => {
+  return useCoreQuery(QUERY_KEYS.GET_PRODUCT_OPTIONS(productId), () => getOptionList({ productId }), {
+    enabled: !!productId,
+    staleTime: 1000 * 60 * 10, // 10분
+  });
+};
 
-interface IGroupedCartItem {
-  productId: number;
-  productName: string;
-  brand: string;
-  imageUrl: string;
-  options: ICartItem[];
-}
+export default function CartModal({ item, onUpdate }: ICartModalProps) {
+  const { closeModal } = useModalStore();
+  const { addItem, deleteItem, cartData, isAdding } = useCart();
+  const { data: optionsData, isLoading: isLoadingOptions } = useCartProductOptions(item.productId);
 
-export default function ShoppingCart() {
-  const navigate = useNavigate();
-  const { openModal } = useModalStore();
+  const cartItems = useMemo(() => {
+    return cartData?.products || [];
+  }, [cartData]);
 
-  const { cartData, isLoading, isError, deleteSelectedItems, isDeletingMultiple, refetch } = useCart();
-  const { mutate: joinTeamFromCartMutation, isPending: isJoiningTeam } = useTeamJoinFromCart();
+  const currentProductCartItems = useMemo(() => {
+    return cartItems.filter((cartItem) => cartItem.productId === item.productId);
+  }, [cartItems, item.productId]);
 
-  const cartList = useMemo(() => {
-    if (!cartData?.products) return [];
-    return cartData.products.map(convertToCartItem);
-  }, [cartData?.products]);
-
-  const groupedCartItems = useMemo(() => {
-    const groups: Record<number, IGroupedCartItem> = {};
-
-    cartList.forEach((item) => {
-      if (!groups[item.productId]) {
-        groups[item.productId] = {
-          productId: item.productId,
-          productName: item.productName,
-          brand: item.brand,
-          imageUrl: item.imageUrl,
-          options: [],
-        };
-      }
-      groups[item.productId].options.push(item);
-    });
-
-    Object.values(groups).forEach((group) => {
-      group.options.sort((a, b) => a.optionName.localeCompare(b.optionName));
-    });
-
-    return Object.values(groups).sort((a, b) => a.productName.localeCompare(b.productName));
-  }, [cartList]);
-
-  const productIds = useMemo(() => cartList.map((item) => `${item.productId}-${item.optionId}`), [cartList]);
-
-  const { checkedItems, initialize, toggle, toggleAll, isAllChecked, reset } = useProductCheckboxStore();
-
-  useEffect(() => {
-    initialize(productIds, false);
-  }, [productIds, initialize]);
-
-  const totalPrice = useMemo(() => {
-    return cartList.reduce((acc: number, product: ICartItem) => {
-      const itemKey = `${product.productId}-${product.optionId}`;
-      if (checkedItems[itemKey]) {
-        return acc + product.totalPrice;
-      }
-      return acc;
-    }, 0);
-  }, [cartList, checkedItems]);
-
-  const isAnyChecked = useMemo(() => Object.values(checkedItems).some((v) => v), [checkedItems]);
-
-  const isCartEmpty = cartList.length === 0;
-
-  const handleDeleteSelected = useCallback(() => {
-    const itemsToDelete = cartList
-      .filter((product) => {
-        const itemKey = `${product.productId}-${product.optionId}`;
-        return checkedItems[itemKey];
-      })
-      .map((product) => ({
-        productId: product.productId,
-        optionId: product.optionId,
-      }));
-
-    deleteSelectedItems(itemsToDelete);
-    reset();
-  }, [cartList, checkedItems, deleteSelectedItems, reset]);
-
-  const handleOptionChange = useCallback(
-    (item: ICartItem) => {
-      openModal('cart-option', {
-        item,
-        onUpdate: () => {
-          refetch();
-        },
-      });
-    },
-    [openModal, refetch],
+  const [selectedOptions, setSelectedOptions] = useState<ISelectedOption[]>(() =>
+    currentProductCartItems.map((cartItem) => ({
+      optionId: cartItem.optionId,
+      optionName: cartItem.optionName,
+      unitPrice: cartItem.unitPrice,
+      quantity: cartItem.quantity,
+    })),
   );
 
-  const handleToggleAll = useCallback(() => {
-    toggleAll(!isAllChecked());
-  }, [toggleAll, isAllChecked]);
+  const formattedOptions = useMemo(() => {
+    if (!optionsData?.result) return [];
+    return optionsData.result.map((option) => ({
+      id: option.id,
+      name: option.name,
+      price: option.unitPrice,
+      originPrice: option.originPrice,
+      unitPrice: option.unitPrice,
+    }));
+  }, [optionsData]);
 
-  const handleToggleItem = useCallback(
-    (productId: number, optionId: number) => {
-      const itemKey = `${productId}-${optionId}`;
-      toggle(itemKey);
-    },
-    [toggle],
-  );
+  const handleAddOption = useCallback(
+    (optionId: number) => {
+      if (optionId === 0) return;
 
-  const handleDeleteAlert = useCallback(() => {
-    openModal('alert', {
-      onDelete: handleDeleteSelected,
-      message: '장바구니에서 상품을 삭제할까요?',
-    });
-  }, [openModal, handleDeleteSelected]);
+      const found = formattedOptions.find((option) => option.id === optionId);
+      if (!found) return;
 
-  const handleTeamJoin = useCallback(
-    (productId: number) => {
-      const selectedOptions = groupedCartItems
-        .find((group) => group.productId === productId)
-        ?.options.filter((option) => {
-          const itemKey = `${option.productId}-${option.optionId}`;
-          return checkedItems[itemKey];
-        });
+      const existingIndex = selectedOptions.findIndex((opt) => opt.optionId === optionId);
 
-      if (!selectedOptions || selectedOptions.length === 0) {
-        toast.error('구매할 상품을 선택해주세요');
+      if (existingIndex >= 0) {
+        toast.error(`${found.name} 옵션이 이미 선택되어 있습니다.`);
         return;
       }
 
-      // 팀 참여 API 호출 (성공 시 자동으로 결제 페이지 이동)
-      joinTeamFromCartMutation(productId);
+      setSelectedOptions((prev) => [
+        ...prev,
+        {
+          optionId: found.id,
+          optionName: found.name,
+          unitPrice: found.unitPrice,
+          quantity: 1,
+        },
+      ]);
     },
-    [groupedCartItems, checkedItems, joinTeamFromCartMutation],
+    [formattedOptions, selectedOptions],
   );
 
-  const handleIndividualPurchase = useCallback(() => {
-    const selectedItems = cartList.filter((product) => {
-      const itemKey = `${product.productId}-${product.optionId}`;
-      return checkedItems[itemKey];
-    });
+  const handleQuantityChange = useCallback((index: number, offset: number) => {
+    setSelectedOptions((prev) => prev.map((opt, idx) => (idx === index ? { ...opt, quantity: Math.max(1, opt.quantity + offset) } : opt)));
+  }, []);
 
-    if (selectedItems.length === 0) {
-      toast.error('구매할 상품을 선택해주세요');
-      return;
+  const handleRemoveOption = useCallback((index: number) => {
+    setSelectedOptions((prev) => prev.filter((_, idx) => idx !== index));
+  }, []);
+
+  const totalPrice = useMemo(() => {
+    return selectedOptions.reduce((acc, opt) => acc + opt.unitPrice * opt.quantity, 0);
+  }, [selectedOptions]);
+
+  const totalQuantity = useMemo(() => {
+    return selectedOptions.reduce((acc, opt) => acc + opt.quantity, 0);
+  }, [selectedOptions]);
+
+  const handleSave = useCallback(async () => {
+    try {
+      console.log('장바구니 옵션 변경 시작:', {
+        기존옵션들: currentProductCartItems,
+        새로운옵션들: selectedOptions,
+      });
+
+      for (const cartItem of currentProductCartItems) {
+        console.log('삭제:', cartItem);
+        await deleteItem({
+          productId: cartItem.productId,
+          optionId: cartItem.optionId,
+        });
+      }
+
+      for (const option of selectedOptions) {
+        console.log('추가:', option);
+        await addItem({
+          productId: item.productId,
+          optionId: option.optionId,
+          quantity: option.quantity,
+        });
+      }
+
+      console.log('장바구니 옵션 변경 완료');
+
+      onUpdate?.(item);
+      closeModal();
+      toast.success('장바구니가 업데이트되었습니다');
+    } catch (error) {
+      console.error('장바구니 업데이트 실패:', error);
+      toast.error('장바구니 업데이트에 실패했습니다. 다시 시도해주세요.');
     }
+  }, [selectedOptions, currentProductCartItems, deleteItem, addItem, item, onUpdate, closeModal]);
 
-    const paymentItems: TPaymentItem[] = selectedItems.map((item) => ({
-      id: item.id,
-      productId: item.productId,
-      optionId: item.optionId,
-      quantity: item.quantity,
-      unitPrice: item.price,
-      teamPrice: item.unitPrice,
-      individualPrice: item.price,
-      productName: item.productName,
-      optionName: item.optionName,
-      productThumbnail: item.imageUrl,
-      brand: item.brand,
-    }));
-
-    const paymentData: TPaymentData = {
-      orderType: 'individual',
-      selectedItems: paymentItems,
-    };
-
-    navigate('/payment', { state: paymentData });
-  }, [cartList, checkedItems, navigate]);
-
-  if (isLoading) {
+  if (isLoadingOptions) {
     return (
-      <>
-        <header>
-          <PageHeaderBar title="장바구니" />
-        </header>
-        <Loading />
-        <BottomBar />
-      </>
+      <div className="h-full pb-2 flex flex-col gap-4 select-none">
+        <div className="flex items-center justify-center h-32">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange mx-auto mb-4" />
+            <p className="text-body-regular text-black-4">{item.productName}의 옵션을 불러오는 중...</p>
+          </div>
+        </div>
+      </div>
     );
   }
 
-  if (isError) {
+  if (!formattedOptions.length) {
     return (
-      <>
-        <header>
-          <PageHeaderBar title="장바구니" />
-        </header>
-        <div className="w-full bg-white text-black pb-32 flex items-center justify-center h-[calc(100vh-56px)]">
-          <div className="text-center">
-            <p className="text-body-medium mb-4">장바구니를 불러올 수 없습니다.</p>
-            <Button kind="basic" variant="outline-orange" onClick={() => refetch()}>
-              다시 시도
-            </Button>
-          </div>
+      <div className="h-full pb-2 flex flex-col gap-4 select-none">
+        <div className="flex items-center justify-center h-32">
+          <p className="text-body-regular text-black-4">{item.productName}의 사용 가능한 옵션이 없습니다.</p>
         </div>
-        <BottomBar />
-      </>
+        <div className="w-full">
+          <SelectButton
+            kind="select-bottom"
+            leftText="닫기"
+            rightText=""
+            leftVariant="left-outline"
+            rightVariant="right-orange"
+            onLeftClick={closeModal}
+            onRightClick={closeModal}
+          />
+        </div>
+      </div>
     );
   }
 
   return (
-    <>
-      <header>
-        <PageHeaderBar title="장바구니" />
-      </header>
-
-      <div className="w-full bg-white text-black pb-32">
-        {isCartEmpty ? (
-          <section className="flex flex-col items-center justify-center h-[calc(100vh-56px-56px)] pt-20 pb-10 px-4">
-            <img src={EmptyCartImage} alt="장바구니 비어 있음" className="w-40 h-40 mb-6" />
-            <p className="text-subtitle-medium mb-2">장바구니에 담긴 상품이 없습니다.</p>
-            <p className="text-body-regular text-black-4">원하는 상품을 찾아 장바구니를 채워보세요.</p>
-          </section>
-        ) : (
-          <>
-            <section className="flex items-center px-4 py-3 border-b-4 border-black-1">
-              <BaseCheckbox checked={isAllChecked()} onClick={handleToggleAll} message="전체 선택" textClassName="text-small-medium" disabled={isCartEmpty} />
-              <button
-                className="ml-auto text-body-regular text-black disabled:text-black-3"
-                disabled={!isAnyChecked || isDeletingMultiple}
-                onClick={handleDeleteAlert}
-              >
-                {isDeletingMultiple ? '삭제 중...' : '선택 삭제'}
-              </button>
-            </section>
-
-            {groupedCartItems.map((group) => {
-              const groupTotalPrice = group.options.reduce((acc, option) => acc + option.totalPrice, 0);
-              const groupTotalQuantity = group.options.reduce((acc, option) => acc + option.quantity, 0);
-
-              return (
-                <section key={group.productId} className="w-full border-b-4 border-black-0">
-                  {group.options.map((product, index) => {
-                    const itemKey = `${product.productId}-${product.optionId}`;
-                    const isChecked = checkedItems[itemKey] || false;
-
-                    return (
-                      <div key={itemKey} className={`px-4 py-5 ${index < group.options.length - 1 ? 'border-b border-black-1' : ''}`}>
-                        <div className="flex items-start gap-3">
-                          <BaseCheckbox checked={isChecked} onClick={() => handleToggleItem(product.productId, product.optionId)} />
-                          <div className="flex-1">
-                            <OrderItem item={product} show={false} showPrice={false} />
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-
-                  <div className="px-4 pb-3">
-                    <div className="flex w-full gap-2">
-                      <Button
-                        kind="select-content"
-                        variant={group.options.some((option) => option.teamAvailable) ? 'outline-orange' : 'outline-gray'}
-                        className={`flex-1 py-1 ${!group.options.some((option) => option.teamAvailable) ? 'border-black-1 text-black-2' : ''}`}
-                        onClick={() => handleTeamJoin(group.productId)}
-                        disabled={!group.options.some((option) => option.teamAvailable) || isJoiningTeam}
-                      >
-                        {isJoiningTeam ? '참여 중...' : '팀 참여'}
-                      </Button>
-                      <Button kind="select-content" variant="outline-gray" className="flex-1 py-1" onClick={() => handleOptionChange(group.options[0])}>
-                        옵션 변경
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="px-4 py-3 flex justify-between items-center">
-                    <p className="text-small-medium text-black-4">총 {groupTotalQuantity}개</p>
-                    <p className="text-body-medium">{groupTotalPrice.toLocaleString()} 원</p>
-                  </div>
-                </section>
-              );
-            })}
-          </>
-        )}
+    <div className="h-full pb-2 flex flex-col gap-4 select-none">
+      <div className="px-4">
+        <DropDown options={formattedOptions} onChange={({ id }) => handleAddOption(id)} />
       </div>
 
-      {!isCartEmpty && (
-        <div className="fixed bottom-14 left-0 right-0 w-full max-w-[600px] mx-auto">
-          <Button kind="basic" variant="solid-orange" className="w-full" disabled={totalPrice === 0} onClick={handleIndividualPurchase}>
-            {totalPrice.toLocaleString()} 원 1인 구매하기
-          </Button>
-        </div>
-      )}
+      <div className="flex-1 px-4 space-y-3 max-h-60 overflow-y-auto">
+        {selectedOptions.map((option, index) => (
+          <div key={`${option.optionId}-${index}`} className="bg-black-0 rounded p-4 relative">
+            <button className="absolute top-2 right-2 p-1" onClick={() => handleRemoveOption(index)} type="button">
+              <Close className="w-4 h-4 text-black-3" />
+            </button>
 
-      <BottomBar />
-    </>
+            <p className="text-body-regular mb-3 pr-6">{option.optionName}</p>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center w-21 h-6 border border-black-2">
+                <div className="flex items-center justify-center w-6 h-full cursor-pointer" onClick={() => handleQuantityChange(index, -1)}>
+                  <Minus />
+                </div>
+                <div className="flex items-center justify-center w-9 h-full border-x border-black-2 text-small-regular bg-white">{option.quantity}</div>
+                <div className="flex items-center justify-center w-6 h-full cursor-pointer" onClick={() => handleQuantityChange(index, 1)}>
+                  <Plus />
+                </div>
+              </div>
+              <p className="text-body-medium">{(option.unitPrice * option.quantity).toLocaleString()} 원</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="px-4 py-3 mx-4">
+        <div className="flex justify-between items-center">
+          <p className="text-small-medium">총 {totalQuantity}개</p>
+          <p className="text-body-medium font-bold">{totalPrice.toLocaleString()} 원</p>
+        </div>
+      </div>
+
+      <div className="w-full px-4">
+        {isAdding ? (
+          <div className="w-full h-12 flex justify-center items-center bg-black-2 rounded text-body-medium text-black-4">변경 중...</div>
+        ) : (
+          <SelectButton
+            kind="select-bottom"
+            leftText="취소"
+            rightText="변경하기"
+            leftVariant="left-outline"
+            rightVariant="right-orange"
+            onLeftClick={closeModal}
+            onRightClick={handleSave}
+          />
+        )}
+      </div>
+    </div>
   );
 }

@@ -14,6 +14,12 @@ const navItems = [
   { to: '/shoppingcart', icon: cart, activeIcon: cartFillIcon, label: '장바구니' },
   { to: '/mypage', icon: myIcon, label: '마이페이지' },
 ];
+const prefetch = () => {
+  import('@/pages/board');
+  import('@/pages/categoryPage');
+  import('@/pages/shoppingCart');
+};
+
 export default function BottomBar() {
   return (
     <div className="fixed bottom-0 left-0 right-0 w-full bg-white z-50">
@@ -22,6 +28,8 @@ export default function BottomBar() {
           <NavLink
             key={to}
             to={to}
+            onPointerEnter={prefetch}
+            onTouchStart={prefetch}
             className={({ isActive }) =>
               `flex flex-col items-center gap-1 transition-colors 
               ${isActive ? 'text-gray-800' : 'text-black-4'} hover:text-gray-600`

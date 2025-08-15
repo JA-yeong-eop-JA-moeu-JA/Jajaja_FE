@@ -4,10 +4,12 @@ import { useInView } from 'react-intersection-observer';
 import useInfinitePoints from '@/hooks/points/useInfinitePoints';
 
 import PageHeader from '@/components/head_bottom/PageHeader';
+import Loading from '@/components/loading';
 import PointCard from '@/components/pointCard';
+import PointCardSkeleton from '@/components/pointCardSkeleton';
 
 export default function Points() {
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfinitePoints();
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isPending } = useInfinitePoints();
 
   const { ref, inView } = useInView({ threshold: 0 });
 
@@ -20,8 +22,16 @@ export default function Points() {
   const balance = data?.pages[0]?.result.pointBalance ?? 0;
   const points = data?.pages.flatMap((page) => page.result.pointHistories) ?? [];
 
+  if (isPending) {
+    return (
+      <div className="w-full min-h-screen flex items-center justify-center">
+        <Loading />
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full h-screen">
+    <div className="w-full min-h-screen">
       <PageHeader title="적립금" />
       <div className="w-full flex flex-col items-center justify-center gap-6 px-4 mb-9">
         <div className="flex flex-col items-center justify-center gap-1 w-full border border-black-1 rounded py-4">
@@ -34,9 +44,8 @@ export default function Points() {
           ))}
         </div>
 
+        {isFetchingNextPage && Array.from({ length: 5 }).map((_, i) => <PointCardSkeleton key={i} isFirst={i === 0} />)}
         <div ref={ref} className="h-2" />
-
-        {isFetchingNextPage && <p className="text-center py-4 text-gray-500">더 불러오는 중...</p>}
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 
 import type { TGetUserInfoResponse } from '@/types/member/TGetUserInfo';
 
-import useUserInfo from '@/hooks/myPage/useUserInfo';
+import useUserInfo from '@/hooks/members/useUserInfo';
 
 interface IAuthContextType {
   user: TGetUserInfoResponse['result'] | null;
@@ -15,7 +15,7 @@ interface IAuthContextType {
 
 const AuthContext = createContext<IAuthContextType | null>(null);
 
-const PROTECTED_PREFIXES = ['/mypage', '/notifications', '/payment', '/address'];
+const PROTECTED_PREFIXES = ['/mypage', '/notifications', '/payment', '/address', '/shoppingcart'];
 
 export function AuthProvider({ children }: PropsWithChildren) {
   const { pathname } = useLocation();

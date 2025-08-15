@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
-import usePatchUserInfo from '@/hooks/myPage/usePatchUserInfo';
-import useUserInfo from '@/hooks/myPage/useUserInfo';
+import usePatchUserInfo from '@/hooks/members/usePatchUserInfo';
+import useUserInfo from '@/hooks/members/useUserInfo';
 import { useImageUploader } from '@/hooks/s3/useImageUploader';
 import usePostUpload from '@/hooks/s3/usePostUpload';
 import usePutUpload from '@/hooks/s3/usePutUpload';

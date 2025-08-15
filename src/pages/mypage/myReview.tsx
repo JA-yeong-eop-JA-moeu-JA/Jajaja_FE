@@ -6,15 +6,32 @@ import useGetReviewable from '@/hooks/review/useGetReviewable';
 
 import { PageButton, type TabId } from '@/components/common/button';
 import PageHeader from '@/components/head_bottom/PageHeader';
+import Loading from '@/components/loading';
 import OrderReviewList from '@/components/review/orderReviewList';
+import OrderReviewListSkeleton from '@/components/review/orderReviewListSkeleton';
+import ReviewItemSkeleton from '@/components/review/reviewItemSkeleton';
 
 import ReviewItem from '../../components/review/reviewItem';
 
 import Receipt from '@/assets/myPage/review/receipt.svg?react';
 
 export default function MyReview() {
-  const { data: reviewableData, fetchNextPage: fetchNextPage1, hasNextPage: hasNextPage1, isFetchingNextPage: isFetchingNextPage1 } = useGetReviewable();
-  const { data: myReivewData, fetchNextPage: fetchNextPage2, hasNextPage: hasNextPage2, isFetchingNextPage: isFetchingNextPage2 } = useGetMyReview();
+  const {
+    data: reviewableData,
+    fetchNextPage: fetchNextPage1,
+    hasNextPage: hasNextPage1,
+    isFetchingNextPage: isFetchingNextPage1,
+    isPending: isPending1,
+  } = useGetReviewable();
+  const {
+    data: myReivewData,
+    fetchNextPage: fetchNextPage2,
+    hasNextPage: hasNextPage2,
+    isFetchingNextPage: isFetchingNextPage2,
+    isPending: isPending2,
+  } = useGetMyReview();
+
+  const [selectedTop1, setSelectedTop1] = useState<TabId>('writeReview');
   const { ref, inView } = useInView({ threshold: 0 });
 
   useEffect(() => {
@@ -25,16 +42,23 @@ export default function MyReview() {
 
   useEffect(() => {
     if (inView && hasNextPage2 && !isFetchingNextPage2) {
-      fetchNextPage1();
+      fetchNextPage2();
     }
   }, [inView, hasNextPage2, 2, fetchNextPage2]);
 
   const orderData = reviewableData?.pages.flatMap((page) => page.result.orders) ?? [];
   const myReviewData = myReivewData?.pages.flatMap((page) => page.result.reviews) ?? [];
 
-  const [selectedTop1, setSelectedTop1] = useState<TabId>('writeReview');
+  if (isPending1 || isPending2) {
+    return (
+      <div className="w-full min-h-screen flex items-center justify-center">
+        <Loading />
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full h-screen relative">
+    <div className="w-full min-h-screen relative">
       <PageHeader title="리뷰" />
       <PageButton items={['writeReview', 'myReview']} selected={selectedTop1} onSelect={setSelectedTop1} />
       {selectedTop1 === 'writeReview' ? (
@@ -42,8 +66,8 @@ export default function MyReview() {
           {orderData.length > 0 ? (
             <div className="w-full">
               <OrderReviewList orders={orderData} />
+              {isFetchingNextPage1 && Array.from({ length: 3 }).map((_, i) => <OrderReviewListSkeleton key={i} />)}
               <div ref={ref} className="h-2" />
-              {isFetchingNextPage1 && <p className="text-center py-4 text-gray-500">더 불러오는 중...</p>}
             </div>
           ) : (
             <div className="w-full fixed inset-0 pointer-events-none flex flex-col items-center justify-center gap-2">
@@ -63,8 +87,8 @@ export default function MyReview() {
               {myReviewData.map((item) => (
                 <div key={item.review.id}>
                   <ReviewItem review={item.review} isLike={item.isLike} imageUrls={item.imageUrls} />
+                  {isFetchingNextPage2 && Array.from({ length: 3 }).map((_, i) => <ReviewItemSkeleton key={`skeleton-${i}`} />)}
                   <div ref={ref} className="h-2" />
-                  {isFetchingNextPage1 && <p className="text-center py-4 text-gray-500">더 불러오는 중...</p>}
                 </div>
               ))}
             </div>

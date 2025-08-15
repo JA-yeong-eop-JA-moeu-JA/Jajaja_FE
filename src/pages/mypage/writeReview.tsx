@@ -81,7 +81,7 @@ export default function WriteReview() {
   };
 
   return (
-    <div className="w-full h-screen flex flex-col justify-between">
+    <div className="w-full min-h-screen flex flex-col justify-between">
       <div>
         <PageHeader title="리뷰 작성" />
         <div className="w-full px-4">

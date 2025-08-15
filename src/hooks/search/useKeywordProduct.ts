@@ -1,12 +1,10 @@
-// src/hooks/search/useKeywordProducts.ts
 import { useMemo } from 'react';
+import { useInfiniteQuery } from '@tanstack/react-query';
 
 import type { TCategorySort } from '@/types/category';
 import { QUERY_KEYS } from '@/constants/querykeys/queryKeys';
 
 import { getProductsByKeyword } from '@/apis/search/search';
-
-import { useCoreQuery } from '@/hooks/customQuery';
 
 // 허용 정렬값
 const SORTS = ['POPULAR', 'NEW', 'PRICE_ASC', 'REVIEW'] as const;
@@ -16,22 +14,39 @@ type TSort = (typeof SORTS)[number];
 const getSafeSort = (s?: string): TCategorySort => ((SORTS as readonly string[]).includes(s ?? '') ? (s as TSort) : 'POPULAR');
 
 export function useKeywordProducts(opts: { keyword?: string; sort?: string; page?: number; size?: number }) {
-  const { keyword, sort, page = 0, size = 6 } = opts;
+  const { keyword, sort, size = 6 } = opts;
   const safeSort: TCategorySort = getSafeSort(sort);
-  const q = useCoreQuery([QUERY_KEYS.GET_KEYWORD_PRODUCTS, keyword, safeSort, page, size], () => getProductsByKeyword(keyword ?? '', safeSort, page, size), {
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetching, isError, error } = useInfiniteQuery({
+    queryKey: [QUERY_KEYS.GET_KEYWORD_PRODUCTS, 'infinite', keyword, safeSort, size],
+    queryFn: ({ pageParam = 0 }) => getProductsByKeyword(keyword ?? '', safeSort, pageParam, size),
     enabled: !!keyword,
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) => {
+      const responsePage = lastPage?.result?.page;
+      if (!responsePage) return undefined;
+      const hasNext =
+        typeof responsePage.hasNextPage === 'boolean'
+          ? responsePage.hasNextPage
+          : typeof responsePage.isLast === 'boolean'
+            ? !responsePage.isLast
+            : (lastPage?.result?.products?.length ?? 0) === size;
+      if (!hasNext) return undefined;
+      const current = responsePage.currentPage + 1;
+      return current;
+    },
   });
 
   return useMemo(() => {
-    const res = q.data;
     return {
-      products: res?.result?.products ?? [],
-      pageInfo: res?.result?.page,
-      isLoading: q.isLoading,
-      isFetching: q.isFetching,
-      isError: q.isError,
-      error: q.error as any,
-      raw: res,
+      products: data?.pages.flatMap((page) => page.result.products) ?? [],
+      pageInfo: data?.pages.flatMap((page) => page.result.page),
+      isLoading: isLoading,
+      isFetching: isFetching,
+      isError: isError,
+      error: error as any,
+      data,
+      fetchNextPage,
+      hasNextPage,
     };
-  }, [q.data, q.isLoading, q.isFetching, q.isError, q.error]);
+  }, [data, isLoading, isFetching, isError, error, fetchNextPage, hasNextPage]);
 }

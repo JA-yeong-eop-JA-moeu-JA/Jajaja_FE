@@ -9,7 +9,9 @@ import useGetNotiUnread from '@/hooks/notifications/useGetNotiUnread';
 import usePatchNotiReadAll from '@/hooks/notifications/usePatchNotiReadAll';
 
 import PageHeader from '@/components/head_bottom/PageHeader';
+import Loading from '@/components/loading';
 import NotiCard from '@/components/notiCard';
+import NotiCardSkeleton from '@/components/notiCardSkeleton';
 
 export function getDateCategory(dateString?: string): string {
   if (!dateString) return '이전';
@@ -25,7 +27,7 @@ export function getDateCategory(dateString?: string): string {
 }
 
 export default function Notifications() {
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useGetNotiList();
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isPending } = useGetNotiList();
   const { mutate: readAll } = usePatchNotiReadAll();
   const { data: unread } = useGetNotiUnread();
   const hasUnread = (unread?.result.unreadCount ?? 0) > 0;
@@ -56,8 +58,16 @@ export default function Notifications() {
     if (hasUnread) readAll(null);
   };
 
+  if (isPending) {
+    return (
+      <div className="w-full min-h-screen flex items-center justify-center">
+        <Loading />
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full h-screen bg-white">
+    <div className="w-full min-h-screen bg-white">
       <PageHeader title="알림" />
       <div className="w-full flex items-center justify-between px-4 text-small-medium">
         <button className="py-3.5 text-orange disabled:text-black-4" disabled={!hasUnread}>
@@ -77,8 +87,9 @@ export default function Notifications() {
                 {list.map((noti) => (
                   <NotiCard key={noti.id} {...noti} />
                 ))}
+
+                {isFetchingNextPage && Array.from({ length: 5 }).map((_, i) => <NotiCardSkeleton key={i} />)}
                 <div ref={ref} className="h-2" />
-                {isFetchingNextPage && <p className="text-center py-4 text-gray-500">더 불러오는 중...</p>}
               </div>
             ),
         )}

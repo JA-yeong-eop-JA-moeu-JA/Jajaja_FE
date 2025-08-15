@@ -5,7 +5,7 @@ import { MAIN_FUNCTIONS } from '@/constants/myPage/mainFunctions';
 import { SUB_FUNCTIONS } from '@/constants/myPage/subFunctions';
 
 import useLogout from '@/hooks/auth/useLogout';
-import useUserInfo from '@/hooks/myPage/useUserInfo';
+import useUserInfo from '@/hooks/members/useUserInfo';
 
 import BenefitCard from '@/components/benefitCard';
 import BottomBar from '@/components/head_bottom/BottomBar';
@@ -18,7 +18,7 @@ export default function MyPage() {
   const { logout } = useLogout();
   const navigate = useNavigate();
   return (
-    <div className="w-full h-screen">
+    <div className="w-full min-h-screen">
       <header className="px-3">
         <Header />
       </header>
