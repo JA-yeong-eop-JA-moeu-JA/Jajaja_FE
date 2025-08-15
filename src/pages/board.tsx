@@ -5,7 +5,7 @@ import type { TReviewItem } from '@/types/board/reviewBoard';
 import { useReviews } from '@/hooks/board/useReviews';
 import { useTeamProducts } from '@/hooks/board/useTeamProducts';
 import useInfiniteObserver from '@/hooks/common/useInfiniteObserver';
-import useUserInfo from '@/hooks/myPage/useUserInfo';
+import useUserInfo from '@/hooks/members/useUserInfo';
 
 import HorizontalProductCard from '@/components/board/HorizontalProductCard';
 import { PageButton, type TabId } from '@/components/common/button';

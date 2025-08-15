@@ -10,6 +10,7 @@ export default function useGetNotiUnread() {
   const { isLoggedIn } = useAuth();
   const { data } = useCoreQuery(QUERY_KEYS.GET_NOTI_UNREAD, () => getNotiUnread(), {
     refetchOnWindowFocus: true,
+    refetchOnMount: true,
     enabled: isLoggedIn,
   });
   const count = data?.result?.unreadCount ?? 0;

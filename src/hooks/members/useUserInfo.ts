@@ -15,7 +15,6 @@ export default function useUserInfo(options?: TOptions) {
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     refetchOnMount: false,
-    staleTime: 60 * 1000,
     enabled,
   });
   return { data, isError, isLoading, refetch };
