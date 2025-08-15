@@ -26,7 +26,7 @@ export default function Agreement() {
   };
 
   return (
-    <div className="w-full h-screen flex flex-col justify-between">
+    <div className="w-full min-h-screen flex flex-col justify-between">
       <div>
         <PageHeaderBar />
         <div className="w-full bg-white text-black">
