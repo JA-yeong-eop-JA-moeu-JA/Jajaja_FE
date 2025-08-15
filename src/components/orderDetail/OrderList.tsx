@@ -6,6 +6,7 @@ import type { TReviewableOrderItem } from '@/types/review/myReview';
 import { MATCH_STATUS_COLOR_MAP, ORDER_STATUS_COLOR_MAP } from '@/constants/product/statusColorMap';
 
 import OrderItem from '@/components/review/orderItem';
+
 import ChevronRight from '@/assets/ChevronRight2.svg';
 
 interface IOrderProps {
@@ -27,7 +28,7 @@ type TBEOrderStatus =
   | 'TEAM_MATCHING_FAILED';
 
 type TTOSKey =
-  | '결제 대기'
+  | '결제 완료'
   | '결제 완료'
   | '결제 취소'
   | '결제 실패'
@@ -40,7 +41,7 @@ type TTOSKey =
   | '매칭 실패';
 
 const ORDER_STATUS_LABEL_MAP: Record<TBEOrderStatus, TTOSKey> = {
-  READY: '결제 대기',
+  READY: '결제 완료',
   DONE: '결제 완료',
   CANCELED: '결제 취소',
   ABORTED: '결제 실패',
@@ -81,13 +82,7 @@ function formatHMS(ms: number) {
   return `${hh}:${mm}:${ss}`;
 }
 
-function Countdown({
-  teamCreatedAt,
-  onExpire,
-}: {
-  teamCreatedAt: string | null;
-  onExpire?: () => void;
-}) {
+function Countdown({ teamCreatedAt, onExpire }: { teamCreatedAt: string | null; onExpire?: () => void }) {
   const [remain, setRemain] = useState<number>(() => getRemainMs(teamCreatedAt));
 
   useEffect(() => {
@@ -104,11 +99,7 @@ function Countdown({
   }, [teamCreatedAt, onExpire]);
 
   if (!teamCreatedAt) return null;
-  return (
-    <span className="ml-2 text-xs text-gray-500">
-      {remain === 0 ? '마감' : formatHMS(remain)}
-    </span>
-  );
+  return <span className="ml-2 text-xs text-gray-500">{remain === 0 ? '마감' : formatHMS(remain)}</span>;
 }
 
 type TOrderStatusKey = keyof typeof ORDER_STATUS_COLOR_MAP;
@@ -155,18 +146,11 @@ export default function OrderList({ orders, onExpire }: IOrderProps) {
           : '25.12.12';
 
         return (
-          <section
-            key={order.id}
-            className={`w-full pb-4 mb-4 ${
-              index !== orders.length - 1 ? 'border-b-black-1 border-b-4' : ''
-            }`}
-          >
+          <section key={order.id} className={`w-full pb-4 mb-4 ${index !== orders.length - 1 ? 'border-b-black-1 border-b-4' : ''}`}>
             <button
               type="button"
               className="w-full flex items-center justify-between pr-2 pl-4"
-              onClick={() =>
-                navigate(`/mypage/order/orderDetailPersonal?orderId=${order.id}`)
-              }
+              onClick={() => navigate(`/mypage/order/orderDetailPersonal?orderId=${order.id}`)}
             >
               <p className="text-subtitle-medium text-left">{orderDateLabel}</p>
               <img src={ChevronRight} alt=">" className="w-2 h-4" />
@@ -190,13 +174,9 @@ export default function OrderList({ orders, onExpire }: IOrderProps) {
                   : undefined,
               };
 
-              const osLabel = item.orderStatusRaw
-                ? (ORDER_STATUS_LABEL_MAP[item.orderStatusRaw] as TOrderStatusKey)
-                : undefined;
+              const osLabel = item.orderStatusRaw ? (ORDER_STATUS_LABEL_MAP[item.orderStatusRaw] as TOrderStatusKey) : undefined;
 
-              const msLabel = item.matchStatusRaw
-                ? (MATCH_STATUS_LABEL_MAP[item.matchStatusRaw] as TMatchStatusKey)
-                : undefined;
+              const msLabel = item.matchStatusRaw ? (MATCH_STATUS_LABEL_MAP[item.matchStatusRaw] as TMatchStatusKey) : undefined;
 
               const isMatching = item.matchStatusRaw === 'MATCHING';
 
@@ -212,27 +192,12 @@ export default function OrderList({ orders, onExpire }: IOrderProps) {
                   {(osLabel || msLabel) && (
                     <div className="pb-2 flex justify-between items-center text-body-medium">
                       {/* 왼쪽: 주문 상태 */}
-                      <div>
-                        {osLabel && (
-                          <span className={ORDER_STATUS_COLOR_MAP[osLabel]}>
-                            {osLabel}
-                          </span>
-                        )}
-                      </div>
+                      <div>{osLabel && <span className={ORDER_STATUS_COLOR_MAP[osLabel]}>{osLabel}</span>}</div>
 
                       {/* 오른쪽: 매칭 상태 + 카운트다운 */}
                       <div className="flex items-center gap-2">
-                        {msLabel && (
-                          <span className={MATCH_STATUS_COLOR_MAP[msLabel]}>
-                            {msLabel}
-                          </span>
-                        )}
-                        {isMatching && (
-                          <Countdown
-                            teamCreatedAt={item.teamCreatedAt ?? null}
-                            onExpire={onExpire}
-                          />
-                        )}
+                        {msLabel && <span className={MATCH_STATUS_COLOR_MAP[msLabel]}>{msLabel}</span>}
+                        {isMatching && <Countdown teamCreatedAt={item.teamCreatedAt ?? null} onExpire={onExpire} />}
                       </div>
                     </div>
                   )}

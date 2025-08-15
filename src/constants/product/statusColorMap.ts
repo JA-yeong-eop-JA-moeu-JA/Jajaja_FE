@@ -1,8 +1,7 @@
 import type { IOrderItem } from '@/mocks/orderData';
 
 export const ORDER_STATUS_COLOR_MAP = {
-  '결제 대기': 'text-gray-500',
-  '결제 완료': 'text-blue-500',
+  '결제 완료': 'text-orange-500',
   '결제 취소': 'text-red-500',
   '결제 실패': 'text-red-500',
   '거래 취소': 'text-red-500',
