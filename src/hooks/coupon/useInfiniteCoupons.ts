@@ -7,7 +7,7 @@ import { getCouponsWithPaging } from '@/apis/coupon/getCoupons';
 export default function useInfiniteCoupons() {
   return useInfiniteQuery({
     queryKey: [QUERY_KEYS.GET_COUPONS_INFINITE],
-    queryFn: ({ pageParam = 0 }) => getCouponsWithPaging(pageParam, 10),
+    queryFn: ({ pageParam = 0 }) => getCouponsWithPaging(pageParam, 1),
     initialPageParam: 0,
     getNextPageParam: (lastPage) => {
       const page = lastPage.result.page;

@@ -12,7 +12,7 @@ import { useModalStore } from '@/stores/modalStore';
 import { useGetAddresses } from '@/hooks/address/useAddress';
 import { useCartCoupon } from '@/hooks/coupon/useCoupons';
 import useInfiniteCoupons from '@/hooks/coupon/useInfiniteCoupons';
-import useUserInfo from '@/hooks/myPage/useUserInfo';
+import useUserInfo from '@/hooks/members/useUserInfo';
 import { usePayment } from '@/hooks/payment/usePayment';
 import { usePaymentPrepare } from '@/hooks/payment/usePaymentPrepare';
 import useInfinitePoints from '@/hooks/points/useInfinitePoints';
