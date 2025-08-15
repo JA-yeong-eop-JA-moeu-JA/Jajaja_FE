@@ -65,8 +65,8 @@
 
 | 이름                                                                                                                                               | 역할      | 담당 기능                          |
 |--------------------------------------------------------------------------------------------------------------------------------------------------|-------------|------------------------------------|
-| [<img src="[https://avatars.githubusercontent.com/u/96588957?v=4)" height=130 width=130> <br/> @lwittyl](https://github.com/lwittyl) **박채현**     | 프론트엔드 팀장  | Product(Home), Product(Detail), Search, Review, Team             |
-| [<img src="[https://avatars.githubusercontent.com/u/161998554?v=4)" height=130 width=130> <br/> @yooncandooit](https://github.com/yooncandooit) **김윤지** | 프론트엔드 팀원  | Order, Cart, Delivery                       |
+| [<img src="https://avatars.githubusercontent.com/u/96588957?v=4" height=130 width=130> <br/> @lwittyl](https://github.com/lwittyl) **박채현**     | 프론트엔드 팀장  | Product(Home), Product(Detail), Search, Review, Team             |
+| [<img src="https://avatars.githubusercontent.com/u/161998554?v=4" height=130 width=130> <br/> @yooncandooit](https://github.com/yooncandooit) **김윤지** | 프론트엔드 팀원  | Order, Cart, Delivery                       |
 | [<img src="https://avatars.githubusercontent.com/u/164133432?v=4" height=130 width=130> <br/> @arumicube](https://github.com/arumicube) **안아름**        | 프론트엔드 팀원  | Product(Category), Order, Notice |
 | [<img src="https://avatars.githubusercontent.com/u/180145486?v=4" height=130 width=130> <br/> @yeonthusiast](https://github.com/yeonthusiast) **하승연**  | 프론트엔드 팀원   | Auth, Notification, MyPage      |
 
