@@ -18,6 +18,12 @@ export default function AddressChange() {
 
   const { returnPath, paymentData, selectedAddress: currentSelectedAddress } = location.state || {};
 
+  const sortedAddresses = [...addresses].sort((a, b) => {
+    if (a.isDefault && !b.isDefault) return -1;
+    if (!a.isDefault && b.isDefault) return 1;
+    return a.id - b.id;
+  });
+
   useEffect(() => {
     if (addresses.length > 0 && !selectedAddress) {
       let initialAddress: IAddress | undefined;
@@ -142,7 +148,7 @@ export default function AddressChange() {
         </div>
       ) : (
         <>
-          {addresses.map((addr: IAddress) => {
+          {sortedAddresses.map((addr: IAddress) => {
             const isSelected = selectedAddress?.id === addr.id;
 
             return <AddressCard key={addr.id} address={addr} onDelete={handleDelete} onSelect={handleSelectAddress} isSelected={isSelected} mode="select" />;

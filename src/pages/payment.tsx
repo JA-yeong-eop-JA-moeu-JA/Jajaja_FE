@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 
 import type { IAddress } from '@/types/address/TAddress';
 import type { TPaymentData, TPaymentItem } from '@/types/cart/TCart';
@@ -84,6 +85,7 @@ export default function Payment() {
   const [selectedDeliveryRequest, setSelectedDeliveryRequest] = useState<string>('');
   const [usedPoints, setUsedPoints] = useState<number>(0);
   const [isProcessingPayment, setIsProcessingPayment] = useState<boolean>(false);
+  const [pointsError, setPointsError] = useState<string>(''); // ✅ 적립금 에러 상태 추가
 
   const [backendCalculatedAmount, setBackendCalculatedAmount] = useState<{
     totalAmount: number;
@@ -231,15 +233,24 @@ export default function Payment() {
   const handlePointsChange = (value: number) => {
     const numValue = Number(value) || 0;
 
+    // 에러 상태 초기화
+    setPointsError('');
+
     if (numValue > userPoints) {
       setUsedPoints(userPoints);
-      alert(`사용 가능한 적립금은 최대 ${userPoints.toLocaleString()}원입니다.`);
+      setPointsError(`사용 가능한 적립금은 최대 ${userPoints.toLocaleString()}원입니다.`);
+      toast.error(`사용 가능한 적립금은 최대 ${userPoints.toLocaleString()}원입니다.`);
     } else if (numValue < 0) {
       setUsedPoints(0);
+      setPointsError('적립금은 0원 이상 입력해주세요.');
+      toast.error('적립금은 0원 이상 입력해주세요.');
     } else {
       setUsedPoints(numValue);
     }
   };
+
+  const isPointsValid = usedPoints <= userPoints && usedPoints >= 0;
+  const pointsInputClassName = `w-16 text-right text-body-regular bg-transparent outline-none ${pointsError ? 'text-red-500' : ''}`;
 
   const handleDeliveryRequestClick = () => {
     openModal('delivery', {
@@ -258,22 +269,27 @@ export default function Payment() {
   };
 
   const handlePayment = async () => {
+    if (!isPointsValid) {
+      toast.error('적립금 입력을 확인해주세요.');
+      return;
+    }
+
     if (!user) {
-      alert('사용자 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+      toast.error('사용자 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
       return;
     }
 
     if (!selectedAddress) {
-      alert('배송지를 선택해주세요.');
+      toast.error('배송지를 선택해주세요.');
       return;
     }
 
     if (!selectedAddress.phone) {
-      alert('선택된 배송지에 휴대폰 번호가 없습니다. 배송지를 변경하거나 수정해주세요.');
+      toast.error('선택된 배송지에 휴대폰 번호가 없습니다. 배송지를 변경하거나 수정해주세요.');
       return;
     }
     if (!payment) {
-      alert('결제 시스템을 초기화하고 있습니다. 잠시 후 다시 시도해주세요.');
+      toast.error('결제 시스템을 초기화하고 있습니다. 잠시 후 다시 시도해주세요.');
       return;
     }
 
@@ -286,7 +302,7 @@ export default function Payment() {
     const formattedPhoneNumber = formatPhoneNumberForToss(selectedAddress.phone);
 
     if (!/^\d{10,11}$/.test(formattedPhoneNumber)) {
-      alert('선택된 배송지의 휴대폰 번호 형식이 올바르지 않습니다.');
+      toast.error('선택된 배송지의 휴대폰 번호 형식이 올바르지 않습니다.');
       setIsProcessingPayment(false);
       return;
     }
@@ -305,7 +321,7 @@ export default function Payment() {
       // 팀 구매일 경우에만 teamId 추가
       if (isTeamOrder) {
         if (!paymentData.teamId) {
-          alert('팀 정보가 올바르지 않습니다. 다시 시도해주세요.');
+          toast.error('팀 정보가 올바르지 않습니다. 다시 시도해주세요.');
           setIsProcessingPayment(false);
           return;
         }
@@ -345,7 +361,7 @@ export default function Payment() {
       });
 
       if (finalAmount <= 0) {
-        alert('결제 금액이 0원입니다. 쿠폰 또는 포인트 사용을 조정해주세요.');
+        toast.error('결제 금액이 0원입니다. 쿠폰 또는 포인트 사용을 조정해주세요.');
         setIsProcessingPayment(false);
         return;
       }
@@ -377,9 +393,10 @@ export default function Payment() {
             case 'POINT4002':
               errorMessage = '사용 가능한 적립금을 초과했습니다. 적립금을 확인해주세요.';
               setUsedPoints(0);
+              setPointsError('적립금을 다시 확인해주세요.');
               break;
             case 'COUPON4003':
-              errorMessage = '선택한 쿠폰을 사용할 수 없습니다.\n쿠폰이 만료되었거나 이미 사용되었을 수 있습니다.\n쿠폰을 다시 선택해주세요.';
+              errorMessage = '선택한 쿠폰을 사용할 수 없습니다. 쿠폰이 만료되었거나 이미 사용되었을 수 있습니다.';
               break;
             case 'COUPON_INVALID':
               errorMessage = '선택한 쿠폰을 사용할 수 없습니다.';
@@ -400,7 +417,7 @@ export default function Payment() {
         errorMessage = error.message;
       }
 
-      alert(errorMessage + ' 다시 시도해주세요.');
+      toast.error(errorMessage);
     } finally {
       setIsProcessingPayment(false);
     }
@@ -566,6 +583,7 @@ export default function Payment() {
 
         <section className="p-4 mt-3 border-b-4 border-black-1">
           <p className="text-subtitle-medium mb-4">할인 혜택</p>
+
           <div className="flex justify-between items-center border-1 border-black-3 rounded px-4 py-3 mb-3" onClick={() => navigate('/coupon')}>
             <p className="text-body-medium">쿠폰</p>
             <div className="flex items-center gap-3">
@@ -579,13 +597,14 @@ export default function Payment() {
               <Down className="w-4 h-2 mr-1" />
             </div>
           </div>
+
           <div className="flex gap-2 mb-2">
-            <div className="flex-1 flex justify-between items-center border-1 border-black-3 rounded px-4 py-3">
+            <div className={`flex-1 flex justify-between items-center border-1 rounded px-4 py-3 ${pointsError ? 'border-red-500' : 'border-black-3'}`}>
               <p className="text-body-medium">적립금</p>
               <div className="flex items-center gap-2">
                 <input
                   type="number"
-                  className="w-16 text-right text-body-regular bg-transparent outline-none"
+                  className={pointsInputClassName}
                   placeholder="0"
                   value={usedPoints || ''}
                   onChange={(e) => handlePointsChange(Number(e.target.value) || 0)}
@@ -597,13 +616,19 @@ export default function Payment() {
             </div>
             <button
               className="px-4 py-2.5 border-1 border-black-3 text-body-regular rounded whitespace-nowrap"
-              onClick={() => setUsedPoints(usedPoints === userPoints ? 0 : userPoints)}
+              onClick={() => {
+                const newValue = usedPoints === userPoints ? 0 : userPoints;
+                setUsedPoints(newValue);
+                setPointsError('');
+              }}
             >
               {usedPoints === userPoints ? '사용 취소' : '모두 사용'}
             </button>
           </div>
-          <div className="flex justify-end">
+
+          <div className="flex flex-col items-end gap-1">
             <p className="text-small-medium text-black-4">보유 적립금: {userPoints.toLocaleString()} 원</p>
+            {pointsError && <p className="text-small-regular text-red-500">{pointsError}</p>}
           </div>
         </section>
 
@@ -621,7 +646,9 @@ export default function Payment() {
           <Button
             kind="basic"
             variant="solid-orange"
-            disabled={displayAmount.finalAmount <= 0 || isProcessingPayment || paymentPrepareMutation.isPending || !selectedAddress || paymentLoading}
+            disabled={
+              displayAmount.finalAmount <= 0 || isProcessingPayment || paymentPrepareMutation.isPending || !selectedAddress || paymentLoading || !isPointsValid
+            }
             onClick={handlePayment}
             className="w-full"
           >
