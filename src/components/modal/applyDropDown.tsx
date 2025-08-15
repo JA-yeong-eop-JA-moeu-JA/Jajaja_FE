@@ -24,7 +24,7 @@ export default function ApplyDropDown({ options, onChange, defaultLabel }: TProp
       setIsOpen(false);
       const selected = optionList[idx];
       setSelectedId(selected.id);
-      setList([selected]); // 선택한 항목으로 교체
+      setList([selected]);
       onChange?.({ id: selected.id });
     }
   };

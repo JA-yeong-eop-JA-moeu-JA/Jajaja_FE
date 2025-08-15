@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom';
 
-import cartIcon from '@/assets/bar_icons/basket.svg';
+import cart from '@/assets/bar_icons/basket.svg';
 import boardIcon from '@/assets/bar_icons/board.svg';
 import cartFillIcon from '@/assets/bar_icons/cartFill.svg';
 import categoryIcon from '@/assets/bar_icons/category.svg';
@@ -11,7 +11,7 @@ const navItems = [
   { to: '/home', icon: homeIcon, label: '홈' },
   { to: '/board', icon: boardIcon, label: '게시판' },
   { to: '/category', icon: categoryIcon, label: '카테고리' },
-  { to: '/shoppingcart', icon: cartIcon, activeIcon: cartFillIcon, label: '장바구니' },
+  { to: '/shoppingcart', icon: cart, activeIcon: cartFillIcon, label: '장바구니' },
   { to: '/mypage', icon: myIcon, label: '마이페이지' },
 ];
 export default function BottomBar() {

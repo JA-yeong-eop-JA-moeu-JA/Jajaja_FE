@@ -85,7 +85,6 @@ export default function ApplyReturnOrExchange() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [dropdownKey, setDropdownKey] = useState(0);
 
-  // 주문 상세 API
   const { data } = useOrderDetailPersonal(id);
 
   if (!Number.isFinite(id) || id <= 0) {
@@ -103,8 +102,8 @@ export default function ApplyReturnOrExchange() {
   const { items, delivery, payment } = data;
 
   const mappedItems: (IOrderItem & { orderProductId: number; orderId: number })[] = items.map((it) => ({
-    orderId: id, // 진짜 주문 ID
-    orderProductId: it.orderProductId, // 주문상품 ID
+    orderId: id,
+    orderProductId: it.orderProductId,
     productId: it.product.id,
     name: it.product.name,
     company: it.product.store,
@@ -177,22 +176,13 @@ export default function ApplyReturnOrExchange() {
       return { prev, key };
     },
     onError: (_err, _vars, ctx) => {
-      // 실패 시 롤백
       if (ctx?.prev && ctx?.key) queryClient.setQueryData(ctx.key, ctx.prev);
     },
     onSuccess: () => {
-      // 성공 시 최신화
       queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.GET_ORDER_DETAIL_PERSONAL, id] });
       queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.GET_MY_ORDERS] });
     },
   });
-
-  //const handleSubmit = (): string | null => {
-  //  if (!selectedType || !selectedOrderItem) return null;
-  //  return selectedType === '반품'
-  //    ? '/mypage/order/return/complete'
-  //    : '/mypage/order/exchange/complete';
-  //};
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -290,15 +280,12 @@ export default function ApplyReturnOrExchange() {
           };
 
           try {
-            await mutation.mutateAsync(vars); // ✅ 성공해야만 아래 실행
+            await mutation.mutateAsync(vars);
             setIsModalOpen(false);
             navigate(selectedType === '반품' ? '/mypage/order/return/complete' : '/mypage/order/exchange/complete');
           } catch (e: any) {
             setIsModalOpen(false);
-            // 401 처리: 로그인으로 보낼지 토스트 띄울지 선택
             if (e?.response?.status === 401) {
-              // 예) 로그인으로
-              // navigate('/login?next=' + encodeURIComponent(location.pathname + location.search));
               console.error('인증 필요', e?.response?.data);
             } else {
               console.error('신청 실패', e);

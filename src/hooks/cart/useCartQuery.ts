@@ -26,7 +26,6 @@ export const useAddCartMutation = () => {
   });
 };
 
-// 병합 로직 추가
 export const useAddCartWithMergeMutation = () => {
   const queryClient = useQueryClient();
 
@@ -106,7 +105,6 @@ export const useCart = () => {
     [deleteMultipleMutation],
   );
 
-  // OptionModal용 아이템 추가 함수
   const addMultipleItems = useCallback(
     (items: TCartItemRequest[]): Promise<any> => {
       return addWithMergeMutation.mutateAsync(items);

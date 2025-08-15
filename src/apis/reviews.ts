@@ -3,12 +3,12 @@ import axios from 'axios';
 import type { IReviewResponse } from '@/types/review';
 
 export const getReviews = async ({
-  sort = 'latest',
+  sort = 'LATEST',
   page = 0,
-  size = 5,
+  size = 6,
   token,
 }: {
-  sort?: 'latest' | 'recommend';
+  sort?: 'LATEST' | 'RECOMMEND';
   page?: number;
   size?: number;
   token: string;

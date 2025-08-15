@@ -8,7 +8,7 @@ type TParams = {
   size?: number;
 };
 
-export const getReviews = async ({ sort = 'latest', page = 0, size = 5 }: TParams) => {
+export const getReviews = async ({ sort = 'LATEST', page = 0, size = 6 }: TParams) => {
   const { data } = await axiosInstance.get<TGetReviewsResponse>('/api/reviews', {
     params: { sort, page, size },
   });

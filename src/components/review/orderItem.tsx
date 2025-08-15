@@ -31,7 +31,6 @@ export default function OrderItem({ item, show, showPrice = true }: IOrderDataPr
 
   const getDisplayData = (orderItem: TOrderItemType) => {
     if (isReviewableOrderItem(orderItem)) {
-      // TReviewableOrderItem 타입인 경우
       return {
         imageUrl: orderItem.imageUrl,
         productName: orderItem.productName,
@@ -42,7 +41,6 @@ export default function OrderItem({ item, show, showPrice = true }: IOrderDataPr
         isReviewWritten: orderItem.isReviewWritten,
       };
     } else if (isCartItem(orderItem)) {
-      // ICartItem 타입인 경우
       return {
         imageUrl: orderItem.imageUrl || orderItem.productThumbnail || '',
         productName: orderItem.productName,

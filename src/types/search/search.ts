@@ -5,8 +5,7 @@ export type TGetSearchKeyWord = TCommonResponse<{
   keywords: string[];
 }>;
 
-// types/search/search.ts
-export type TCategorySort = 'POPULAR' | 'NEW' | 'LOW_PRICE' | 'REVIEW';
+export type TCategorySort = 'POPULAR' | 'NEW' | 'PRICE_ASC' | 'REVIEW';
 
 export interface IProductDTO {
   productId: number;
@@ -25,9 +24,11 @@ export interface IGetKeywordProductsResponse {
     page?: {
       size: number;
       totalElements: number;
+      currentElements: number;
       totalPages: number;
-      page: number;
-      isFirst: boolean;
+      currentPage: number;
+      hasNextPage: boolean;
+      hasPreviousPage: boolean;
       isLast: boolean;
     };
   };
