@@ -1,4 +1,3 @@
-// src/hooks/search/useKeywordProducts.ts
 import { useMemo } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 
