@@ -136,12 +136,13 @@ export default function ShoppingCart() {
 
   const handleOptionChange = useCallback(
     (item: ICartItem) => {
-      openModal('bottom-drawer', {
+      // 👇 여기를 'bottom-drawer'에서 'cart-option'으로 되돌립니다.
+      openModal('cart-option', {
         item,
         onUpdate: () => {
           refetch();
         },
-        mode: 'cart',
+        // mode: 'cart' 와 같은 불필요한 prop은 제거합니다.
       });
     },
     [openModal, refetch],
