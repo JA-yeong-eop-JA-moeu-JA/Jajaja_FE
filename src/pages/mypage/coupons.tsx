@@ -32,7 +32,7 @@ export default function Coupons() {
   return (
     <>
       <PageHeader title="쿠폰" />
-      <div className="w-full h-screen bg-white">
+      <div className="w-full min-h-screen bg-white">
         <div className="flex flex-col gap-3 px-3">
           {coupons.map((coupon) => (
             <CouponCard key={coupon.couponId} coupon={coupon} isSelected={false} onClick={() => {}} />

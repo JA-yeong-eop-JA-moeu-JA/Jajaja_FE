@@ -8,7 +8,7 @@ import Profile from '@/assets/myPage/profile.svg?react';
 export default function MyDetailPage() {
   const navigate = useNavigate();
   return (
-    <div className="w-full h-screen bg-black-0">
+    <div className="w-full min-h-screen bg-black-0">
       <PageHeader title="내 정보 관리" />
       <div className="flex flex-col items-center justify-center px-4 text-subtitle-medium bg-white">
         <button className="w-full flex flex-col items-center justify-center gap-1 pb-6 border-b border-black-1" onClick={() => navigate('/mypage/me/profile')}>
