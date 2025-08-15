@@ -134,7 +134,6 @@ export default function ShoppingCart() {
     reset();
   }, [cartList, checkedItems, deleteSelectedItems, reset]);
 
-  // ✨✨✨ 이 부분을 원래 코드로 되돌렸습니다! ✨✨✨
   const handleOptionChange = useCallback(
     (item: ICartItem) => {
       openModal('cart-option', {
@@ -148,7 +147,6 @@ export default function ShoppingCart() {
   );
 
   const handleToggleAll = useCallback(() => {
-    // 전체 선택 로직을 복원했습니다.
     toggleAll(!isAllChecked());
   }, [toggleAll, isAllChecked]);
 
