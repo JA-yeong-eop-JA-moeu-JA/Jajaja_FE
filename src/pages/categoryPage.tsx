@@ -38,7 +38,7 @@ export default function CategoryPage() {
       subcategoryId: String(id),
       sort: 'NEW',
       page: '0',
-      size: '20',
+      size: '6',
       keyword: label,
     });
     navigate(`/search?${qs.toString()}`);
@@ -46,7 +46,7 @@ export default function CategoryPage() {
 
   return (
     <div className="text-body-regular flex flex-col min-h-screen">
-      <header className="px-2">
+      <header className="px-3">
         <Header />
       </header>
 
@@ -84,7 +84,7 @@ export default function CategoryPage() {
                   <li
                     key={id}
                     onClick={() => handleSubCategoryClick(id, label)}
-                    className="flex items-center justify-between py-4 px-2 border-none cursor-pointer"
+                    className="flex items-center justify-between py-4 pl-4 pr-2 border-none cursor-pointer"
                   >
                     <div className="flex items-center gap-2">
                       {icon && <span>{icon}</span>}

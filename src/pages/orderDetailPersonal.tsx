@@ -8,38 +8,74 @@ import PageHeader from '@/components/head_bottom/PageHeader';
 import OrderProductList from '@/components/orderDetail/orderProductList';
 import PaymentInfo from '@/components/orderDetail/paymentInfo';
 
-type TOrderStatus = '배송 중' | '결제 완료' | '결제 취소' | '반품 접수' | '교환 접수';
+type TOrderStatus =
+  | '결제 대기' // READY
+  | '결제 완료' // DONE
+  | '결제 취소' // CANCELED
+  | '결제 실패' // ABORTED
+  | '거래 취소' // EXPIRED
+  | '배송 중' // SHIPPING
+  | '배송 완료' // DELIVERED
+  | '환불 요청' // REFUND_REQUESTED
+  | '환불 실패' // REFUND_FAILED
+  | '환불 완료' // REFUNDED
+  | '매칭 실패'; // TEAM_MATCHING_FAILED
+
 type TMatchStatus = '매칭 중' | '매칭 완료' | '매칭 실패';
 
 const MATCH_TTL_MINUTES = 600;
 
+// PaymentMethod.java: NORMAL, BILLING, BRANDPAY 만 사용
 function formatPayMethod(method: string) {
-  if (method === 'KAKAO') return '카카오페이';
-  return method;
+  switch ((method ?? '').toUpperCase()) {
+    case 'NORMAL':
+      return '일반 결제';
+    case 'BILLING':
+      return '자동결제';
+    case 'BRANDPAY':
+      return '브랜드페이';
+    default:
+      return method;
+  }
 }
 
+type TBEOrderStatus =
+  | 'READY'
+  | 'DONE'
+  | 'CANCELED'
+  | 'ABORTED'
+  | 'EXPIRED'
+  | 'SHIPPING'
+  | 'DELIVERED'
+  | 'REFUND_REQUESTED'
+  | 'REFUND_FAILED'
+  | 'REFUNDED'
+  | 'TEAM_MATCHING_FAILED';
+
+const ORDER_STATUS_LABEL_MAP: Record<TBEOrderStatus, TOrderStatus> = {
+  READY: '결제 대기',
+  DONE: '결제 완료',
+  CANCELED: '결제 취소',
+  ABORTED: '결제 실패',
+  EXPIRED: '거래 취소',
+  SHIPPING: '배송 중',
+  DELIVERED: '배송 완료',
+  REFUND_REQUESTED: '환불 요청',
+  REFUND_FAILED: '환불 실패',
+  REFUNDED: '환불 완료',
+  TEAM_MATCHING_FAILED: '매칭 실패',
+};
+
 const toOrderStatusLabel = (items: Array<{ status?: string }>): TOrderStatus => {
-  const codes = items.map((i) => (i.status ?? '').toUpperCase());
-  if (codes.some((c) => c === 'CANCELED' || c === 'CANCELLED' || c === 'PAYMENT_CANCELED')) {
-    return '결제 취소';
-  }
-  if (codes.some((c) => c === 'RETURN_REQUESTED' || c === 'RETURNING' || c === 'REFUND_REQUESTED')) {
-    return '반품 접수';
-  }
-  if (codes.some((c) => c === 'EXCHANGE_REQUESTED' || c === 'EXCHANGING')) {
-    return '교환 접수';
-  }
-  if (codes.some((c) => c === 'SHIPPING' || c === 'IN_DELIVERY' || c === 'DELIVERING' || c === 'DELIVERED')) {
-    return '배송 중';
-  }
-  return '결제 완료';
+  const code = (items[0]?.status ?? '').toUpperCase() as TBEOrderStatus;
+  return ORDER_STATUS_LABEL_MAP[code] ?? '결제 대기';
 };
 
 const toMatchStatusLabel = (items: Array<{ teamStatus?: string; matchingStatus?: string }>): TMatchStatus | undefined => {
   const raw = items.map((i) => (i.teamStatus ?? i.matchingStatus ?? '').toUpperCase()).filter(Boolean);
-  if (raw.length === 0) return undefined; // 개인 주문: 매칭 상태 없음
+  if (raw.length === 0) return undefined;
   if (raw.some((v) => v === 'MATCHING')) return '매칭 중';
-  if (raw.every((v) => v === 'MATCHED')) return '매칭 완료';
+  if (raw.every((v) => v === 'COMPLETED')) return '매칭 완료';
   return '매칭 실패';
 };
 
@@ -90,12 +126,11 @@ export default function OrderDetailPersonal() {
 
   const { date, orderNumber, items, delivery, payment } = data;
 
-  // ▼ MATCHING인 첫 아이템(있다면) 찾기 (teamCreatedAt 사용)
-  const firstMatching = items.find((it) => (it.teamStatus ?? it.matchStatus ?? '').toUpperCase() === 'MATCHING');
+  const firstMatching = items.find((it) => (it.teamStatus ?? it.matchingStatus ?? '').toUpperCase() === 'MATCHING');
   const teamCreatedAt = firstMatching?.teamCreatedAt;
 
   const mappedItems = items.map((it) => {
-    const isAfterSales = ['RETURN_REQUESTED', 'EXCHANGE_REQUESTED'].includes((it.status ?? '').toUpperCase());
+    const isAfterSales = ['REFUND_REQUESTED'].includes((it.status ?? '').toUpperCase());
     return {
       orderId: id,
       orderProductId: it.orderProductId,
@@ -110,8 +145,6 @@ export default function OrderDetailPersonal() {
 
       orderStatus: toOrderStatusLabel([it]),
       matchStatus: isAfterSales ? undefined : toMatchStatusLabel([it]),
-      // 필요하면 이 라인으로 teamCreatedAt도 아이템에 넘길 수 있음:
-      // teamCreatedAt: it.teamCreatedAt ?? null,
     };
   });
 
@@ -135,7 +168,7 @@ export default function OrderDetailPersonal() {
         </div>
 
         {/* 주문 상품 헤더 + 우측에 매칭 상태/카운트다운 */}
-        <div className="px-5 flex items-center justify-between">
+        <div className="px-6 flex items-center justify-between">
           <h2 className="text-subtitle-medium">주문 상품</h2>
           {firstMatching && (
             <div className="flex items-center gap-2">

@@ -4,7 +4,15 @@ import type { TPage } from '../TPage';
 export type TGetNoti = {
   id: number;
   type: 'MATCHING' | 'DELIVERY' | 'COUPON_AD';
-  body: string;
+  title: string;
+  detail?: {
+    orderId?: number;
+    productName?: string;
+    productImage?: string;
+    isTeamMatched?: boolean;
+    orderProductId?: number;
+    productId?: number;
+  };
   isRead: boolean;
   createdAt: string;
 };

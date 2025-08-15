@@ -19,7 +19,7 @@ export default function MyPage() {
   const navigate = useNavigate();
   return (
     <div className="w-full h-screen">
-      <header className="px-2">
+      <header className="px-3">
         <Header />
       </header>
       <div className="w-full bg-white text-black">
@@ -56,7 +56,7 @@ export default function MyPage() {
 
         <section className="w-full pt-2.5 pb-6">
           <p className="flex-1 text-subtitle-medium px-5 pt-3 pb-4">오늘의 혜택</p>
-          <div className="w-full flex overflow-x-auto gap-x-2 px-4 scrollbar-hide">
+          <div className="w-full flex overflow-x-auto gap-x-2 px-4">
             {BENEFIT_LIST.map(({ id, content }) => (
               <BenefitCard key={id} content={content} />
             ))}
@@ -68,7 +68,7 @@ export default function MyPage() {
             {SUB_FUNCTIONS.map(({ id, name, path }, idx) => (
               <button
                 onClick={() => {
-                  if (path) navigate(path);
+                  if (path) window.open(path, '_blank');
                   if (name === '로그아웃') logout();
                 }}
                 key={id}

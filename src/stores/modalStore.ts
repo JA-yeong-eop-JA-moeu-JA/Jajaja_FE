@@ -2,6 +2,8 @@ import type { ComponentType } from 'react';
 import { createElement } from 'react';
 import { create } from 'zustand';
 
+import type { TGetNoti } from '@/types/notifications/TGetNotiList';
+
 import DeliveryRequestModal from '@/components/modal/deliveryModal';
 import HomeModal from '@/components/modal/homeModal';
 import ImageModal from '@/components/modal/imageModal';
@@ -37,6 +39,7 @@ interface IModalOptions {
   onSelect?: (text: string) => void;
   teamId?: number;
   mode?: string;
+  matching?: TGetNoti;
   [key: string]: any;
 }
 
@@ -59,10 +62,11 @@ export const useModalStore = create<IModalStore>((set) => ({
 
     const WrappedComponent =
       type === 'cart-option'
-        ? () =>
+        ? (props: any) =>
             createElement(ModalComponent, {
               item: options.item,
               onUpdate: options.onUpdate,
+              ...(props || {}),
             })
         : type === 'bottom-drawer' || type === 'bottom-drawer-team'
           ? () =>
@@ -72,6 +76,11 @@ export const useModalStore = create<IModalStore>((set) => ({
                 ...options,
               })
           : () => createElement(ModalComponent, options);
+        : (props: any) =>
+            createElement(ModalComponent, {
+              ...(options || {}),
+              ...(props || {}),
+            });
 
     set({
       isModalOpen: true,

@@ -6,16 +6,17 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 import type { TCategorySort } from '@/types/category';
 
+import Storage from '@/utils/storage';
 import { formatKoreanDateLabel } from '@/utils/time';
 
-// search 에 카테고리 api 연동을 위해서 추가, 수정 부분은 아이콘으로 표시 해뒀습니다!!
-// ⭐ 추가
 import { useCategoryProducts } from '@/hooks/category/useCategoryProduct';
+import useInfiniteObserver from '@/hooks/common/useInfiniteObserver';
 import useDeleteRecent from '@/hooks/search/useDeleteRecent';
 import useGetKeyword from '@/hooks/search/useGetKeyword';
 import useGetRecent from '@/hooks/search/useGetRecent';
 import { useKeywordProducts } from '@/hooks/search/useKeywordProduct';
 
+import InfiniteScrollSentinel from '@/components/common/infiniteScroll';
 import SearchInput from '@/components/common/SearchInput';
 import ProductCard from '@/components/home/productCard';
 import Menu from '@/components/search/menu';
@@ -23,10 +24,13 @@ import Tag from '@/components/search/tag';
 
 import Back from '@/assets/icons/back.svg?react';
 import Down from '@/assets/icons/down.svg?react';
-import NoResult from '@/assets/icons/noResult.svg?react';
 import Up from '@/assets/icons/up.svg?react';
 
 export default function Search() {
+  type TKeywordItem = {
+    id: number;
+    keyword: string;
+  };
   const { data } = useGetKeyword();
   const [searchParams, setSearchParams] = useSearchParams();
   const menuRef = useRef<HTMLDivElement>(null);
@@ -37,10 +41,13 @@ export default function Search() {
   const [inputValue, setValue] = useState('');
   const [isAsc, setIsAsc] = useState(true);
   const { search } = useLocation();
+  const [localKeywords, setLocalKeywords] = useState<TKeywordItem[]>(() => Storage.getKeyword());
 
+  const PAGE_SIZE = 6;
   const navigate = useNavigate();
   const { data: recent } = useGetRecent();
   const { mutate } = useDeleteRecent();
+
   useEffect(() => {
     const keyword = new URLSearchParams(location.search).get('keyword');
     setKeyword(keyword);
@@ -52,10 +59,11 @@ export default function Search() {
 
   const subcategoryId = Number(searchParams.get('subcategoryId') || '');
   const isCategoryMode = !!subcategoryId;
+
   const SORT_ENUM_TO_LABEL: Record<TCategorySort, string> = {
     POPULAR: '인기순',
-    NEW: '최신상품순',
-    LOW_PRICE: '낮은 가격 순',
+    NEW: '신상품순',
+    PRICE_ASC: '낮은 가격 순',
     REVIEW: '리뷰 많은 순',
   };
 
@@ -63,13 +71,13 @@ export default function Search() {
     const s = label.replace(/\s/g, '');
     if (s.includes('인기')) return 'POPULAR';
     if (s.includes('신상품') || s.includes('최신')) return 'NEW';
-    if (s.includes('낮은')) return 'LOW_PRICE';
+    if (s.includes('낮은')) return 'PRICE_ASC';
     if (s.includes('리뷰')) return 'REVIEW';
     return 'NEW';
   };
 
   const page = Number(searchParams.get('page') || '0');
-  const size = searchParams.get('size') ? Number(searchParams.get('size')) : 20;
+  const size = searchParams.get('size') ? Number(searchParams.get('size')) : PAGE_SIZE;
 
   const categoryQuery = useCategoryProducts({
     subcategoryId: isCategoryMode ? subcategoryId : undefined,
@@ -78,13 +86,30 @@ export default function Search() {
     size,
   });
 
-  const keywordQuery = useKeywordProducts({
+  const {
+    data: q,
+    fetchNextPage,
+    hasNextPage,
+    isLoading,
+  } = useKeywordProducts({
     keyword: !isCategoryMode ? keywordParam || '' : undefined,
     sort,
     page,
     size,
   });
 
+  const bottomRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!bottomRef.current || !hasNextPage) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) fetchNextPage();
+      },
+      { threshold: 0.2 },
+    );
+    observer.observe(bottomRef.current);
+    return () => observer.disconnect();
+  }, [fetchNextPage, hasNextPage, sort]);
   type TProductCardItem = {
     id: number;
     name: string;
@@ -109,7 +134,49 @@ export default function Search() {
     tag: '',
   });
 
-  const displayList: TProductCardItem[] = isCategoryMode ? categoryQuery.products.map(mapToProductCard) : keywordQuery.products.map(mapToProductCard);
+  const [accCategory, setAccCategory] = useState<TProductCardItem[]>([]);
+
+  useEffect(() => {
+    if (!isCategoryMode) return;
+    const cur = (categoryQuery.products ?? []).map(mapToProductCard);
+    setAccCategory((prev) => (page === 0 ? cur : [...prev, ...cur]));
+  }, [isCategoryMode, categoryQuery.products, page]);
+
+  useEffect(() => {
+    if (!isCategoryMode) {
+      setAccCategory([]);
+      return;
+    }
+  }, [isCategoryMode, subcategoryId, sort]);
+
+  const pageInfo = categoryQuery?.pageInfo;
+  const hasNextCategory = pageInfo ? (pageInfo.hasNextPage ?? !pageInfo.isLast) : (categoryQuery?.products?.length ?? 0) === size;
+
+  const enableInfiniteCategory = isCategoryMode && hasNextCategory && !categoryQuery.isLoading && accCategory.length >= size;
+
+  const categorySentinelRef = useInfiniteObserver({
+    enabled: enableInfiniteCategory,
+    onIntersect: () => {
+      const qs = new URLSearchParams(searchParams);
+      const cur = Number(qs.get('page') || '0');
+      qs.set('page', String(cur + 1));
+      qs.set('size', String(PAGE_SIZE)); // ★ 유지
+      setSearchParams(qs, { replace: true });
+    },
+    root: null,
+    rootMargin: '0px',
+    threshold: 1,
+  });
+
+  const displayList: TProductCardItem[] = isCategoryMode ? accCategory : (q?.pages.flatMap((p) => p.result.products) ?? []).map(mapToProductCard);
+
+  useEffect(() => {
+    if (!searchParams.get('size')) {
+      const qs = new URLSearchParams(searchParams);
+      qs.set('size', String(PAGE_SIZE));
+      setSearchParams(qs, { replace: true });
+    }
+  }, []);
 
   useEffect(() => {
     if (keywordParam) {
@@ -118,6 +185,7 @@ export default function Search() {
     }
     if (isCategoryMode) setChange(true);
   }, [keywordParam, isCategoryMode]);
+
   useEffect(() => {
     if (!isCategoryMode) return;
     const labelFromUrl = searchParams.get('keyword') || searchParams.get('subcategoryName');
@@ -132,7 +200,24 @@ export default function Search() {
     if (label !== sortOption) setSortOption(label);
   }, [searchParams]);
 
-  const handleDelete = async (id: number) => mutate(id);
+  const keywordExist = Storage.getKeyword().length > 0 || (recent && recent.result.length > 0);
+  const isLocalData = !recent || recent.result.length === 0;
+  const keywordData = isLocalData ? localKeywords : recent!.result;
+
+  const handleDelete = async (id: number) => {
+    if (isLocalData) {
+      Storage.deleteKeyword(id);
+      setLocalKeywords((prev) => prev.filter((item) => item.id !== id));
+    } else {
+      await mutate(id);
+    }
+  };
+
+  useEffect(() => {
+    if (isLocalData) {
+      setLocalKeywords(Storage.getKeyword());
+    }
+  }, [isLocalData, recent]);
 
   const handleValue = (e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value);
 
@@ -148,10 +233,10 @@ export default function Search() {
       qs.delete('keyword');
     }
     qs.set('page', '0');
+    qs.set('size', String(PAGE_SIZE)); // ★ 추가
+    Storage.setKeyword(keyword);
     setSearchParams(qs, { replace: true });
-    setTimeout(() => {
-      (document.activeElement as HTMLElement | null)?.blur();
-    }, 0);
+    setTimeout(() => (document.activeElement as HTMLElement | null)?.blur(), 0);
   };
 
   const handleSortSelect = (value?: string) => {
@@ -163,6 +248,7 @@ export default function Search() {
     const qs = new URLSearchParams(searchParams);
     qs.set('sort', nextSort);
     qs.set('page', '0');
+    qs.set('size', String(PAGE_SIZE)); // ★ 추가
     setSearchParams(qs, { replace: true });
     setIsAsc(true);
     setChange(true);
@@ -178,8 +264,6 @@ export default function Search() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const isLoading = isCategoryMode ? categoryQuery.isLoading : keywordQuery.isLoading;
-  const isError = isCategoryMode ? categoryQuery.isError : keywordQuery.isError;
   const hasKeyword = new URLSearchParams(search).has('keyword');
   const handleNavigate = () => {
     if (hasKeyword) {
@@ -188,6 +272,7 @@ export default function Search() {
       navigate(-1);
     }
   };
+
   return (
     <>
       <header className="w-full pr-4 py-1 flex items-center">
@@ -200,8 +285,8 @@ export default function Search() {
           <section>
             <p className="text-subtitle-medium mb-2">최근 검색</p>
             <ScrollContainer className="flex w-full gap-2 overflow-x-auto cursor-grab pr-5" vertical={false}>
-              {recent?.result.length === 0 && <p className="text-body-regular text-black-4 py-2.5">최근 검색어가 없습니다.</p>}
-              {recent?.result.map(({ id, keyword }) => (
+              {!keywordExist && <p className="text-body-regular text-black-4 py-2.5">최근 검색어가 없습니다.</p>}
+              {keywordData?.map(({ id, keyword }) => (
                 <div key={id} className="shrink-0" onClick={() => handleFilter(keyword)}>
                   <Tag msg={keyword} onDelete={() => handleDelete(id)} />
                 </div>
@@ -231,7 +316,7 @@ export default function Search() {
       )}
 
       {change && (
-        <section className="w-full px-4 pb-7">
+        <section className="w-full px-4 pb-10">
           <div ref={menuRef} className="py-4 relative w-fit ml-auto text-small-medium">
             <div onClick={() => setIsAsc((prev) => !prev)} className="flex items-center gap-2 cursor-pointer">
               <p>{sortOption}</p>
@@ -245,33 +330,23 @@ export default function Search() {
             )}
           </div>
 
-          {/* 로딩/에러/결과 */}
-          {isLoading ? (
-            <div className="w-full flex items-center justify-center h-[calc(100vh-144px)]">
-              <p className="text-subtitle-medium">로딩 중…</p>
-            </div>
-          ) : isError ? (
-            <div className="w-full flex items-center justify-center h-[calc(100vh-144px)]">
-              <p className="text-subtitle-medium text-error-3">불러오기에 실패했습니다.</p>
-            </div>
-          ) : displayList.length === 0 ? (
-            <div className="w-full flex flex-col items-center justify-center h-[calc(100vh-144px)] gap-3">
-              <NoResult />
-              <p className="text-subtitle-medium">찾으시는 상품이 없습니다.</p>
-            </div>
-          ) : (
-            <div className="w-full grid grid-cols-2 gap-x-2 gap-y-6.5 items-center justify-center ">
-              {displayList.map((item) => (
-                <ProductCard
-                  key={item.id}
-                  {...{
-                    ...item,
-                    store: item.store ?? '',
-                    rating: item.rating ?? 0,
-                    reviewCount: item.reviewCount ?? 0,
-                  }}
-                />
-              ))}
+          <div className="w-full grid grid-cols-2 gap-x-2 gap-y-6.5 items-center justify-center ">
+            {displayList.map((item) => (
+              <ProductCard
+                key={item.id}
+                {...{
+                  ...item,
+                  store: item.store ?? '',
+                  rating: item.rating ?? 0,
+                  reviewCount: item.reviewCount ?? 0,
+                }}
+              />
+            ))}
+          </div>
+          {isCategoryMode ? <InfiniteScrollSentinel ref={categorySentinelRef} style={{ height: 1 }} /> : <div ref={bottomRef} className="h-1" />}
+          {(isLoading || categoryQuery.isLoading) && (
+            <div className="w-full flex items-center justify-center p-4">
+              <div className="animate-spin rounded-full h-15 w-15 border-3 border-t-transparent border-orange-light-active" />
             </div>
           )}
         </section>

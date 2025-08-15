@@ -51,9 +51,7 @@ export default function Product() {
     );
   return (
     <div className="pb-16">
-      <header className="px-2">
-        <ProductHeader />
-      </header>
+      <ProductHeader />
       <img src={data?.result?.thumbnailUrl} className="w-full" alt={data?.result?.name} />
       <section className="py-5 px-4 flex flex-col gap-3">
         <div className="flex flex-col gap-2">

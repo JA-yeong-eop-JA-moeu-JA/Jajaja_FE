@@ -1,4 +1,3 @@
-// src/components/StarRating.tsx
 import { useState } from 'react';
 
 import Star from '@/assets/myPage/review/star.svg?react';

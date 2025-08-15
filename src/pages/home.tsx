@@ -51,7 +51,7 @@ export default function Home() {
   const [scrollDir, setScrollDir] = useState<'up' | 'down'>('up');
   const [lastY, setLastY] = useState(0);
   const { openModal } = useModalStore();
-  const { data } = useHomeProduct();
+  const { data, isLoading } = useHomeProduct();
   const navigate = useNavigate();
   useLayoutEffect(() => {
     const shouldShow = !document.cookie.includes('hidePopup=true');
@@ -87,10 +87,11 @@ export default function Home() {
                     max-w-[600px] mx-auto
                     ${scrollDir === 'down' ? '-translate-y-[104px] opacity-0 pointer-events-none' : 'translate-y-0 opacity-100 pointer-events-auto'}`}
       >
-        <header className="px-2">
+        <header className="px-3">
           <Header showSearch={false} />
         </header>
-        <header className="pb-2.5 px-4">
+
+        <header className="w-full pb-2.5 px-5 max-w-screen-sm mx-auto">
           <SearchInput value={''} onFocus={() => navigate('/search')} />
         </header>
       </div>
@@ -99,7 +100,13 @@ export default function Home() {
         <section className="w-full">
           <Banner />
         </section>
-
+        <section>
+          {isLoading && (
+            <div className="w-full flex justify-center p-15">
+              <div className="animate-spin rounded-full h-15 w-15 border-3 border-t-transparent border-orange-light-active" />
+            </div>
+          )}
+        </section>
         <section className="w-full px-4 py-7 flex flex-col items-center gap-26">
           {data?.result && (
             <>
@@ -109,24 +116,26 @@ export default function Home() {
             </>
           )}
         </section>
-        <footer className="pb-20 px-4 pt-5 bg-black-0 flex flex-col gap-4">
-          <div className="flex items-center px-1 gap-2 text-small-regular">
-            <p className="text-black-4">이용약관</p>
-            <p>|</p>
-            <p>개인정보처리방침</p>
-          </div>
-          <div className="flex flex-col gap-3 text-tiny-regular text-black-4">
-            <p>
-              (주) 자자자는 통신판매중개자이며 통신판매의 당사자가 아닙니다. 따라서 (주)자자자는 입점 판매사가 등록한 상품 정보 및 거래에 대해 책임을 지지
-              않습니다.
-            </p>
-            <p>
-              본 사이트의 상품/판매자/쇼핑 정보, 콘텐츠, UI 등에 대한 무단 복제, 전송, 배포, 스크래핑 등의 행위는 저작권법, 콘텐츠사업 진흥법 등에 의하여 엄격히
-              금지됩니다.
-            </p>
-            <p>Copyright ⓒ JAJAJA.COM Corp. All rights reserved.</p>
-          </div>
-        </footer>
+        {!isLoading && (
+          <footer className="pb-20 px-4 pt-5 bg-black-0 flex flex-col gap-4">
+            <div className="flex items-center px-1 gap-2 text-small-regular">
+              <p className="text-black-4">이용약관</p>
+              <p>|</p>
+              <p>개인정보처리방침</p>
+            </div>
+            <div className="flex flex-col gap-3 text-tiny-regular text-black-4">
+              <p>
+                (주) 자자자는 통신판매중개자이며 통신판매의 당사자가 아닙니다. 따라서 (주)자자자는 입점 판매사가 등록한 상품 정보 및 거래에 대해 책임을 지지
+                않습니다.
+              </p>
+              <p>
+                본 사이트의 상품/판매자/쇼핑 정보, 콘텐츠, UI 등에 대한 무단 복제, 전송, 배포, 스크래핑 등의 행위는 저작권법, 콘텐츠사업 진흥법 등에 의하여
+                엄격히 금지됩니다.
+              </p>
+              <p>Copyright ⓒ JAJAJA.COM Corp. All rights reserved.</p>
+            </div>
+          </footer>
+        )}
       </div>
 
       <div

@@ -10,6 +10,6 @@ import { useAuth } from '@/context/AuthContext';
 export default function useHomeProduct() {
   const { isLoggedIn } = useAuth();
   const category = isLoggedIn ? undefined : Number(Storage.getCategory());
-  const { data } = useCoreQuery(QUERY_KEYS.GET_HOME_PRODUCT, () => getHomeProduct({ categoryId: category }));
-  return { data };
+  const { data, isLoading } = useCoreQuery(QUERY_KEYS.GET_HOME_PRODUCT, () => getHomeProduct({ categoryId: category }));
+  return { data, isLoading };
 }

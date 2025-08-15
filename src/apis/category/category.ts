@@ -11,7 +11,7 @@ export const categoryApi = {
     const res = await axiosInstance.get(`/api/categories/${mainId}/subcategories`);
     return res.data;
   },
-  getProductsBySubcategory: async (subcategoryId: number, sort: TCategorySort = 'NEW', page = 0, size = 20): Promise<IGetCategoryProductsResponse> => {
+  getProductsBySubcategory: async (subcategoryId: number, sort: TCategorySort = 'NEW', page = 0, size = 6): Promise<IGetCategoryProductsResponse> => {
     try {
       const res = await axiosInstance.get(`/api/products/categories/${subcategoryId}/products`, {
         params: { sort, page, size },
@@ -27,7 +27,7 @@ export const categoryApi = {
         'params:',
         err.config?.params,
       );
-      throw err; // 상위에서 처리하게 던짐
+      throw err;
     }
   },
 };

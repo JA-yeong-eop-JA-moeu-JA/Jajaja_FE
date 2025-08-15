@@ -30,13 +30,13 @@ const mapToIOrders = (orders?: TOrder[] | null): IOrder[] =>
   }));
 
 export const useMyOrders = (opts?: { page?: number; size?: number; sort?: string }) => {
-  const { page = 0, size = 1, sort } = opts ?? {};
+  const { page = 0, size = 6, sort } = opts ?? {};
 
   return useCoreQuery<IOrder[]>(
     [QUERY_KEYS.GET_MY_ORDERS, page, size, sort],
     async () => {
       if (import.meta.env.DEV) console.log('[useMyOrders] fetch start', { page, size, sort });
-      const data = await getMyOrders({ page, size, sort }); // BE: /api/orders/me
+      const data = await getMyOrders({ page, size, sort });
       const mapped = mapToIOrders(data.result?.orders);
       if (import.meta.env.DEV) console.log('[useMyOrders] fetch done, mapped count:', mapped.length);
       return mapped;
