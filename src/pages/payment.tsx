@@ -10,6 +10,7 @@ import { formatPhoneNumberForToss, generateCustomerKey } from '@/utils/paymentUt
 
 import { useModalStore } from '@/stores/modalStore';
 import { useGetAddresses } from '@/hooks/address/useAddress';
+import { useCart } from '@/hooks/cart/useCartQuery';
 import { useCartCoupon } from '@/hooks/coupon/useCoupons';
 import useInfiniteCoupons from '@/hooks/coupon/useInfiniteCoupons';
 import useUserInfo from '@/hooks/members/useUserInfo';
@@ -65,9 +66,19 @@ export default function Payment() {
   const navigate = useNavigate();
   const location = useLocation();
   const { openModal } = useModalStore();
+  const { cartData, isLoading: cartLoading } = useCart();
 
-  const paymentData = location.state as TPaymentData;
-  const currentOrderItems = paymentData?.selectedItems || orderData[0].items;
+  const paymentData = location.state as TPaymentData & {
+    isDirectPurchase?: boolean;
+    directPurchaseInfo?: {
+      products: { productId: number; optionId: number; quantity: number; timestamp: number }[];
+      productDetails?: {
+        name: string;
+        thumbnailUrl: string;
+        store: string;
+      };
+    };
+  };
 
   const [selectedAddress, setSelectedAddress] = useState<IAddress | null>(null);
   const [selectedDeliveryRequest, setSelectedDeliveryRequest] = useState<string>('');
@@ -86,19 +97,89 @@ export default function Payment() {
   const { data: addressesData, isLoading: addressesLoading } = useGetAddresses();
   const { data: pointsData, isLoading: pointsLoading } = useInfinitePoints();
   const { data: couponsData, isLoading: couponsLoading } = useInfiniteCoupons();
-  const { calculateDiscount, getAppliedCoupon, isExpired, isApplicable } = useCartCoupon();
+  const { calculateDiscount, getAppliedCoupon, getLocalAppliedCoupon, isExpired, isApplicable } = useCartCoupon();
   const paymentPrepareMutation = usePaymentPrepare();
 
   const user = userInfo?.result;
   const userPoints = pointsData?.pages[0]?.result?.pointBalance ?? 0;
   const addresses: IAddress[] = Array.isArray(addressesData) ? addressesData : [];
-  const appliedCoupon: TCoupons | null = getAppliedCoupon();
+
+  const appliedCoupon: TCoupons | null = (() => {
+    const cartCoupon = getAppliedCoupon();
+    if (cartCoupon) return cartCoupon;
+
+    const localCoupon = getLocalAppliedCoupon();
+    if (localCoupon) return localCoupon;
+
+    return null;
+  })();
+
+  const getOrderItemsForDirectPurchase = () => {
+    if (!paymentData?.isDirectPurchase || !paymentData?.directPurchaseInfo || !cartData) {
+      return paymentData?.selectedItems || orderData[0].items;
+    }
+
+    const directProducts = paymentData.directPurchaseInfo.products;
+    const productDetails = paymentData.directPurchaseInfo.productDetails;
+
+    const exactMatches = cartData.products.filter((cartItem) => {
+      return directProducts.some(
+        (directProduct) =>
+          directProduct.productId === cartItem.productId && directProduct.optionId === cartItem.optionId && directProduct.quantity === cartItem.quantity,
+      );
+    });
+
+    if (exactMatches.length > 0) {
+      return exactMatches.map((cartItem) => ({
+        id: cartItem.id,
+        productId: cartItem.productId,
+        optionId: cartItem.optionId,
+        quantity: cartItem.quantity,
+        unitPrice: cartItem.unitPrice,
+        teamPrice: cartItem.teamPrice || cartItem.unitPrice,
+        individualPrice: cartItem.individualPrice || cartItem.unitPrice,
+        productName: cartItem.productName,
+        optionName: cartItem.optionName,
+        productThumbnail: cartItem.productThumbnail,
+        brand: cartItem.brand,
+        store: cartItem.brand,
+      }));
+    }
+
+    const partialMatches = directProducts
+      .map((directProduct) => {
+        const cartItem = cartData.products.find((item) => item.productId === directProduct.productId && item.optionId === directProduct.optionId);
+
+        if (cartItem) {
+          return {
+            id: cartItem.id,
+            productId: cartItem.productId,
+            optionId: cartItem.optionId,
+            quantity: directProduct.quantity,
+            unitPrice: cartItem.unitPrice,
+            teamPrice: cartItem.teamPrice || cartItem.unitPrice,
+            individualPrice: cartItem.individualPrice || cartItem.unitPrice,
+            productName: productDetails?.name || cartItem.productName,
+            optionName: cartItem.optionName,
+            productThumbnail: productDetails?.thumbnailUrl || cartItem.productThumbnail,
+            brand: productDetails?.store || cartItem.brand,
+            store: productDetails?.store || cartItem.brand,
+          };
+        }
+        return null;
+      })
+      .filter(Boolean);
+
+    return partialMatches;
+  };
+
+  const currentOrderItems = getOrderItemsForDirectPurchase().filter((item): item is NonNullable<typeof item> => item !== null);
 
   const calculateEstimatedAmount = () => {
-    if (!paymentData?.selectedItems || paymentData.selectedItems.length === 0) return 0;
+    if (!currentOrderItems || currentOrderItems.length === 0) return 0;
 
-    return paymentData.selectedItems.reduce((acc, item) => {
-      const price = paymentData.orderType === 'individual' ? item.individualPrice || item.unitPrice : item.teamPrice || item.unitPrice;
+    return currentOrderItems.reduce((acc, item) => {
+      const price = paymentData?.orderType === 'individual' ? item.individualPrice || item.unitPrice : item.teamPrice || item.unitPrice;
       return acc + price * item.quantity;
     }, 0);
   };
@@ -211,15 +292,29 @@ export default function Payment() {
     }
 
     try {
-      const prepareData = {
-        items: paymentData?.selectedItems.map((item) => item.id) || [],
+      const isTeamOrder = paymentData?.orderType !== 'individual';
+
+      const prepareData: any = {
+        items: currentOrderItems.map((item) => item.id),
         addressId: selectedAddress.id,
+        orderType: isTeamOrder ? 'TEAM' : 'PERSONAL',
         deliveryRequest: selectedDeliveryRequest || '현관문 앞에 놓아주세요.',
-        ...(appliedCoupon?.couponId && { appliedCouponId: appliedCoupon.couponId }),
         point: usedPoints,
-        orderType: paymentData?.orderType === 'individual' ? 'PERSONAL' : 'TEAM',
-        ...(paymentData?.teamId && { teamId: paymentData.teamId }),
       };
+
+      // 팀 구매일 경우에만 teamId 추가
+      if (isTeamOrder) {
+        if (!paymentData.teamId) {
+          alert('팀 정보가 올바르지 않습니다. 다시 시도해주세요.');
+          setIsProcessingPayment(false);
+          return;
+        }
+        prepareData.teamId = paymentData.teamId;
+      }
+
+      if (appliedCoupon?.couponId) {
+        prepareData.appliedCouponId = appliedCoupon.couponId;
+      }
 
       const prepareResult = await paymentPrepareMutation.mutateAsync(prepareData);
 
@@ -376,7 +471,7 @@ export default function Payment() {
     );
   }
 
-  if (userLoading || addressesLoading || pointsLoading || couponsLoading) {
+  if (userLoading || addressesLoading || pointsLoading || couponsLoading || (paymentData?.isDirectPurchase && cartLoading)) {
     return (
       <>
         <PageHeader title="주문 결제" />
