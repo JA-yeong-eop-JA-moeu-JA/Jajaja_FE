@@ -42,7 +42,7 @@ export default function PaymentStatusPage({ status, errorMessage }: IPaymentStat
                 leftVariant="left-outline"
                 rightVariant="right-orange"
                 onLeftClick={() => {
-                  navigate(isSuccess ? '/주문목록' : '/shoppingcart');
+                  navigate(isSuccess ? '/주문내역' : '/shoppingcart');
                 }}
                 onRightClick={() => {
                   navigate('/home');
