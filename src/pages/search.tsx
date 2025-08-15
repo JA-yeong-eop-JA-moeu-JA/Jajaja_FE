@@ -86,13 +86,30 @@ export default function Search() {
     size,
   });
 
-  const keywordQuery = useKeywordProducts({
+  const {
+    data: q,
+    fetchNextPage,
+    hasNextPage,
+    isLoading,
+  } = useKeywordProducts({
     keyword: !isCategoryMode ? keywordParam || '' : undefined,
     sort,
     page,
     size,
   });
 
+  const bottomRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!bottomRef.current || !hasNextPage) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) fetchNextPage();
+      },
+      { threshold: 0.2 },
+    );
+    observer.observe(bottomRef.current);
+    return () => observer.disconnect();
+  }, [fetchNextPage, hasNextPage, sort]);
   type TProductCardItem = {
     id: number;
     name: string;
@@ -151,7 +168,7 @@ export default function Search() {
     threshold: 1,
   });
 
-  const displayList: TProductCardItem[] = isCategoryMode ? accCategory : (keywordQuery.products ?? []).map(mapToProductCard);
+  const displayList: TProductCardItem[] = isCategoryMode ? accCategory : (q?.pages.flatMap((p) => p.result.products) ?? []).map(mapToProductCard);
 
   useEffect(() => {
     if (!searchParams.get('size')) {
@@ -326,8 +343,12 @@ export default function Search() {
               />
             ))}
           </div>
-
-          {isCategoryMode && <InfiniteScrollSentinel ref={categorySentinelRef} style={{ height: 1 }} />}
+          {isCategoryMode ? <InfiniteScrollSentinel ref={categorySentinelRef} style={{ height: 1 }} /> : <div ref={bottomRef} className="h-1" />}
+          {(isLoading || categoryQuery.isLoading) && (
+            <div className="w-full flex items-center justify-center p-4">
+              <div className="animate-spin rounded-full h-15 w-15 border-3 border-t-transparent border-orange-light-active" />
+            </div>
+          )}
         </section>
       )}
     </>

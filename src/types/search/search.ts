@@ -24,9 +24,11 @@ export interface IGetKeywordProductsResponse {
     page?: {
       size: number;
       totalElements: number;
+      currentElements: number;
       totalPages: number;
-      page: number;
-      isFirst: boolean;
+      currentPage: number;
+      hasNextPage: boolean;
+      hasPreviousPage: boolean;
       isLast: boolean;
     };
   };
