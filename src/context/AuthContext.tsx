@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 
 import type { TGetUserInfoResponse } from '@/types/member/TGetUserInfo';
 
-import useUserInfo from '@/hooks/myPage/useUserInfo';
+import useUserInfo from '@/hooks/members/useUserInfo';
 
 interface IAuthContextType {
   user: TGetUserInfoResponse['result'] | null;
