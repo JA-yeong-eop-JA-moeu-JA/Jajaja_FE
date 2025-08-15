@@ -68,11 +68,7 @@ export const useModalStore = create<IModalStore>((set) => ({
               onUpdate: options.onUpdate,
               ...(props || {}),
             })
-        : (props: any) =>
-            createElement(ModalComponent, {
-              ...(options || {}),
-              ...(props || {}),
-            });
+        : () => createElement(ModalComponent, options);
 
     set({
       isModalOpen: true,
