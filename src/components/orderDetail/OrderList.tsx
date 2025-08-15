@@ -57,11 +57,8 @@ const ORDER_STATUS_LABEL_MAP: Record<TBEOrderStatus, TTOSKey> = {
 /** 팀 매칭 유효시간(분) — BE와 합의된 값으로 변경 */
 const MATCH_TTL_MINUTES = 600;
 
-/** BE 매칭 상태(영문) */
-type TBackendMatch = 'MATCHING' | 'COMPLETED' | 'FAILED';
-
-/** BE 상태(영문) → UI 라벨(한글) 매핑 (MATCH_STATUS_COLOR_MAP의 key와 동일해야 함) */
-const MATCH_STATUS_LABEL_MAP: Record<TBackendMatch, keyof typeof MATCH_STATUS_COLOR_MAP> = {
+/** BE 상태(영문) → UI 라벨(한글) 매핑 */
+const MATCH_STATUS_LABEL_MAP: Record<'MATCHING' | 'COMPLETED' | 'FAILED', keyof typeof MATCH_STATUS_COLOR_MAP> = {
   MATCHING: '매칭 중',
   COMPLETED: '매칭 완료',
   FAILED: '매칭 실패',
@@ -71,8 +68,7 @@ function getRemainMs(teamCreatedAt: string | null) {
   if (!teamCreatedAt) return 0;
   const start = new Date(teamCreatedAt).getTime();
   const end = start + MATCH_TTL_MINUTES * 60_000;
-  const now = Date.now();
-  return Math.max(0, end - now);
+  return Math.max(0, end - Date.now());
 }
 
 function formatHMS(ms: number) {
@@ -102,113 +98,94 @@ function Countdown({ teamCreatedAt, onExpire }: { teamCreatedAt: string | null; 
   return <span className="ml-2 text-xs text-gray-500">{remain === 0 ? '마감' : formatHMS(remain)}</span>;
 }
 
-type TOrderStatusKey = keyof typeof ORDER_STATUS_COLOR_MAP;
-type TMatchStatusKey = keyof typeof MATCH_STATUS_COLOR_MAP;
-
-type TOrderListItem = IOrderItem & {
-  orderProductId: number;
-  orderStatus?: TOrderStatusKey;
-  matchStatus?: TMatchStatusKey;
-  orderDate?: string;
-  /** BE 원시값들(존재 시) */
-  teamCreatedAt?: string | null;
-  /** BE가 영문 상태를 내려줄 수 있으므로 any로 안전캐스팅용 */
-  orderStatusRaw?: TBEOrderStatus | null;
-  matchStatusRaw?: TBackendMatch | null;
-};
-
 export default function OrderList({ orders, onExpire }: IOrderProps) {
   const navigate = useNavigate();
 
-  const toReviewable = (it: TOrderListItem): TReviewableOrderItem => ({
-    orderId: it.orderId,
-    orderDate: '', // 필요 시 상위 order.createdAt을 내려 매핑
-    orderProductId: it.orderProductId,
-    productId: it.productId,
-    productName: it.name,
-    store: it.company,
-    optionName: it.option,
-    imageUrl: it.image ?? null,
-    price: it.price,
-    quantity: it.quantity,
-    isReviewWritten: Boolean(it.reviewed),
-  });
+  const toReviewable = (order: IOrder, item: IOrderItem): TReviewableOrderItem => {
+
+    const anyItem = item as any;
+    return {
+      ...anyItem, // 먼저 펼치고(뒤에서 필요한 값들로 덮어쓰기)
+      orderId: order.id,
+      orderDate: order.createdAt ?? '',
+      orderProductId: anyItem.orderProductId ?? item.productId,
+      productId: item.productId,
+      productName: item.name,
+      store: item.company,
+      optionName: item.option,
+      quantity: item.quantity,
+      price: item.price,
+      isReviewWritten: item.reviewed,
+      imageUrl:
+        anyItem.imageUrl ??
+        anyItem.image ?? // IOrderItem.image
+        anyItem.product?.image ?? // 혹시 product.image로만 오는 경우
+        '',
+    } as TReviewableOrderItem;
+  };
+
 
   return (
     <div className="w-full flex flex-col">
-      {orders.map((order, index) => {
-        const orderDateLabel = order.createdAt
-          ? new Date(order.createdAt).toLocaleDateString('ko-KR', {
-              year: 'numeric',
-              month: '2-digit',
-              day: '2-digit',
-            })
-          : '25.12.12';
+      {orders.map((order, index) => (
+        <section key={order.id} className={`w-full pb-4 mb-4 ${index !== orders.length - 1 ? 'border-b-black-1 border-b-4' : ''}`}>
+          <button
+            className="w-full flex items-center justify-between pr-2 pl-4"
+            onClick={() => navigate(`/mypage/order/orderDetailPersonal?orderId=${order.id}`)}
+          >
+            <p className="text-subtitle-medium text-left">
+              {order.createdAt
+                ? new Date(order.createdAt).toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                  })
+                : '25.12.12'}
+            </p>
+            <img src={ChevronRight} alt=">" className="w-2 h-4" />
+          </button>
 
-        return (
-          <section key={order.id} className={`w-full pb-4 mb-4 ${index !== orders.length - 1 ? 'border-b-black-1 border-b-4' : ''}`}>
-            <button
-              type="button"
-              className="w-full flex items-center justify-between pr-2 pl-4"
-              onClick={() => navigate(`/mypage/order/orderDetailPersonal?orderId=${order.id}`)}
-            >
-              <p className="text-subtitle-medium text-left">{orderDateLabel}</p>
-              <img src={ChevronRight} alt=">" className="w-2 h-4" />
-            </button>
+          {/* 주문 아이템 카드 */}
+          {order.items.map((item) => {
+            type TOSKey = keyof typeof ORDER_STATUS_COLOR_MAP;
+            type TMSKey = keyof typeof MATCH_STATUS_COLOR_MAP;
 
-            {/* 주문 아이템 카드 */}
-            {order.items.map((rawItem) => {
-              // 필요한 필드만 안전하게 추려서 사용
-              const item: TOrderListItem = {
-                ...rawItem,
-                orderProductId: (rawItem as any).orderProductId,
-                teamCreatedAt: (rawItem as any).teamCreatedAt ?? null,
-                orderStatusRaw: (rawItem as any).orderStatus ?? null,
-                matchStatusRaw: (rawItem as any).matchStatus ?? null,
-                // Ensure orderStatus and matchStatus are of the correct type and not null
-                orderStatus: (rawItem as any).orderStatus
-                  ? (ORDER_STATUS_LABEL_MAP[(rawItem as any).orderStatus as TBEOrderStatus] as TOrderStatusKey)
-                  : undefined,
-                matchStatus: (rawItem as any).matchStatus
-                  ? (MATCH_STATUS_LABEL_MAP[(rawItem as any).matchStatus as TBackendMatch] as TMatchStatusKey)
-                  : undefined,
-              };
+            const beOs = (item as any).orderStatus as TBEOrderStatus | null | undefined;
+            const osLabel = beOs ? (ORDER_STATUS_LABEL_MAP[beOs] as TOSKey) : undefined;
 
-              const osLabel = item.orderStatusRaw ? (ORDER_STATUS_LABEL_MAP[item.orderStatusRaw] as TOrderStatusKey) : undefined;
+            const beMs = (item as any).matchStatus as 'MATCHING' | 'COMPLETED' | 'FAILED' | null | undefined;
+            const msLabel = beMs ? (MATCH_STATUS_LABEL_MAP[beMs] as TMSKey) : undefined;
 
-              const msLabel = item.matchStatusRaw ? (MATCH_STATUS_LABEL_MAP[item.matchStatusRaw] as TMatchStatusKey) : undefined;
+            const isMatching = beMs === 'MATCHING';
 
-              const isMatching = item.matchStatusRaw === 'MATCHING';
+            return (
+              <div
+                key={`${item.orderId}-${item.productId}`}
+                className="px-4 pt-4 cursor-pointer"
+                onClick={(e) => {
+                  if ((e.target as HTMLElement).closest('button')) return;
+                  navigate(`/mypage/order/orderDetailPersonal?orderId=${order.id}`);
+                }}
+              >
+                {(osLabel || msLabel) && (
+                  <div className="pb-2 flex justify-between items-center text-body-medium">
+                    {/* 왼쪽: 주문 상태 */}
+                    <div>{osLabel && <span className={ORDER_STATUS_COLOR_MAP[osLabel]}>{osLabel}</span>}</div>
 
-              return (
-                <div
-                  key={`${order.id}-${item.orderProductId ?? item.productId}`}
-                  className="px-4 pt-4 cursor-pointer"
-                  onClick={(e) => {
-                    if ((e.target as HTMLElement).closest('button')) return;
-                    navigate(`/mypage/order/orderDetailPersonal?orderId=${order.id}`);
-                  }}
-                >
-                  {(osLabel || msLabel) && (
-                    <div className="pb-2 flex justify-between items-center text-body-medium">
-                      {/* 왼쪽: 주문 상태 */}
-                      <div>{osLabel && <span className={ORDER_STATUS_COLOR_MAP[osLabel]}>{osLabel}</span>}</div>
-
-                      {/* 오른쪽: 매칭 상태 + 카운트다운 */}
-                      <div className="flex items-center gap-2">
-                        {msLabel && <span className={MATCH_STATUS_COLOR_MAP[msLabel]}>{msLabel}</span>}
-                        {isMatching && <Countdown teamCreatedAt={item.teamCreatedAt ?? null} onExpire={onExpire} />}
-                      </div>
+                    {/* 오른쪽: 매칭 상태 + 카운트다운 */}
+                    <div className="flex items-center gap-2">
+                      {msLabel && <span className={MATCH_STATUS_COLOR_MAP[msLabel]}>{msLabel}</span>}
+                      {isMatching && <Countdown teamCreatedAt={(item as any).teamCreatedAt ?? null} onExpire={onExpire} />}
                     </div>
-                  )}
+                  </div>
+                )}
 
-                  <OrderItem item={toReviewable(item)} show={false} />
-                </div>
-              );
-            })}
-          </section>
-        );
-      })}
+                <OrderItem item={toReviewable(order, item)} show={false} />
+              </div>
+            );
+          })}
+        </section>
+      ))}
     </div>
   );
 }
