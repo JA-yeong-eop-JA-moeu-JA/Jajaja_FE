@@ -180,8 +180,10 @@ export default function Payment() {
   const calculateEstimatedAmount = () => {
     if (!currentOrderItems || currentOrderItems.length === 0) return 0;
 
+    const orderType = paymentData?.orderType || 'individual';
+
     return currentOrderItems.reduce((acc, item) => {
-      const price = paymentData?.orderType === 'individual' ? item.individualPrice || item.unitPrice : item.teamPrice || item.unitPrice;
+      const price = orderType === 'individual' ? item.individualPrice || item.unitPrice : item.teamPrice || item.unitPrice;
       return acc + price * item.quantity;
     }, 0);
   };

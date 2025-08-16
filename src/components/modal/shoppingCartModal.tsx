@@ -54,7 +54,7 @@ export default function CartModal({ item, onUpdate }: ICartModalProps) {
     currentProductCartItems.map((cartItem) => ({
       optionId: cartItem.optionId,
       optionName: cartItem.optionName,
-      unitPrice: cartItem.unitPrice,
+      unitPrice: cartItem.individualPrice ?? 0,
       quantity: cartItem.quantity,
     })),
   );
