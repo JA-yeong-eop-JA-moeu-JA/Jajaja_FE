@@ -28,7 +28,7 @@ type TBEOrderStatus =
   | 'TEAM_MATCHING_FAILED';
 
 type TTOSKey =
-  | '결제 대기'
+  | '결제 완료'
   | '결제 완료'
   | '결제 취소'
   | '결제 실패'
@@ -41,7 +41,7 @@ type TTOSKey =
   | '매칭 실패';
 
 const ORDER_STATUS_LABEL_MAP: Record<TBEOrderStatus, TTOSKey> = {
-  READY: '결제 대기',
+  READY: '결제 완료',
   DONE: '결제 완료',
   CANCELED: '결제 취소',
   ABORTED: '결제 실패',

@@ -9,7 +9,7 @@ import OrderProductList from '@/components/orderDetail/orderProductList';
 import PaymentInfo from '@/components/orderDetail/paymentInfo';
 
 type TOrderStatus =
-  | '결제 대기' // READY
+  | '결제 완료' // READY
   | '결제 완료' // DONE
   | '결제 취소' // CANCELED
   | '결제 실패' // ABORTED
@@ -53,7 +53,7 @@ type TBEOrderStatus =
   | 'TEAM_MATCHING_FAILED';
 
 const ORDER_STATUS_LABEL_MAP: Record<TBEOrderStatus, TOrderStatus> = {
-  READY: '결제 대기',
+  READY: '결제 완료',
   DONE: '결제 완료',
   CANCELED: '결제 취소',
   ABORTED: '결제 실패',
@@ -68,7 +68,7 @@ const ORDER_STATUS_LABEL_MAP: Record<TBEOrderStatus, TOrderStatus> = {
 
 const toOrderStatusLabel = (items: Array<{ status?: string }>): TOrderStatus => {
   const code = (items[0]?.status ?? '').toUpperCase() as TBEOrderStatus;
-  return ORDER_STATUS_LABEL_MAP[code] ?? '결제 대기';
+  return ORDER_STATUS_LABEL_MAP[code] ?? '결제 완료';
 };
 
 const toMatchStatusLabel = (items: Array<{ teamStatus?: string; matchingStatus?: string }>): TMatchStatus | undefined => {
