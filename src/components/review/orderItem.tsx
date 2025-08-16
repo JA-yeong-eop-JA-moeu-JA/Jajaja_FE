@@ -2,7 +2,21 @@ import { useNavigate } from 'react-router-dom';
 
 import type { TReviewableOrderItem } from '@/types/review/myReview';
 
-import type { ICartItem } from '@/pages/shoppingCart';
+// API 응답에 맞는 장바구니 아이템 타입
+interface ICartItem {
+  id: number;
+  productId: number;
+  productName: string;
+  brand: string;
+  optionId: number;
+  optionName: string;
+  quantity: number;
+  productThumbnail: string;
+  individualPrice?: number;
+  teamPrice?: number;
+  totalPrice: number;
+  teamAvailable: boolean;
+}
 
 type TOrderItemType = TReviewableOrderItem | ICartItem;
 
@@ -10,6 +24,10 @@ export interface IOrderDataProps {
   item: TOrderItemType;
   show: boolean;
   showPrice?: boolean;
+  // 같은 상품의 여러 옵션에 대한 총합 가격 (선택적)
+  totalTeamPrice?: number;
+  totalIndividualPrice?: number;
+  showTotalPriceOnly?: boolean; // 총합 가격만 표시할지 여부
 }
 
 const isReviewableOrderItem = (orderItem: TOrderItemType): orderItem is TReviewableOrderItem => {
@@ -17,10 +35,10 @@ const isReviewableOrderItem = (orderItem: TOrderItemType): orderItem is TReviewa
 };
 
 const isCartItem = (orderItem: TOrderItemType): orderItem is ICartItem => {
-  return 'productId' in orderItem && 'optionId' in orderItem;
+  return 'productId' in orderItem && 'optionId' in orderItem && 'brand' in orderItem;
 };
 
-export default function OrderItem({ item, show, showPrice = true }: IOrderDataProps) {
+export default function OrderItem({ item, show, showPrice = true, totalTeamPrice, totalIndividualPrice, showTotalPriceOnly = false }: IOrderDataProps) {
   const navigate = useNavigate();
 
   const writeReview = () => {
@@ -45,16 +63,16 @@ export default function OrderItem({ item, show, showPrice = true }: IOrderDataPr
       };
     } else if (isCartItem(orderItem)) {
       return {
-        imageUrl: orderItem.imageUrl || orderItem.productThumbnail || '',
+        imageUrl: orderItem.productThumbnail || '',
         productName: orderItem.productName,
-        store: orderItem.store || orderItem.brand,
+        store: orderItem.brand,
         optionName: orderItem.optionName,
         quantity: orderItem.quantity,
-        price: showPrice ? orderItem.totalPrice || orderItem.price * orderItem.quantity : 0,
+        price: showPrice ? orderItem.totalPrice : 0,
         isReviewWritten: false,
         teamPrice: orderItem.teamPrice,
         individualPrice: orderItem.individualPrice,
-        discountRate: orderItem.discountRate,
+        discountRate: undefined,
       };
     }
 
@@ -78,21 +96,14 @@ export default function OrderItem({ item, show, showPrice = true }: IOrderDataPr
   function PriceDisplay() {
     if (!showPrice) return null;
 
-    // 장바구니 아이템인 경우 팀구매가와 개별구매가 모두 표시
-    if (isCartItem(item) && displayData.teamPrice && displayData.individualPrice) {
+    // 총합 가격만 표시하는 경우 (같은 상품의 여러 옵션 그룹)
+    if (showTotalPriceOnly && totalTeamPrice && totalIndividualPrice) {
       return (
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
-            <span className="text-orange text-small-medium">{(displayData.teamPrice * displayData.quantity).toLocaleString('ko-KR')} 원</span>
-            <span className="text-xs text-orange bg-orange-1 px-1 py-0.5 rounded">팀구매가</span>
+            <span className="text-black-3 text-small-regular line-through">{totalIndividualPrice.toLocaleString('ko-KR')} 원</span>
+            <span className="text-body-medium">{totalTeamPrice.toLocaleString('ko-KR')} 원</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-black-3 text-small-regular line-through">
-              {(displayData.individualPrice * displayData.quantity).toLocaleString('ko-KR')} 원
-            </span>
-            <span className="text-xs text-black-3">개별구매가</span>
-          </div>
-          {displayData.discountRate && <span className="text-orange text-xs font-medium">{displayData.discountRate}% 할인</span>}
         </div>
       );
     }
