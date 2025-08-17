@@ -32,13 +32,7 @@ class Storage {
   static setCategory = (category: number) => {
     localStorage.setItem('category', category.toString());
   };
-  static getServer = () => {
-    const server = localStorage.getItem('server');
-    return server ? server : undefined;
-  };
-  static setServer = () => {
-    localStorage.setItem('server', 'set');
-  };
+
   static setKeyword = (keyword: string) => {
     const list: TKeywordItem[] = JSON.parse(sessionStorage.getItem('keyword') || '[]');
     if (list[0]?.keyword === keyword) return;
