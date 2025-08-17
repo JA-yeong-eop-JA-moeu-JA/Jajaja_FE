@@ -180,8 +180,10 @@ export default function Payment() {
   const calculateEstimatedAmount = () => {
     if (!currentOrderItems || currentOrderItems.length === 0) return 0;
 
+    const orderType = paymentData?.orderType || 'individual';
+
     return currentOrderItems.reduce((acc, item) => {
-      const price = paymentData?.orderType === 'individual' ? item.individualPrice || item.unitPrice : item.teamPrice || item.unitPrice;
+      const price = orderType === 'individual' ? item.individualPrice || item.unitPrice : item.teamPrice || item.unitPrice;
       return acc + price * item.quantity;
     }, 0);
   };
@@ -492,7 +494,9 @@ export default function Payment() {
     return (
       <>
         <PageHeader title="주문 결제" />
-        <Loading />
+        <div className="w-full min-h-screen flex items-center justify-center">
+          <Loading />
+        </div>
       </>
     );
   }
@@ -507,6 +511,9 @@ export default function Payment() {
       </>
     );
   }
+
+  const amountPayableBeforePoints = displayAmount.originalAmount - displayAmount.couponDiscount + displayAmount.shippingFee;
+  const maxPointsToUse = Math.min(userPoints, Math.max(0, amountPayableBeforePoints));
 
   return (
     <>
@@ -617,12 +624,13 @@ export default function Payment() {
             <button
               className="px-4 py-2.5 border-1 border-black-3 text-body-regular rounded whitespace-nowrap"
               onClick={() => {
-                const newValue = usedPoints === userPoints ? 0 : userPoints;
+                const newValue = usedPoints === maxPointsToUse ? 0 : maxPointsToUse;
                 setUsedPoints(newValue);
                 setPointsError('');
               }}
             >
-              {usedPoints === userPoints ? '사용 취소' : '모두 사용'}
+              {/* 최대 사용 가능 포인트를 사용 중일 때만 사용 취소 표시 */}
+              {usedPoints === maxPointsToUse && usedPoints > 0 ? '사용 취소' : '모두 사용'}
             </button>
           </div>
 
