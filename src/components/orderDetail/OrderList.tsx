@@ -28,7 +28,7 @@ type TBEOrderStatus =
   | 'TEAM_MATCHING_FAILED';
 
 type TTOSKey =
-  | '결제 대기'
+  | '결제 완료'
   | '결제 완료'
   | '결제 취소'
   | '결제 실패'
@@ -41,7 +41,7 @@ type TTOSKey =
   | '매칭 실패';
 
 const ORDER_STATUS_LABEL_MAP: Record<TBEOrderStatus, TTOSKey> = {
-  READY: '결제 대기',
+  READY: '결제 완료',
   DONE: '결제 완료',
   CANCELED: '결제 취소',
   ABORTED: '결제 실패',
@@ -102,13 +102,25 @@ export default function OrderList({ orders, onExpire }: IOrderProps) {
   const navigate = useNavigate();
 
   const toReviewable = (order: IOrder, item: IOrderItem): TReviewableOrderItem => {
+    const anyItem = item as any;
     return {
-      orderDate: order.createdAt,
-      orderProductId: (item as any).orderProductId ?? item.productId,
+      ...anyItem, // 먼저 펼치고(뒤에서 필요한 값들로 덮어쓰기)
+      orderId: order.id,
+      orderDate: order.createdAt ?? '',
+      orderProductId: anyItem.orderProductId ?? item.productId,
+      productId: item.productId,
       productName: item.name,
       store: item.company,
-      ...(item as any),
-    } as unknown as TReviewableOrderItem;
+      optionName: item.option,
+      quantity: item.quantity,
+      price: item.price,
+      isReviewWritten: item.reviewed,
+      imageUrl:
+        anyItem.imageUrl ??
+        anyItem.image ?? // IOrderItem.image
+        anyItem.product?.image ?? // 혹시 product.image로만 오는 경우
+        '',
+    } as TReviewableOrderItem;
   };
 
   return (

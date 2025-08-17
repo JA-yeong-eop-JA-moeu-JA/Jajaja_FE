@@ -68,6 +68,19 @@ interface IGroupedCartItem {
   options: ICartItem[];
 }
 
+// 그룹의 총 팀구매가와 개별가격 계산 함수
+const calculateGroupTotalPrices = (options: ICartItem[]) => {
+  const totalTeamPrice = options.reduce((sum, option) => {
+    return sum + (option.teamPrice || option.unitPrice) * option.quantity;
+  }, 0);
+
+  const totalIndividualPrice = options.reduce((sum, option) => {
+    return sum + (option.individualPrice || option.price) * option.quantity;
+  }, 0);
+
+  return { totalTeamPrice, totalIndividualPrice };
+};
+
 export default function ShoppingCart() {
   const navigate = useNavigate();
   const { openModal } = useModalStore();
@@ -300,21 +313,31 @@ export default function ShoppingCart() {
             </section>
 
             {groupedCartItems.map((group) => {
-              const groupTotalPrice = group.options.reduce((acc, option) => acc + option.totalPrice, 0);
+              // 그룹의 총 가격 계산
+              const { totalTeamPrice, totalIndividualPrice } = calculateGroupTotalPrices(group.options);
               const groupTotalQuantity = group.options.reduce((acc, option) => acc + option.quantity, 0);
 
               return (
                 <section key={group.productId} className="w-full border-b-4 border-black-0">
+                  {/* 그룹의 첫 번째 아이템에만 총 가격 표시 */}
                   {group.options.map((product, index) => {
                     const itemKey = `${product.productId}-${product.optionId}`;
                     const isChecked = checkedItems[itemKey] || false;
+                    const isFirstInGroup = index === 0;
 
                     return (
                       <div key={itemKey} className={`px-4 py-5 ${index < group.options.length - 1 ? 'border-b border-black-1' : ''}`}>
                         <div className="flex items-start gap-3">
                           <BaseCheckbox checked={isChecked} onClick={() => handleToggleItem(product.productId, product.optionId)} />
                           <div className="flex-1">
-                            <OrderItem item={product} show={false} showPrice={true} />
+                            <OrderItem
+                              item={product}
+                              show={false}
+                              showPrice={false}
+                              totalTeamPrice={isFirstInGroup ? totalTeamPrice : undefined}
+                              totalIndividualPrice={isFirstInGroup ? totalIndividualPrice : undefined}
+                              showTotalPriceOnly={isFirstInGroup && group.options.length > 1}
+                            />
                           </div>
                         </div>
                       </div>
@@ -340,7 +363,12 @@ export default function ShoppingCart() {
 
                   <div className="px-4 py-3 flex justify-between items-center">
                     <p className="text-small-medium text-black-4">총 {groupTotalQuantity}개</p>
-                    <p className="text-body-medium">{groupTotalPrice.toLocaleString()} 원</p>
+                    <div className="flex items-center gap-2">
+                      {totalIndividualPrice > totalTeamPrice && (
+                        <span className="text-black-3 text-small-regular line-through">{totalIndividualPrice.toLocaleString()} 원</span>
+                      )}
+                      <p className="text-body-medium text-body-medium">{totalTeamPrice.toLocaleString()} 원</p>
+                    </div>
                   </div>
                 </section>
               );

@@ -18,7 +18,7 @@ export default function MyPage() {
   const { logout } = useLogout();
   const navigate = useNavigate();
   return (
-    <div className="w-full h-screen">
+    <div className="w-full min-h-screen">
       <header className="px-3">
         <Header />
       </header>
