@@ -68,7 +68,7 @@ interface IGroupedCartItem {
   options: ICartItem[];
 }
 
-// 그룹의 총 팀구매가와 개별가격 계산 함수
+// 그룹의 총 팀구매가와 개별가격 계산
 const calculateGroupTotalPrices = (options: ICartItem[]) => {
   const totalTeamPrice = options.reduce((sum, option) => {
     return sum + (option.teamPrice || option.unitPrice) * option.quantity;
@@ -198,13 +198,12 @@ export default function ShoppingCart() {
         return;
       }
 
-      // 선택된 옵션들을 TPaymentItem 형식으로 변환
       const paymentItems: TPaymentItem[] = selectedOptions.map((item) => ({
         id: item.id,
         productId: item.productId,
         optionId: item.optionId,
         quantity: item.quantity,
-        unitPrice: item.teamPrice || item.unitPrice, // 팀 구매가 사용
+        unitPrice: item.teamPrice || item.unitPrice,
         teamPrice: item.teamPrice || item.unitPrice,
         individualPrice: item.individualPrice || item.price,
         productName: item.productName,
@@ -319,7 +318,6 @@ export default function ShoppingCart() {
 
               return (
                 <section key={group.productId} className="w-full border-b-4 border-black-0">
-                  {/* 그룹의 첫 번째 아이템에만 총 가격 표시 */}
                   {group.options.map((product, index) => {
                     const itemKey = `${product.productId}-${product.optionId}`;
                     const isChecked = checkedItems[itemKey] || false;

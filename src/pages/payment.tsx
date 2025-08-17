@@ -85,7 +85,7 @@ export default function Payment() {
   const [selectedDeliveryRequest, setSelectedDeliveryRequest] = useState<string>('');
   const [usedPoints, setUsedPoints] = useState<number>(0);
   const [isProcessingPayment, setIsProcessingPayment] = useState<boolean>(false);
-  const [pointsError, setPointsError] = useState<string>(''); // ✅ 적립금 에러 상태 추가
+  const [pointsError, setPointsError] = useState<string>('');
 
   const [backendCalculatedAmount, setBackendCalculatedAmount] = useState<{
     totalAmount: number;
@@ -235,7 +235,6 @@ export default function Payment() {
   const handlePointsChange = (value: number) => {
     const numValue = Number(value) || 0;
 
-    // 에러 상태 초기화
     setPointsError('');
 
     if (numValue > userPoints) {
@@ -634,7 +633,7 @@ export default function Payment() {
                 setPointsError('');
               }}
             >
-              {/* 최대 사용 가능 포인트를 사용 중일 때만 사용 취소" 표시 */}
+              {/* 최대 사용 가능 포인트를 사용 중일 때만 사용 취소 표시 */}
               {usedPoints === maxPointsToUse && usedPoints > 0 ? '사용 취소' : '모두 사용'}
             </button>
           </div>

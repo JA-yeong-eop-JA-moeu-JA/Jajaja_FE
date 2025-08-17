@@ -249,7 +249,7 @@ export default function OptionModal({ type, teamId, mode }: IOptionModalProps) {
                       <Plus />
                     </div>
                   </div>
-                  <p className="text-body-medium">{((shouldUseTeamPrice ? originPrice : unitPrice) * quantity).toLocaleString()} 원</p>
+                  <p className="text-body-medium">{((shouldUseTeamPrice ? unitPrice : originPrice) * quantity).toLocaleString()} 원</p>
                 </div>
               </div>
             ))}
@@ -263,7 +263,7 @@ export default function OptionModal({ type, teamId, mode }: IOptionModalProps) {
                   <p className="text-orange">팀 구매하면 {diff.toLocaleString()}원 저렴해요!</p>
                 )}
               </div>
-              <p>{shouldUseTeamPrice ? originTotalPrice.toLocaleString() : unitTotalPrice.toLocaleString()} 원</p>
+              <p>{shouldUseTeamPrice ? unitTotalPrice.toLocaleString() : originTotalPrice.toLocaleString()} 원</p>
             </div>
           </div>
         )}

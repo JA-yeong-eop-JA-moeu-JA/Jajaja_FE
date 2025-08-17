@@ -45,7 +45,7 @@ export default function PaymentStatusPage({ status, errorMessage }: IPaymentStat
                 leftVariant="left-outline"
                 rightVariant="right-orange"
                 onLeftClick={() => {
-                  navigate(isSuccess ? 'mypage/order/orderDetailPersonal' : '/shoppingcart');
+                  navigate(isSuccess ? '/mypage/order/orderDetailPersonal' : '/shoppingcart');
                 }}
                 onRightClick={() => {
                   navigate('/home');
