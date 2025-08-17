@@ -2,11 +2,8 @@ import { useNavigate } from 'react-router-dom';
 
 import { AGREEMENT } from '@/constants/myPage/agreementList';
 
-import Storage from '@/utils/storage';
-
 import { useAgreementCheckboxStore } from '@/stores/agreementCheckboxStore';
 import usePostAgree from '@/hooks/members/usePostAgree';
-import useCategory from '@/hooks/onBoarding/useCategory';
 
 import CheckboxAgreement from '@/components/checkbox/CheckboxAgreement';
 import { Button } from '@/components/common/button';
@@ -16,7 +13,6 @@ import Right from '@/assets/right.svg?react';
 
 export default function Agreement() {
   const { mutate } = usePostAgree();
-  const { mutate: setCategory } = useCategory();
   const { checkedItems } = useAgreementCheckboxStore();
   const navigate = useNavigate();
   const requiredKeys = ['terms-service', 'terms-privacy', 'terms-age', 'terms-financial'] as const;
@@ -26,9 +22,6 @@ export default function Agreement() {
   const handleSubmit = () => {
     if (!isSubmitEnabled) return;
     mutate(null);
-    if (Storage.getCategory()) {
-      setCategory({ businessCategoryId: Number(Storage.getCategory()) });
-    }
     navigate('/home');
   };
 
