@@ -246,7 +246,9 @@ export default function ShoppingCart() {
         <header>
           <PageHeaderBar title="장바구니" />
         </header>
-        <Loading />
+        <div className="w-full h-screen flex items-center justify-center">
+          <Loading />
+        </div>
         <BottomBar />
       </>
     );

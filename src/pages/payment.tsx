@@ -270,6 +270,15 @@ export default function Payment() {
     });
   };
 
+  const handleAddAddress = () => {
+    navigate('/address/add', {
+      state: {
+        returnPath: '/address/change',
+        originalData: { returnPath: '/payment', paymentData, selectedAddress },
+      },
+    });
+  };
+
   const handlePayment = async () => {
     if (!isPointsValid) {
       toast.error('적립금 입력을 확인해주세요.');
@@ -560,14 +569,10 @@ export default function Payment() {
               <div className="p-4">
                 <div className="flex justify-between items-center mb-2">
                   <p className="text-subtitle-medium">배송지</p>
-                  <button className="text-orange text-small-medium" onClick={handleAddressChangeClick}>
-                    변경하기
-                  </button>
                 </div>
-                <div className="text-center py-8">
-                  <p className="text-body-regular text-black-4 mb-4">등록된 배송지가 없습니다</p>
-                  <Button kind="basic" variant="solid-orange" onClick={() => navigate('/address/add')} className="px-6 py-2">
-                    배송지 추가
+                <div className="text-center py-4">
+                  <Button kind="basic" variant="outline-gray" onClick={handleAddAddress} className="px-6 py-2">
+                    + 배송지 추가
                   </Button>
                 </div>
               </div>
@@ -629,7 +634,7 @@ export default function Payment() {
                 setPointsError('');
               }}
             >
-              {/* 최대 사용 가능 포인트를 사용 중일 때만 사용 취소 표시 */}
+              {/* 최대 사용 가능 포인트를 사용 중일 때만 사용 취소" 표시 */}
               {usedPoints === maxPointsToUse && usedPoints > 0 ? '사용 취소' : '모두 사용'}
             </button>
           </div>
