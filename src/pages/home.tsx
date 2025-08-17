@@ -1,11 +1,8 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-import Storage from '@/utils/storage';
 
 import { useModalStore } from '@/stores/modalStore';
 import useHomeProduct from '@/hooks/home/useGetProduct';
-import useCategory from '@/hooks/onBoarding/useCategory';
 
 import SearchInput from '@/components/common/SearchInput';
 import BottomBar from '@/components/head_bottom/BottomBar';
@@ -15,39 +12,7 @@ import New from '@/components/home/new';
 import Popular from '@/components/home/popular';
 import Recommand from '@/components/home/recommand';
 
-import { useAuth } from '@/context/AuthContext';
-
 export default function Home() {
-  const { isLoggedIn } = useAuth();
-  const { mutate } = useCategory();
-  // user 정보 알고 싶을 때
-  // console.log('user:', user?.name);
-  /*  refetch 호출로 user 정보 재요청(useUserInfo를 강제 호출하여 로그인 유무 확인)
-  회원이어야만 작동하는 버튼 트리거에 넣으면 좋습니다
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      const res = await refetch();
-      if (!mounted) return;
-      if (res.data?.result) {
-        console.log('User data fetched:', res.data.result.name);
-      }
-      if (res.error) {
-        console.error('Error fetching user data:', res.error);
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, [refetch]); */
-  const called = useRef(false);
-  useEffect(() => {
-    if (!isLoggedIn || called.current || Storage.getServer()) return;
-    called.current = true;
-    Storage.setServer();
-    mutate({ businessCategoryId: Number(Storage.getCategory()) });
-  }, [isLoggedIn, mutate]);
-
   const [scrollDir, setScrollDir] = useState<'up' | 'down'>('up');
   const [lastY, setLastY] = useState(0);
   const { openModal } = useModalStore();
