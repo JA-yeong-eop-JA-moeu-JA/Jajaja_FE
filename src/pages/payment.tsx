@@ -99,23 +99,14 @@ export default function Payment() {
   const { data: addressesData, isLoading: addressesLoading } = useGetAddresses();
   const { data: pointsData, isLoading: pointsLoading } = useInfinitePoints();
   const { data: couponsData, isLoading: couponsLoading } = useInfiniteCoupons();
-  const { calculateDiscount, getAppliedCoupon, getLocalAppliedCoupon, isExpired, isApplicable } = useCartCoupon();
+  const { calculateDiscount, getAppliedCoupon, getLocalAppliedCoupon, isExpired, isApplicable, clearAppliedCoupon, isCouponStillAvailable } = useCartCoupon();
   const paymentPrepareMutation = usePaymentPrepare();
 
   const user = userInfo?.result;
   const userPoints = pointsData?.pages[0]?.result?.pointBalance ?? 0;
   const addresses: IAddress[] = Array.isArray(addressesData) ? addressesData : [];
 
-  const appliedCoupon: TCoupons | null = (() => {
-    const cartCoupon = getAppliedCoupon();
-    if (cartCoupon) return cartCoupon;
-
-    const localCoupon = getLocalAppliedCoupon();
-    if (localCoupon) return localCoupon;
-
-    return null;
-  })();
-
+  // calculateEstimatedAmount 함수를 미리 정의
   const getOrderItemsForDirectPurchase = () => {
     if (!paymentData?.isDirectPurchase || !paymentData?.directPurchaseInfo || !cartData) {
       return paymentData?.selectedItems || orderData[0].items;
@@ -188,9 +179,52 @@ export default function Payment() {
     }, 0);
   };
 
+  const appliedCoupon: TCoupons | null = (() => {
+    // 우선순위 1: 장바구니에서 적용된 쿠폰 (서버에서 관리)
+    const cartAppliedCoupon = getAppliedCoupon();
+    if (cartAppliedCoupon) {
+      return cartAppliedCoupon;
+    }
+
+    // 우선순위 2: localStorage에서 적용된 쿠폰 (클라이언트 임시 저장)
+    const localAppliedCoupon = getLocalAppliedCoupon();
+    if (localAppliedCoupon) {
+      // 만료 확인
+      if (isExpired(localAppliedCoupon)) {
+        localStorage.removeItem('appliedCoupon');
+        return null;
+      }
+
+      // 적용 가능 여부 확인
+      const currentAmount = calculateEstimatedAmount();
+      if (!isApplicable(currentAmount, localAppliedCoupon)) {
+        return null;
+      }
+
+      return localAppliedCoupon;
+    }
+
+    return null;
+  })();
+
   const availableCoupons = couponsData?.pages.flatMap((page) => page.result.coupons || []) ?? [];
   const currentOrderAmount = calculateEstimatedAmount();
   const couponsCount = availableCoupons.filter((coupon) => !isExpired(coupon) && isApplicable(currentOrderAmount, coupon)).length;
+
+  // 페이지 로드 시 쿠폰 유효성 검증
+  useEffect(() => {
+    const localCoupon = getLocalAppliedCoupon();
+    if (localCoupon && availableCoupons.length > 0) {
+      // 현재 사용 가능한 쿠폰 목록에서 해당 쿠폰이 있는지 확인
+      const isStillAvailable = isCouponStillAvailable(localCoupon.couponId, availableCoupons);
+
+      if (!isStillAvailable) {
+        // 쿠폰이 더 이상 사용 불가능하면 localStorage에서 제거
+        clearAppliedCoupon();
+        toast.info('이전에 선택한 쿠폰이 더 이상 사용할 수 없어 제거되었습니다.');
+      }
+    }
+  }, [availableCoupons, getLocalAppliedCoupon, clearAppliedCoupon, isCouponStillAvailable]);
 
   useEffect(() => {
     if (location.state?.selectedAddress) {
@@ -338,6 +372,7 @@ export default function Payment() {
         prepareData.teamId = paymentData.teamId;
       }
 
+      // 쿠폰 적용 로직 - Swagger 스펙에 맞춰 appliedCouponId 전달
       if (appliedCoupon?.couponId) {
         prepareData.appliedCouponId = appliedCoupon.couponId;
       }
@@ -407,9 +442,18 @@ export default function Payment() {
               break;
             case 'COUPON4003':
               errorMessage = '선택한 쿠폰을 사용할 수 없습니다. 쿠폰이 만료되었거나 이미 사용되었을 수 있습니다.';
+              localStorage.removeItem('appliedCoupon');
+              break;
+            case 'COUPON4001':
+              errorMessage = '이미 사용된 쿠폰입니다.';
+              localStorage.removeItem('appliedCoupon');
+              break;
+            case 'COUPON4002':
+              errorMessage = '쿠폰 사용 조건을 만족하지 않습니다.';
               break;
             case 'COUPON_INVALID':
               errorMessage = '선택한 쿠폰을 사용할 수 없습니다.';
+              localStorage.removeItem('appliedCoupon');
               break;
             case 'ADDRESS_NOT_FOUND':
               errorMessage = '배송지 정보를 확인할 수 없습니다.';
@@ -633,7 +677,6 @@ export default function Payment() {
                 setPointsError('');
               }}
             >
-              {/* 최대 사용 가능 포인트를 사용 중일 때만 사용 취소 표시 */}
               {usedPoints === maxPointsToUse && usedPoints > 0 ? '사용 취소' : '모두 사용'}
             </button>
           </div>
