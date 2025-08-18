@@ -4,6 +4,9 @@ import { motion } from 'framer-motion';
 import { SelectButton } from '@/components/common/button/selectButton';
 import FeedbackPage from '@/components/common/FeedbackPage';
 
+import paymentCompleteIcon from '/src/assets/paymentComplete.svg';
+import paymentFailIcon from '/src/assets/paymentFail.svg';
+
 type TPaymentStatus = 'success' | 'fail';
 
 interface IPaymentStatusPageProps {
@@ -28,7 +31,7 @@ export default function PaymentStatusPage({ status, errorMessage }: IPaymentStat
       >
         <div>
           <FeedbackPage
-            iconSrc={isSuccess ? '/src/assets/paymentComplete.svg' : '/src/assets/paymentFail.svg'}
+            iconSrc={isSuccess ? paymentCompleteIcon : paymentFailIcon}
             title={isSuccess ? '주문이 완료됐습니다.' : '일시적 오류로 결제에 실패했어요.'}
             subtitle={subtitle}
           />
@@ -42,7 +45,7 @@ export default function PaymentStatusPage({ status, errorMessage }: IPaymentStat
                 leftVariant="left-outline"
                 rightVariant="right-orange"
                 onLeftClick={() => {
-                  navigate(isSuccess ? '/주문내역' : '/shoppingcart');
+                  navigate(isSuccess ? '/mypage/order/orderDetailPersonal' : '/shoppingcart');
                 }}
                 onRightClick={() => {
                   navigate('/home');
