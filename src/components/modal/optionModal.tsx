@@ -46,6 +46,8 @@ export default function OptionModal({ type, teamId, mode }: IOptionModalProps) {
   const isTeam = type === 'team';
   const isTeamJoin = mode === 'team_join';
 
+  const shouldUseTeamPrice = !isTeam || isTeamJoin;
+
   const handleSelect = (selectedId: number) => {
     const found = optionData?.result.find(({ id: optionId }) => optionId === selectedId);
     if (!found) return;
@@ -79,8 +81,8 @@ export default function OptionModal({ type, teamId, mode }: IOptionModalProps) {
         productId,
         optionId: item.id,
         quantity: item.quantity,
-        unitPrice: isTeam ? item.unitPrice : item.originPrice,
-        totalPrice: (isTeam ? item.unitPrice : item.originPrice) * item.quantity,
+        unitPrice: shouldUseTeamPrice ? item.unitPrice : item.originPrice,
+        totalPrice: (shouldUseTeamPrice ? item.unitPrice : item.originPrice) * item.quantity,
       }));
 
       await addMultipleItems(cartItems);
@@ -108,8 +110,8 @@ export default function OptionModal({ type, teamId, mode }: IOptionModalProps) {
         productId,
         optionId: item.id,
         quantity: item.quantity,
-        unitPrice: isTeam ? item.unitPrice : item.originPrice,
-        totalPrice: (isTeam ? item.unitPrice : item.originPrice) * item.quantity,
+        unitPrice: shouldUseTeamPrice ? item.unitPrice : item.originPrice,
+        totalPrice: (shouldUseTeamPrice ? item.unitPrice : item.originPrice) * item.quantity,
       }));
 
       await addMultipleItems(tempCartItems);
@@ -247,7 +249,7 @@ export default function OptionModal({ type, teamId, mode }: IOptionModalProps) {
                       <Plus />
                     </div>
                   </div>
-                  <p className="text-body-medium">{((isTeam ? unitPrice : originPrice) * quantity).toLocaleString()} 원</p>
+                  <p className="text-body-medium">{((shouldUseTeamPrice ? unitPrice : originPrice) * quantity).toLocaleString()} 원</p>
                 </div>
               </div>
             ))}
@@ -255,13 +257,13 @@ export default function OptionModal({ type, teamId, mode }: IOptionModalProps) {
             <div className="flex justify-between items-center text-small-medium">
               <div className="flex items-center gap-2">
                 <p>총 {totalQuantity}개</p>
-                {!isTeam ? (
+                {shouldUseTeamPrice ? (
                   <p className="text-orange">1인 구매보다 {diff.toLocaleString()}원 저렴해요!</p>
                 ) : (
                   <p className="text-orange">팀 구매하면 {diff.toLocaleString()}원 저렴해요!</p>
                 )}
               </div>
-              <p>{isTeam ? unitTotalPrice.toLocaleString() : originTotalPrice.toLocaleString()} 원</p>
+              <p>{shouldUseTeamPrice ? unitTotalPrice.toLocaleString() : originTotalPrice.toLocaleString()} 원</p>
             </div>
           </div>
         )}
