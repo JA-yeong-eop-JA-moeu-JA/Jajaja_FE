@@ -10,7 +10,13 @@ export default function PaymentStatusWrapper() {
   const { isConfirming, confirmResult, error } = usePaymentStatus();
 
   if (isConfirming) {
-    return <Loading />;
+    return (
+      <>
+        <div className="w-full h-screen flex items-center justify-center">
+          <Loading />
+        </div>
+      </>
+    );
   }
 
   if (error) {
@@ -35,5 +41,11 @@ export default function PaymentStatusWrapper() {
     }
   }
 
-  return <Loading />;
+  return (
+    <>
+      <div className="w-full h-screen flex items-center justify-center">
+        <Loading />
+      </div>
+    </>
+  );
 }

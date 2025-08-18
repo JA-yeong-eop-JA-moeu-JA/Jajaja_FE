@@ -85,7 +85,7 @@ export default function Payment() {
   const [selectedDeliveryRequest, setSelectedDeliveryRequest] = useState<string>('');
   const [usedPoints, setUsedPoints] = useState<number>(0);
   const [isProcessingPayment, setIsProcessingPayment] = useState<boolean>(false);
-  const [pointsError, setPointsError] = useState<string>(''); // ✅ 적립금 에러 상태 추가
+  const [pointsError, setPointsError] = useState<string>('');
 
   const [backendCalculatedAmount, setBackendCalculatedAmount] = useState<{
     totalAmount: number;
@@ -99,23 +99,14 @@ export default function Payment() {
   const { data: addressesData, isLoading: addressesLoading } = useGetAddresses();
   const { data: pointsData, isLoading: pointsLoading } = useInfinitePoints();
   const { data: couponsData, isLoading: couponsLoading } = useInfiniteCoupons();
-  const { calculateDiscount, getAppliedCoupon, getLocalAppliedCoupon, isExpired, isApplicable } = useCartCoupon();
+  const { calculateDiscount, getAppliedCoupon, getLocalAppliedCoupon, isExpired, isApplicable, clearAppliedCoupon, isCouponStillAvailable } = useCartCoupon();
   const paymentPrepareMutation = usePaymentPrepare();
 
   const user = userInfo?.result;
   const userPoints = pointsData?.pages[0]?.result?.pointBalance ?? 0;
   const addresses: IAddress[] = Array.isArray(addressesData) ? addressesData : [];
 
-  const appliedCoupon: TCoupons | null = (() => {
-    const cartCoupon = getAppliedCoupon();
-    if (cartCoupon) return cartCoupon;
-
-    const localCoupon = getLocalAppliedCoupon();
-    if (localCoupon) return localCoupon;
-
-    return null;
-  })();
-
+  // calculateEstimatedAmount 함수를 미리 정의
   const getOrderItemsForDirectPurchase = () => {
     if (!paymentData?.isDirectPurchase || !paymentData?.directPurchaseInfo || !cartData) {
       return paymentData?.selectedItems || orderData[0].items;
@@ -188,9 +179,52 @@ export default function Payment() {
     }, 0);
   };
 
+  const appliedCoupon: TCoupons | null = (() => {
+    // 우선순위 1: 장바구니에서 적용된 쿠폰 (서버에서 관리)
+    const cartAppliedCoupon = getAppliedCoupon();
+    if (cartAppliedCoupon) {
+      return cartAppliedCoupon;
+    }
+
+    // 우선순위 2: localStorage에서 적용된 쿠폰 (클라이언트 임시 저장)
+    const localAppliedCoupon = getLocalAppliedCoupon();
+    if (localAppliedCoupon) {
+      // 만료 확인
+      if (isExpired(localAppliedCoupon)) {
+        localStorage.removeItem('appliedCoupon');
+        return null;
+      }
+
+      // 적용 가능 여부 확인
+      const currentAmount = calculateEstimatedAmount();
+      if (!isApplicable(currentAmount, localAppliedCoupon)) {
+        return null;
+      }
+
+      return localAppliedCoupon;
+    }
+
+    return null;
+  })();
+
   const availableCoupons = couponsData?.pages.flatMap((page) => page.result.coupons || []) ?? [];
   const currentOrderAmount = calculateEstimatedAmount();
   const couponsCount = availableCoupons.filter((coupon) => !isExpired(coupon) && isApplicable(currentOrderAmount, coupon)).length;
+
+  // 페이지 로드 시 쿠폰 유효성 검증
+  useEffect(() => {
+    const localCoupon = getLocalAppliedCoupon();
+    if (localCoupon && availableCoupons.length > 0) {
+      // 현재 사용 가능한 쿠폰 목록에서 해당 쿠폰이 있는지 확인
+      const isStillAvailable = isCouponStillAvailable(localCoupon.couponId, availableCoupons);
+
+      if (!isStillAvailable) {
+        // 쿠폰이 더 이상 사용 불가능하면 localStorage에서 제거
+        clearAppliedCoupon();
+        toast.info('이전에 선택한 쿠폰이 더 이상 사용할 수 없어 제거되었습니다.');
+      }
+    }
+  }, [availableCoupons, getLocalAppliedCoupon, clearAppliedCoupon, isCouponStillAvailable]);
 
   useEffect(() => {
     if (location.state?.selectedAddress) {
@@ -235,7 +269,6 @@ export default function Payment() {
   const handlePointsChange = (value: number) => {
     const numValue = Number(value) || 0;
 
-    // 에러 상태 초기화
     setPointsError('');
 
     if (numValue > userPoints) {
@@ -266,6 +299,15 @@ export default function Payment() {
         returnPath: '/payment',
         paymentData,
         selectedAddress,
+      },
+    });
+  };
+
+  const handleAddAddress = () => {
+    navigate('/address/add', {
+      state: {
+        returnPath: '/address/change',
+        originalData: { returnPath: '/payment', paymentData, selectedAddress },
       },
     });
   };
@@ -330,6 +372,7 @@ export default function Payment() {
         prepareData.teamId = paymentData.teamId;
       }
 
+      // 쿠폰 적용 로직 - Swagger 스펙에 맞춰 appliedCouponId 전달
       if (appliedCoupon?.couponId) {
         prepareData.appliedCouponId = appliedCoupon.couponId;
       }
@@ -399,9 +442,18 @@ export default function Payment() {
               break;
             case 'COUPON4003':
               errorMessage = '선택한 쿠폰을 사용할 수 없습니다. 쿠폰이 만료되었거나 이미 사용되었을 수 있습니다.';
+              localStorage.removeItem('appliedCoupon');
+              break;
+            case 'COUPON4001':
+              errorMessage = '이미 사용된 쿠폰입니다.';
+              localStorage.removeItem('appliedCoupon');
+              break;
+            case 'COUPON4002':
+              errorMessage = '쿠폰 사용 조건을 만족하지 않습니다.';
               break;
             case 'COUPON_INVALID':
               errorMessage = '선택한 쿠폰을 사용할 수 없습니다.';
+              localStorage.removeItem('appliedCoupon');
               break;
             case 'ADDRESS_NOT_FOUND':
               errorMessage = '배송지 정보를 확인할 수 없습니다.';
@@ -494,7 +546,9 @@ export default function Payment() {
     return (
       <>
         <PageHeader title="주문 결제" />
-        <Loading />
+        <div className="w-full min-h-screen flex items-center justify-center">
+          <Loading />
+        </div>
       </>
     );
   }
@@ -509,6 +563,9 @@ export default function Payment() {
       </>
     );
   }
+
+  const amountPayableBeforePoints = displayAmount.originalAmount - displayAmount.couponDiscount + displayAmount.shippingFee;
+  const maxPointsToUse = Math.min(userPoints, Math.max(0, amountPayableBeforePoints));
 
   return (
     <>
@@ -555,14 +612,10 @@ export default function Payment() {
               <div className="p-4">
                 <div className="flex justify-between items-center mb-2">
                   <p className="text-subtitle-medium">배송지</p>
-                  <button className="text-orange text-small-medium" onClick={handleAddressChangeClick}>
-                    변경하기
-                  </button>
                 </div>
-                <div className="text-center py-8">
-                  <p className="text-body-regular text-black-4 mb-4">등록된 배송지가 없습니다</p>
-                  <Button kind="basic" variant="solid-orange" onClick={() => navigate('/address/add')} className="px-6 py-2">
-                    배송지 추가
+                <div className="text-center py-4">
+                  <Button kind="basic" variant="outline-gray" onClick={handleAddAddress} className="px-6 py-2">
+                    + 배송지 추가
                   </Button>
                 </div>
               </div>
@@ -619,12 +672,12 @@ export default function Payment() {
             <button
               className="px-4 py-2.5 border-1 border-black-3 text-body-regular rounded whitespace-nowrap"
               onClick={() => {
-                const newValue = usedPoints === userPoints ? 0 : userPoints;
+                const newValue = usedPoints === maxPointsToUse ? 0 : maxPointsToUse;
                 setUsedPoints(newValue);
                 setPointsError('');
               }}
             >
-              {usedPoints === userPoints ? '사용 취소' : '모두 사용'}
+              {usedPoints === maxPointsToUse && usedPoints > 0 ? '사용 취소' : '모두 사용'}
             </button>
           </div>
 
