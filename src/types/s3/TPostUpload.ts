@@ -12,7 +12,7 @@ export type TUrlSet = {
 export type TPostUploadResponse = TCommonResponse<TUrlSet>;
 
 export type TPostUploadListRequest = {
-  fileName: string[];
+  fileNameList: string[];
 };
 
 export type TPostUploadListResponse = TCommonResponse<{

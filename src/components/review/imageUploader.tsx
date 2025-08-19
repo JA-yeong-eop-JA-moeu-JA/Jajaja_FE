@@ -1,25 +1,19 @@
 import type { ChangeEventHandler } from 'react';
 
-import { useReviewImageStore } from '@/stores/reviewImageStore';
 import { useImageUploader } from '@/hooks/s3/useImageUploader';
 
 import Close from '@/assets/myPage/review/close.svg?react';
 import Plus from '@/assets/myPage/review/plus.svg?react';
 
 export default function ReviewImageUploader() {
-  const { inputRef, images, openFileDialog, handleFileChange, deleteImage, files } = useImageUploader(5);
-  const setFiles = useReviewImageStore((s) => s.setFiles);
+  const { inputRef, images, openFileDialog, handleFileChange, deleteImage } = useImageUploader(5);
+
   const onInputChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     handleFileChange(e);
-    const picked = e.target.files ? Array.from(e.target.files) : [];
-    const next = [...files, ...picked];
-    setFiles(next);
   };
 
   const onDelete = (idx: number) => {
     deleteImage(idx);
-    const next = files.filter((_, i) => i !== idx);
-    setFiles(next);
   };
 
   return (

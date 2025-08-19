@@ -81,11 +81,11 @@ export default function MyReview() {
           )}
         </div>
       ) : (
-        <div className="flex flex-1 items-center justify-center">
+        <div className="w-full flex flex-1 items-center justify-center">
           {myReviewData.length > 0 ? (
             <div className="w-full flex flex-col items-center justify-center px-4">
               {myReviewData.map((item) => (
-                <div key={item.review.id}>
+                <div key={item.review.id} className="w-full">
                   <ReviewItem review={item.review} isLike={item.isLike} imageUrls={item.imageUrls} />
                   {isFetchingNextPage2 && Array.from({ length: 3 }).map((_, i) => <ReviewItemSkeleton key={`skeleton-${i}`} />)}
                   <div ref={ref} className="h-2" />
