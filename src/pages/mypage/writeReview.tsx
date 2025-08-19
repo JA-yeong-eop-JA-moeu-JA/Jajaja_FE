@@ -52,11 +52,12 @@ export default function WriteReview() {
           content: comment,
           imageKeys: [],
         });
+        navigate('/mypage/review', { replace: true });
         return;
       }
 
       const fileNames = files.map((f) => f.name);
-      const { result } = await requestPresignedUrl({ fileName: fileNames });
+      const { result } = await requestPresignedUrl({ fileNameList: fileNames });
 
       const urlSets: TUrlSet[] = result.presignedUrlUploadResponses;
 
@@ -78,6 +79,7 @@ export default function WriteReview() {
       console.error(error);
       alert('이미지 업로드에 실패했습니다. 다시 시도해 주세요.');
     }
+    navigate('/mypage/review', { replace: true });
   };
 
   return (

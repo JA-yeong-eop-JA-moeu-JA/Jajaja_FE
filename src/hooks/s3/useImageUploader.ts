@@ -1,5 +1,6 @@
-// hooks/useImageUploader.ts
 import { type ChangeEvent, useEffect, useRef, useState } from 'react';
+
+import { useReviewImageStore } from '@/stores/reviewImageStore';
 
 interface IPreviewImage {
   file: File;
@@ -9,6 +10,8 @@ interface IPreviewImage {
 export function useImageUploader(maxCount: number = 5, overwrite: boolean = false) {
   const [images, setImages] = useState<IPreviewImage[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const { setFiles, reset } = useReviewImageStore();
 
   const openFileDialog = () => {
     inputRef.current?.click();
@@ -20,7 +23,6 @@ export function useImageUploader(maxCount: number = 5, overwrite: boolean = fals
 
     const selectedFiles = Array.from(files);
 
-    // 덮어쓰기 모드 (ex. 프로필 이미지)
     if (overwrite) {
       images.forEach((img) => URL.revokeObjectURL(img.url));
 
@@ -30,11 +32,10 @@ export function useImageUploader(maxCount: number = 5, overwrite: boolean = fals
       };
 
       setImages([preview]);
-      e.target.value = '';
+      setFiles([selectedFiles[0]]);
       return;
     }
 
-    // 일반 모드 (ex. 리뷰 이미지 최대 5장)
     const currentCount = images.length;
     const totalCount = currentCount + selectedFiles.length;
 
@@ -53,7 +54,11 @@ export function useImageUploader(maxCount: number = 5, overwrite: boolean = fals
       url: URL.createObjectURL(file),
     }));
 
-    setImages([...images, ...newPreviews]);
+    const nextImages = [...images, ...newPreviews];
+    setImages(nextImages);
+
+    setFiles(nextImages.map((img) => img.file));
+
     e.target.value = '';
   };
 
@@ -67,11 +72,13 @@ export function useImageUploader(maxCount: number = 5, overwrite: boolean = fals
     }));
 
     setImages(remapped);
+    setFiles(remapped.map((img) => img.file));
   };
 
   const resetImages = () => {
     images.forEach((img) => URL.revokeObjectURL(img.url));
     setImages([]);
+    reset();
   };
 
   useEffect(() => {
@@ -87,6 +94,5 @@ export function useImageUploader(maxCount: number = 5, overwrite: boolean = fals
     handleFileChange,
     deleteImage,
     resetImages,
-    files: images.map((img) => img.file),
   };
 }

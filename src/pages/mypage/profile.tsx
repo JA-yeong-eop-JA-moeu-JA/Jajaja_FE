@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import { useReviewImageStore } from '@/stores/reviewImageStore';
 import usePatchUserInfo from '@/hooks/members/usePatchUserInfo';
 import useUserInfo from '@/hooks/members/useUserInfo';
 import { useImageUploader } from '@/hooks/s3/useImageUploader';
@@ -41,7 +42,9 @@ export default function Profile() {
     }
   }, [data]);
 
-  const { inputRef, images, openFileDialog, handleFileChange, resetImages, files } = useImageUploader(1, true);
+  const { inputRef, images, openFileDialog, handleFileChange, resetImages } = useImageUploader(1, true);
+
+  const files = useReviewImageStore((s) => s.files);
 
   const currentPreviewUrl = useDefaultImage ? defaultImageUrl : images[0]?.url || data?.result.profileUrl;
 
@@ -68,12 +71,10 @@ export default function Profile() {
     }
 
     let profileKeyName: string | undefined = undefined;
-    if (!useDefaultImage && files[0]) {
+    if (!useDefaultImage && files.length > 0) {
       try {
         const { result } = await requestPresignedUrl({ fileName: files[0].name });
-
         await putUpload({ url: result.url, file: files[0] });
-
         profileKeyName = result.keyName;
       } catch (error) {
         alert('이미지 업로드에 실패했습니다.');
