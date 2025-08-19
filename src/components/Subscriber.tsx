@@ -15,7 +15,7 @@ export default function Subscriber() {
 
   useEffect(() => {
     if (esRef.current) return;
-    const es = new EventSource('/api/notifications/subscribe', { withCredentials: true });
+    const es = new EventSource(`${import.meta.env.VITE_API_BASE_URL}/api/notifications/subscribe`, { withCredentials: true });
     esRef.current = es;
 
     const onAlarm = (evt: Event) => {
