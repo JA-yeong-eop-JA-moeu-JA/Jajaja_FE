@@ -21,7 +21,6 @@ export default function Board() {
   const [hasInitReview, setHasInitReview] = useState<boolean>(true);
   const { data, isLoading: isLoadingDetail } = useGetProductDetail();
 
-
   const [pageReview, setPageReview] = useState(0);
   const [pageTeam, setPageTeam] = useState(0);
   const [accReviews, setAccReviews] = useState<TReviewItem[]>([]);
@@ -112,7 +111,6 @@ export default function Board() {
     }
   };
 
-
   return (
     <div className="flex flex-col min-h-screen">
       <header className="px-3">
@@ -139,32 +137,28 @@ export default function Board() {
                   </div>
                 ))}
               </div>
-                {pageReview === 0 &&
-                renderReviews.length === 0 &&
-                hasInitReview &&
-                (isLoadingReviews || !isFetchedReviews || isLoadingDetail) ? (
-                  <p className="text-center text-black-3">리뷰 로딩 중...</p>
-                ) : isErrorReviews && pageReview === 0 && hasInitReview ? (
-                  <p className="text-center text-error-3">리뷰 로드 실패</p>
-                ) : renderReviews.length === 0 && hasInitReview ? (
-                  <div className="w-full flex justify-center items-center text-body-regular text-black-4 h-20">
-                    <p>아직 등록된 리뷰가 없어요.</p>
+              {pageReview === 0 && renderReviews.length === 0 && hasInitReview && (isLoadingReviews || !isFetchedReviews || isLoadingDetail) ? (
+                <p className="text-center text-black-3">리뷰 로딩 중...</p>
+              ) : isErrorReviews && pageReview === 0 && hasInitReview ? (
+                <p className="text-center text-error-3">리뷰 로드 실패</p>
+              ) : renderReviews.length === 0 && hasInitReview ? (
+                <div className="w-full flex justify-center items-center text-body-regular text-black-4 h-20">
+                  <p>아직 등록된 리뷰가 없어요.</p>
+                </div>
+              ) : (
+                renderReviews.map((item, idx) => (
+                  <div key={item.review.id ?? idx} className="flex flex-col gap-3">
+                    <ReviewCard
+                      review={item.review}
+                      isLike={item.isLike}
+                      imageUrls={item.imageUrls}
+                      productId={(item as any).productId} // ★ 백엔드에서 준 값
+                      productName={item.review.productName} // ★ UI 표시용
+                    />
+                    {idx !== renderReviews.length - 1 && <hr className="border-black-1" />}
                   </div>
-                ) : (
-                  renderReviews.map((item, idx) => (
-                    <div key={item.review.id ?? idx} className="flex flex-col gap-3">
-                      <ReviewCard
-                        review={item.review}
-                        isLike={item.isLike}
-                        imageUrls={item.imageUrls}
-                        productId={(item as any).productId}           // ★ 백엔드에서 준 값
-                        productName={item.review.productName}         // ★ UI 표시용
-                      />
-                      {idx !== renderReviews.length - 1 && <hr className="border-black-1" />}
-                    </div>
-                  ))
-                )}
-
+                ))
+              )}
 
               {/* 센티넬(리뷰) */}
               <InfiniteScrollSentinel ref={reviewSentinelRef} style={{ height: 1 }} />

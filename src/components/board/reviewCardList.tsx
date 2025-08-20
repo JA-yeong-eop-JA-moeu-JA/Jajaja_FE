@@ -50,14 +50,13 @@ export default function ReviewCard({ review, isLike, imageUrls, productId, produ
     !expanded ? el.classList.remove('line-clamp-3') : el.classList.add('line-clamp-3');
   };
 
-    const handleLike = (e: React.MouseEvent) => {
+  const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
     setLike((prev) => !prev);
     setLikeCount((prev) => (like ? prev - 1 : prev + 1));
     mutate({ reviewId: review.id });
-    };
-
+  };
 
   return (
     <Link to={`/product/${pid}`}>
