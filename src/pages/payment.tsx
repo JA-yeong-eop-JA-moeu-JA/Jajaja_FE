@@ -75,6 +75,7 @@ export default function Payment() {
 
   // [수정] location.state에서 넘어온 데이터를 paymentDataFromState 변수로 통일하여 받습니다.
   const paymentDataFromState = location.state as {
+    isDirectBuy: any;
     orderType: TOrderType;
     selectedItems: TOrderItem[];
     teamId?: number;
@@ -282,6 +283,13 @@ export default function Payment() {
       return;
     }
     try {
+      if (paymentDataFromState?.isDirectBuy) {
+        const itemsToDelete = orderItems.map((item) => ({
+          productId: item.productId,
+          optionId: item.optionId,
+        }));
+        sessionStorage.setItem('directBuyItemsToDelete', JSON.stringify(itemsToDelete));
+      }
       const isTeamOrder = paymentDataFromState?.orderType !== 'individual';
       const prepareData: any = {
         items: orderItems.map((item) => item.id),
@@ -342,6 +350,8 @@ export default function Payment() {
         failUrl: `${baseUrl}/payment/confirm`,
       });
     } catch (error) {
+      sessionStorage.removeItem('directBuyItemsToDelete');
+
       let errorMessage = '결제 처리 중 오류가 발생했습니다.';
       if (error && typeof error === 'object' && 'response' in error) {
         const axiosError = error as any;

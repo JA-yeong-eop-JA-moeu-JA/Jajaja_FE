@@ -124,6 +124,7 @@ export default function OptionModal({ type, teamId, mode }: IOptionModalProps) {
           orderType,
           selectedItems: addedItemsInCart,
           teamId: orderType === 'team_join' ? teamId : undefined,
+          isDirectBuy: true,
         },
       });
 
@@ -177,6 +178,7 @@ export default function OptionModal({ type, teamId, mode }: IOptionModalProps) {
           orderType: 'team_create',
           selectedItems: addedItemsInCart,
           teamId: newTeamId,
+          isDirectBuy: true,
         },
       });
 
