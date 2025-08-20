@@ -5,6 +5,7 @@ import type { TReviewItem } from '@/types/board/reviewBoard';
 import { useReviews } from '@/hooks/board/useReviews';
 import { useTeamProducts } from '@/hooks/board/useTeamProducts';
 import useInfiniteObserver from '@/hooks/common/useInfiniteObserver';
+import useGetProductDetail from '@/hooks/product/useGetProductDetail';
 
 import HorizontalProductCard from '@/components/board/HorizontalProductCard';
 import { PageButton, type TabId } from '@/components/common/button';
@@ -18,6 +19,7 @@ export default function Board() {
   const [sortType, setSortType] = useState<'LATEST' | 'RECOMMEND'>('LATEST');
 
   const [hasInitReview, setHasInitReview] = useState<boolean>(true);
+  const { data } = useGetProductDetail();
 
   const [pageReview, setPageReview] = useState(0);
   const [pageTeam, setPageTeam] = useState(0);
@@ -134,16 +136,19 @@ export default function Board() {
                 ))}
               </div>
 
-              {pageReview === 0 && accReviews.length === 0 && hasInitReview && (isLoadingReviews || !isFetchedReviews) ? (
+              {pageReview === 0 && (data?.result?.reviews?.length ?? 0) === 0 && hasInitReview && (isLoadingReviews || !isFetchedReviews) ? (
                 <p className="text-center text-black-3">리뷰 로딩 중...</p>
               ) : isErrorReviews && pageReview === 0 && hasInitReview ? (
                 <p className="text-center text-error-3">리뷰 로드 실패</p>
-              ) : accReviews.length === 0 && hasInitReview ? (
-                <p className="text-center text-black-3">리뷰가 없습니다.</p>
+              ) : (data?.result?.reviews?.length ?? 0) === 0 && hasInitReview ? (
+                <div className="w-full flex justify-center items-center text-body-regular text-black-4 h-20">
+                  <p>아직 등록된 리뷰가 없어요.</p>
+                </div>
               ) : (
-                accReviews.map((r) => (
-                  <div key={r.review.id} className="border-b border-black-1">
-                    <ReviewCard review={r.review} isLike={r.isLike} imageUrls={r.imageUrls} />
+                data?.result?.reviews.map((item, idx) => (
+                  <div key={idx} className="flex flex-col gap-3">
+                    <ReviewCard {...item} />
+                    {idx !== (data?.result?.reviews?.length ?? 0) - 1 && <hr className="border-black-1" />}
                   </div>
                 ))
               )}
