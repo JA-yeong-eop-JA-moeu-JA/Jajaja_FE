@@ -10,6 +10,7 @@ import useInfiniteCoupons from '@/hooks/coupon/useInfiniteCoupons';
 
 import CouponCard from '@/components/coupon/CouponCard';
 import PageHeader from '@/components/head_bottom/PageHeader';
+import Loading from '@/components/loading';
 
 export default function CouponPage() {
   const [selectedCoupon, setSelectedCoupon] = useState<TCoupons | null>(null);
@@ -74,7 +75,7 @@ export default function CouponPage() {
           });
         });
 
-        await new Promise((resolve) => setTimeout(resolve, 300));
+        await new Promise((resolve) => setTimeout(resolve, 200));
       }
 
       setSelectedCoupon(coupon);
@@ -93,7 +94,7 @@ export default function CouponPage() {
             if (err.response?.data?.code) {
               switch (err.response.data.code) {
                 case 'COUPON4003':
-                  errorMessage = '사용할 수 없는 쿠폰입니다';
+                  errorMessage = '사용할 수 없는 쿠폰입니다'; // Todo: 이미 사용된게 안 없어지고 남아있는 경우
                   break;
                 case 'COUPON4001':
                   errorMessage = '이미 사용된 쿠폰입니다';
@@ -122,8 +123,8 @@ export default function CouponPage() {
     return (
       <>
         <PageHeader title="쿠폰" />
-        <div className="w-full h-screen flex justify-center items-center">
-          <div className="text-body-regular text-black-4">쿠폰을 불러오는 중...</div>
+        <div className="w-full min-h-screen flex items-center justify-center">
+          <Loading />
         </div>
       </>
     );
@@ -167,7 +168,7 @@ export default function CouponPage() {
         <div ref={ref} className="h-2" />
 
         {(isFetchingNextPage || isApplying || isUnapplying || isProcessing) && (
-          <p className="text-center py-4 text-gray-500">{isFetchingNextPage ? '더 불러오는 중...' : '쿠폰 처리 중...'}</p>
+          <p className="text-center py-4 text-black-4">{isFetchingNextPage ? '더 불러오는 중...' : '쿠폰 처리 중...'}</p>
         )}
       </div>
     </>

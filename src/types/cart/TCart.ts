@@ -112,3 +112,21 @@ export type TLocalCartStorage = {
   items: TLocalCartItem[];
   lastUpdated: string;
 };
+
+export interface ICartItem {
+  productId: number;
+  productName: string;
+  store: string;
+  optionName: string;
+  quantity: number;
+  price: number;
+  totalPrice: number;
+  imageUrl: string;
+  productThumbnail: string;
+  brand: string;
+  id: number; // cartItemId
+  optionId: number;
+  unitPrice: number;
+  originalPrice: number;
+  teamAvailable: boolean;
+}

@@ -149,6 +149,14 @@ export default function ApplyReturnOrExchange() {
     isReviewWritten: it.reviewed,
   });
 
+  const handleAddressChangeClick = () => {
+    navigate('/address/change', {
+      state: {
+        returnPath: '/mypage/apply', // 수정 필요
+      },
+    });
+  };
+
   // const mutation = useMutation({
   //   mutationFn: submitAfterSales,
   //   onMutate: async (vars: TMutationVars) => {
@@ -237,7 +245,9 @@ export default function ApplyReturnOrExchange() {
         <section className="flex flex-col gap-2 px-4">
           <div className="flex justify-between items-center">
             <h2 className="text-subtitle-medium">회수지 정보</h2>
-            <button className="text-small-medium h-[16px] text-orange">변경하기</button>
+            <button className="text-orange text-small-medium" onClick={handleAddressChangeClick}>
+              변경하기
+            </button>
           </div>
           <div className="flex flex-col gap-[2px] text-body-regular text-black">
             <p>{delivery.name}</p>

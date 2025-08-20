@@ -106,9 +106,7 @@ export const useUnapplyCoupon = () => {
         exact: false,
       });
     },
-    onError: () => {
-      // 에러 발생 시에도 localStorage 정리할 수 있음
-    },
+    onError: () => {},
   });
 };
 
@@ -205,14 +203,13 @@ export const useCartCoupon = () => {
   };
 
   return {
-    // Payment.tsx에서 사용하는 함수명에 맞춤
     getAppliedCoupon: getCartAppliedCoupon,
     getLocalAppliedCoupon,
     clearAppliedCoupon,
     calculateDiscount,
     isApplicable,
     isExpired,
-    isCouponStillAvailable, // 새로 추가
+    isCouponStillAvailable,
   };
 };
 
