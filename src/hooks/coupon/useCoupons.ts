@@ -6,14 +6,12 @@ import { QUERY_KEYS } from '@/constants/querykeys/queryKeys';
 
 import { applyCoupon, cancelCoupon } from '@/apis/coupon/getCoupons';
 
-// TCoupon (장바구니)을 TCoupons (쿠폰 목록)로 변환
 const convertTCouponToTCoupons = (coupon: TCoupon): TCoupons => ({
   couponId: coupon.couponId,
   couponName: coupon.couponName,
   discountType: coupon.discountType as 'PERCENTAGE' | 'FIXED_AMOUNT',
   discountValue: coupon.discountValue,
   applicableConditions: {
-    // TCoupon의 'SPECIFIC'을 TCoupons의 'ALL'로 매핑
     type: coupon.applicableConditions.type === 'SPECIFIC' ? 'ALL' : (coupon.applicableConditions.type as 'ALL' | 'BRAND' | 'CATEGORY' | 'FIRST'),
     values: coupon.applicableConditions.values,
     minOrderAmount: coupon.applicableConditions.minOrderAmount,
@@ -21,7 +19,6 @@ const convertTCouponToTCoupons = (coupon: TCoupon): TCoupons => ({
   },
 });
 
-// TStoredCouponData를 TCoupons로 변환
 const convertStoredDataToTCoupons = (storedData: TStoredCouponData): TCoupons => ({
   couponId: storedData.couponId,
   couponName: storedData.couponName,
@@ -36,7 +33,6 @@ export const useApplyCoupon = () => {
   return useMutation({
     mutationFn: applyCoupon,
     onSuccess: (data) => {
-      // 쿠폰 목록에서 해당 쿠폰 정보 찾기
       const couponsData = queryClient.getQueryData([QUERY_KEYS.GET_COUPONS_INFINITE]) as any;
       let couponInfo: TCoupons | null = null;
 
@@ -50,7 +46,6 @@ export const useApplyCoupon = () => {
         }
       }
 
-      // localStorage에 저장할 데이터 구성
       const couponData: TStoredCouponData = {
         couponId: data.result.couponId,
         couponName: data.result.couponName,
@@ -62,7 +57,6 @@ export const useApplyCoupon = () => {
           minOrderAmount: 0,
           expireAt: '',
         },
-        // API 응답 추가 정보
         cartId: data.result.cartId,
         originalAmount: data.result.originalAmount,
         discountAmount: data.result.discountAmount,
@@ -72,7 +66,6 @@ export const useApplyCoupon = () => {
 
       localStorage.setItem('appliedCoupon', JSON.stringify(couponData));
 
-      // 캐시 무효화
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.GET_COUPONS_INFINITE],
         exact: false,
@@ -96,7 +89,6 @@ export const useUnapplyCoupon = () => {
     onSuccess: () => {
       localStorage.removeItem('appliedCoupon');
 
-      // 캐시 무효화
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.GET_COUPONS_INFINITE],
         exact: false,
@@ -113,7 +105,6 @@ export const useUnapplyCoupon = () => {
 export const useCartCoupon = () => {
   const queryClient = useQueryClient();
 
-  // 장바구니에서 적용된 쿠폰 가져오기 (서버 상태)
   const getCartAppliedCoupon = (): TCoupons | null => {
     try {
       const cartData = queryClient.getQueryData(QUERY_KEYS.GET_CART_ITEMS) as any;
@@ -129,7 +120,6 @@ export const useCartCoupon = () => {
     }
   };
 
-  // localStorage에서 적용된 쿠폰 가져오기 (클라이언트 상태)
   const getLocalAppliedCoupon = (): TCoupons | null => {
     try {
       const savedCoupon = localStorage.getItem('appliedCoupon');
@@ -149,7 +139,6 @@ export const useCartCoupon = () => {
     localStorage.removeItem('appliedCoupon');
   };
 
-  // 쿠폰이 현재 사용 가능한지 확인하는 함수 추가
   const isCouponStillAvailable = (couponId: number, availableCoupons: TCoupons[]): boolean => {
     return availableCoupons.some((coupon) => coupon.couponId === couponId);
   };
