@@ -20,6 +20,8 @@ export default function Board() {
 
   const [hasInitReview, setHasInitReview] = useState<boolean>(true);
   const { data, isLoading: isLoadingDetail } = useGetProductDetail();
+
+
   const [pageReview, setPageReview] = useState(0);
   const [pageTeam, setPageTeam] = useState(0);
   const [accReviews, setAccReviews] = useState<TReviewItem[]>([]);
@@ -82,6 +84,7 @@ export default function Board() {
   const enableInfiniteTeams = isTeamTab && hasNextTeam && accTeams.length > 5 && !isLoading;
 
   const scrollRootRef = useRef<HTMLDivElement | null>(null);
+  const renderReviews = useMemo(() => (pageReview === 0 ? (data?.result?.reviews ?? []) : accReviews), [pageReview, data?.result?.reviews, accReviews]);
 
   const reviewSentinelRef = useInfiniteObserver({
     enabled: enableInfiniteReviews,
@@ -109,22 +112,6 @@ export default function Board() {
     }
   };
 
-  const detailReviews = data?.result?.reviews ?? [];
-
-  const accReviewsNormalized = useMemo(
-    () =>
-      accReviews.map((r) => ({
-        ...r,
-        review: {
-          ...r.review,
-          id: (r.review as any)?.id ?? (r.review as any)?.reviewId ?? null, // ★ NaN 방지
-        },
-      })),
-    [accReviews],
-  );
-
-  // 4) 실제로 렌더에 쓸 소스 선택
-  const renderReviews = pageReview === 0 ? detailReviews : accReviewsNormalized;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -152,29 +139,32 @@ export default function Board() {
                   </div>
                 ))}
               </div>
-
-              {pageReview === 0 && renderReviews.length === 0 && hasInitReview && (isLoadingReviews || !isFetchedReviews || isLoadingDetail) ? (
-                <p className="text-center text-black-3">리뷰 로딩 중...</p>
-              ) : isErrorReviews && pageReview === 0 && hasInitReview ? (
-                <p className="text-center text-error-3">리뷰 로드 실패</p>
-              ) : renderReviews.length === 0 && hasInitReview ? (
-                <div className="w-full flex justify-center items-center text-body-regular text-black-4 h-20">
-                  <p>아직 등록된 리뷰가 없어요.</p>
-                </div>
-              ) : (
-                renderReviews.map((item, idx) => (
-                  <div key={item.review.id ?? idx} className="flex flex-col gap-3">
-                    <ReviewCard
-                      review={item.review}
-                      isLike={item.isLike}
-                      imageUrls={item.imageUrls}
-                      productId={(item as any).productId} // ★ 백엔드에서 준 값
-                      productName={item.review.productName} // ★ UI 표시용
-                    />
-                    {idx !== renderReviews.length - 1 && <hr className="border-black-1" />}
+                {pageReview === 0 &&
+                renderReviews.length === 0 &&
+                hasInitReview &&
+                (isLoadingReviews || !isFetchedReviews || isLoadingDetail) ? (
+                  <p className="text-center text-black-3">리뷰 로딩 중...</p>
+                ) : isErrorReviews && pageReview === 0 && hasInitReview ? (
+                  <p className="text-center text-error-3">리뷰 로드 실패</p>
+                ) : renderReviews.length === 0 && hasInitReview ? (
+                  <div className="w-full flex justify-center items-center text-body-regular text-black-4 h-20">
+                    <p>아직 등록된 리뷰가 없어요.</p>
                   </div>
-                ))
-              )}
+                ) : (
+                  renderReviews.map((item, idx) => (
+                    <div key={item.review.id ?? idx} className="flex flex-col gap-3">
+                      <ReviewCard
+                        review={item.review}
+                        isLike={item.isLike}
+                        imageUrls={item.imageUrls}
+                        productId={(item as any).productId}           // ★ 백엔드에서 준 값
+                        productName={item.review.productName}         // ★ UI 표시용
+                      />
+                      {idx !== renderReviews.length - 1 && <hr className="border-black-1" />}
+                    </div>
+                  ))
+                )}
+
 
               {/* 센티넬(리뷰) */}
               <InfiniteScrollSentinel ref={reviewSentinelRef} style={{ height: 1 }} />

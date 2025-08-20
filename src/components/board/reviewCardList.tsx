@@ -50,11 +50,14 @@ export default function ReviewCard({ review, isLike, imageUrls, productId, produ
     !expanded ? el.classList.remove('line-clamp-3') : el.classList.add('line-clamp-3');
   };
 
-  const handleLike = () => {
+    const handleLike = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
     setLike((prev) => !prev);
     setLikeCount((prev) => (like ? prev - 1 : prev + 1));
     mutate({ reviewId: review.id });
-  };
+    };
+
 
   return (
     <Link to={`/product/${pid}`}>
@@ -111,6 +114,7 @@ export default function ReviewCard({ review, isLike, imageUrls, productId, produ
                   className="flex justify-center items-center text-white text-body-regular absolute top-0 left-0 bg-[#00000099] w-full h-full"
                   onClick={(e) => {
                     e.stopPropagation();
+                    e.preventDefault();
                     if (!pid || !Number.isFinite(pid)) return;
                     navigate({ pathname: `/product/${pid}/photoReview`, search: '' });
                   }}
