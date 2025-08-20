@@ -44,8 +44,6 @@ const DELIVERY_REQUEST_OPTIONS = [
   { id: 4, name: '전화 후 전달해주세요' },
 ];
 
-
-
 export default function ApplyReturnOrExchange() {
   const params = useParams<{ orderId?: string; orderProductId?: string }>();
   const [sp] = useSearchParams();
@@ -126,8 +124,6 @@ export default function ApplyReturnOrExchange() {
     quantity: it.quantity,
     isReviewWritten: it.reviewed,
   });
-
-
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
