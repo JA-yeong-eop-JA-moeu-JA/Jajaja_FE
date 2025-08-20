@@ -19,7 +19,7 @@ export default function ReturnCompletePage() {
           leftVariant="left-outline"
           rightVariant="right-orange"
           onLeftClick={() => {
-            window.location.href = '/return/history';
+            window.location.href = '/mypage/order';
           }}
           onRightClick={() => {
             window.location.href = '/home';
