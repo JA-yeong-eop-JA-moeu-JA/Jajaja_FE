@@ -10,7 +10,7 @@ export type TOrderStatusBE =
   | 'DONE' // 결제 승인
   | 'CANCELED' // 결제 취소
   | 'ABORTED' // 결제 승인 실패
-  | 'EXPIRED' // 유효기간 만료로 거래 취소
+  | 'EXPIRED' // 유효기간 만료로 결제 취소
   | 'SHIPPING' // 배송 중
   | 'DELIVERED' // 배송 완료
   | 'REFUND_REQUESTED' // 환불(반품) 요청

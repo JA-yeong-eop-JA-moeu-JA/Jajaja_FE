@@ -13,7 +13,7 @@ type TOrderStatus =
   | '결제 완료' // DONE
   | '결제 취소' // CANCELED
   | '결제 실패' // ABORTED
-  | '거래 취소' // EXPIRED
+  | '결제 취소' // EXPIRED
   | '배송 중' // SHIPPING
   | '배송 완료' // DELIVERED
   | '환불 요청' // REFUND_REQUESTED
@@ -57,7 +57,7 @@ const ORDER_STATUS_LABEL_MAP: Record<TBEOrderStatus, TOrderStatus> = {
   DONE: '결제 완료',
   CANCELED: '결제 취소',
   ABORTED: '결제 실패',
-  EXPIRED: '거래 취소',
+  EXPIRED: '결제 취소',
   SHIPPING: '배송 중',
   DELIVERED: '배송 완료',
   REFUND_REQUESTED: '환불 요청',
