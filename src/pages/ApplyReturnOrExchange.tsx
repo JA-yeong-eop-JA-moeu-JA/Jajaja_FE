@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 //import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { TOptionBase } from '@/types/optionApply';
@@ -69,6 +69,8 @@ const toOrderStatusLabel = (items: Array<{ status?: string }>): TOrderStatus => 
 // }
 
 export default function ApplyReturnOrExchange() {
+  const location = useLocation();
+
   const params = useParams<{ orderId?: string; orderProductId?: string }>();
   const [sp] = useSearchParams();
   const orderIdStr = params.orderId ?? sp.get('orderId') ?? '';
@@ -153,6 +155,7 @@ export default function ApplyReturnOrExchange() {
     navigate('/address/change', {
       state: {
         returnPath: '/mypage/apply', // 수정 필요
+        ...location.state, // 현재 state를 그대로 다시 전달
       },
     });
   };

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-import { useCart } from '@/hooks/cart/useCartQuery'; // [추가] 장바구니 훅 import
+import { useCart } from '@/hooks/cart/useCartQuery';
 import { usePaymentConfirm } from '@/hooks/payment/usePaymentConfirm';
 
 interface IPaymentConfirmResponse {
@@ -28,7 +28,7 @@ export const usePaymentStatus = (): IUsePaymentStatusReturn => {
   const [error, setError] = useState<string | null>(null);
 
   const paymentConfirmMutation = usePaymentConfirm();
-  const { deleteSelectedItems } = useCart(); // [추가] 장바구니 아이템 삭제 함수 가져오기
+  const { deleteSelectedItems } = useCart();
 
   const didEffectRun = useRef(false);
 
@@ -62,25 +62,19 @@ export const usePaymentStatus = (): IUsePaymentStatusReturn => {
           setConfirmResult(response);
           sessionStorage.removeItem('finalAmount');
 
-          // --- [추가] '즉시 구매' 상품 장바구니에서 삭제하는 로직 ---
           const itemsJson = sessionStorage.getItem('directBuyItemsToDelete');
           if (itemsJson) {
             try {
               const itemsToDelete = JSON.parse(itemsJson);
               if (itemsToDelete && itemsToDelete.length > 0) {
-                // 결제가 성공했으므로, 저장해둔 상품을 장바구니에서 삭제합니다.
                 await deleteSelectedItems(itemsToDelete);
               }
             } catch (deleteError) {
-              // 이 과정에서 에러가 발생해도 결제 자체는 성공한 것이므로,
-              // 사용자에게 오류를 보여주지 않고 콘솔에만 기록합니다.
               console.error('Failed to delete direct-buy items from cart:', deleteError);
             } finally {
-              // 성공하든 실패하든, 사용된 sessionStorage 데이터는 반드시 삭제합니다.
               sessionStorage.removeItem('directBuyItemsToDelete');
             }
           }
-          // --- 로직 종료 ---
         } else {
           setError(response.message || '결제 승인에 실패했습니다.');
         }
@@ -98,7 +92,7 @@ export const usePaymentStatus = (): IUsePaymentStatusReturn => {
     };
 
     confirmPayment();
-  }, []); // 의존성 배열은 비워두어 최초 1회만 실행되도록 합니다.
+  }, []);
 
   return {
     isConfirming: isConfirming || paymentConfirmMutation.isPending,
