@@ -7,8 +7,8 @@ export const postUpload = async (file: TPostUploadRequest): Promise<TPostUploadR
   return data;
 };
 
-export const postUploadList = async ({ fileName }: TPostUploadListRequest): Promise<TPostUploadListResponse> => {
-  const { data } = await axiosInstance.post(`/api/s3/presigned/upload/list`, fileName);
+export const postUploadList = async (fileNameList: TPostUploadListRequest): Promise<TPostUploadListResponse> => {
+  const { data } = await axiosInstance.post(`/api/s3/presigned/upload/list`, fileNameList);
   return data;
 };
 

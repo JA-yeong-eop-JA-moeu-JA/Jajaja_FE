@@ -48,8 +48,6 @@ export const useTossPayments = (): IUseTossPaymentsReturn => {
   useEffect(() => {
     const initializeTossPayments = () => {
       try {
-        console.log('Vercel에 설정된 클라이언트 키:', import.meta.env.VITE_TOSS_CLIENT_KEY);
-
         const clientKey = import.meta.env.VITE_TOSS_CLIENT_KEY;
         console.log('클라이언트 키:', clientKey ? '설정됨' : '설정되지 않음');
 
