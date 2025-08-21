@@ -17,6 +17,7 @@ const convertTCouponToTCoupons = (coupon: TCoupon): TCoupons => ({
     minOrderAmount: coupon.applicableConditions.minOrderAmount,
     expireAt: coupon.applicableConditions.expireAt,
   },
+  isApplicable: true,
 });
 
 const convertStoredDataToTCoupons = (storedData: TStoredCouponData): TCoupons => ({
@@ -25,6 +26,7 @@ const convertStoredDataToTCoupons = (storedData: TStoredCouponData): TCoupons =>
   discountType: storedData.discountType,
   discountValue: storedData.discountValue,
   applicableConditions: storedData.applicableConditions,
+  isApplicable: storedData.isApplicable,
 });
 
 export const useApplyCoupon = () => {
@@ -57,6 +59,8 @@ export const useApplyCoupon = () => {
           minOrderAmount: 0,
           expireAt: '',
         },
+        // [수정 3] isApplicable 필드를 추가합니다. 쿠폰 적용 성공 시점에는 항상 true입니다.
+        isApplicable: couponInfo?.isApplicable ?? true,
         cartId: data.result.cartId,
         originalAmount: data.result.originalAmount,
         discountAmount: data.result.discountAmount,
@@ -81,6 +85,7 @@ export const useApplyCoupon = () => {
   });
 };
 
+// ... 이하 useUnapplyCoupon, useCartCoupon 훅은 수정할 필요 없습니다 ...
 export const useUnapplyCoupon = () => {
   const queryClient = useQueryClient();
 
@@ -137,6 +142,10 @@ export const useCartCoupon = () => {
 
   const clearAppliedCoupon = () => {
     localStorage.removeItem('appliedCoupon');
+    queryClient.invalidateQueries({
+      queryKey: QUERY_KEYS.GET_CART_ITEMS,
+      exact: false,
+    });
   };
 
   const isCouponStillAvailable = (couponId: number, availableCoupons: TCoupons[]): boolean => {

@@ -14,6 +14,7 @@ export type TCoupons = {
   discountType: 'PERCENTAGE' | 'FIXED_AMOUNT';
   discountValue: number;
   applicableConditions: TApplicableConditions;
+  isApplicable: boolean;
 };
 
 export type TGetCouponsInfiniteResponse = TCommonResponse<{

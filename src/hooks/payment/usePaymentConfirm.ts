@@ -1,4 +1,6 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+
+import { QUERY_KEYS } from '@/constants/querykeys/queryKeys';
 
 import { axiosInstance } from '@/apis/axiosInstance';
 import type { IPaymentConfirmRequest } from '@/apis/payment/payment';
@@ -12,10 +14,15 @@ const confirmPaymentWithAuth = async (data: IPaymentConfirmRequest) => {
 };
 
 export const usePaymentConfirm = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: confirmPaymentWithAuth,
     onSuccess: (data) => {
       console.log('결제 승인 성공:', data);
+
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.GET_CART_ITEMS });
+      localStorage.removeItem('appliedCoupon');
     },
     onError: (error) => {
       console.error('결제 승인 실패:', error);

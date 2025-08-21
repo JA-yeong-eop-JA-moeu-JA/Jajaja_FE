@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 
 import type { IAddress } from '@/types/address/TAddress';
-// [수정] TPaymentData, TCartItem 타입을 import 목록에 추가합니다.
 import type { ICartItem, TOrderType, TPaymentItem } from '@/types/cart/TCart';
 import type { TCoupons } from '@/types/coupon/TGetCoupons';
 
@@ -12,9 +11,7 @@ import { formatPhoneNumberForToss, generateCustomerKey } from '@/utils/paymentUt
 
 import { useModalStore } from '@/stores/modalStore';
 import { useGetAddresses } from '@/hooks/address/useAddress';
-// [수정] useCart 훅은 더 이상 이 페이지에서 직접 사용되지 않으므로 import를 제거해도 됩니다.
-// import { useCart } from '@/hooks/cart/useCartQuery';
-import { useCartCoupon } from '@/hooks/coupon/useCoupons';
+import { useApplyCoupon, useCartCoupon } from '@/hooks/coupon/useCoupons';
 import useInfiniteCoupons from '@/hooks/coupon/useInfiniteCoupons';
 import useUserInfo from '@/hooks/members/useUserInfo';
 import { usePayment } from '@/hooks/payment/usePayment';
@@ -27,10 +24,7 @@ import Loading from '@/components/loading';
 import OrderItem from '@/components/review/orderItem';
 
 import Down from '@/assets/icons/down.svg?react';
-// [삭제] mock 데이터 import는 더 이상 필요 없습니다.
-// import { orderData } from '@/mocks/orderData';
 
-// [수정] TCartItem 타입을 사용하도록 함수 시그니처를 명확히 합니다.
 const convertPaymentItemToCartItem = (item: TPaymentItem, orderType: string): ICartItem => {
   const price = orderType === 'individual' ? item.individualPrice || item.unitPrice : item.teamPrice || item.unitPrice;
 
@@ -48,8 +42,8 @@ const convertPaymentItemToCartItem = (item: TPaymentItem, orderType: string): IC
     id: item.id,
     optionId: item.optionId,
     unitPrice: item.unitPrice,
-    originalPrice: item.unitPrice, // originalPrice를 unitPrice로 설정 (필요 시 API 응답에 맞춰 수정)
-    teamAvailable: true, // teamAvailable 필드 추가
+    originalPrice: item.unitPrice,
+    teamAvailable: true,
   };
 };
 
@@ -73,7 +67,6 @@ export default function Payment() {
   const location = useLocation();
   const { openModal } = useModalStore();
 
-  // [수정] location.state에서 넘어온 데이터를 paymentDataFromState 변수로 통일하여 받습니다.
   const paymentDataFromState = location.state as {
     isDirectBuy: any;
     orderType: TOrderType;
@@ -81,17 +74,11 @@ export default function Payment() {
     teamId?: number;
   };
 
-  // [삭제] 'isDirectPurchase', 'directPurchaseInfo' 등을 포함했던 복잡한 paymentData 변수는 더 이상 필요 없으므로 삭제합니다.
-  /*
-  const paymentData = location.state as TPaymentData & { ... };
-  */
-
   const [selectedAddress, setSelectedAddress] = useState<IAddress | null>(null);
   const [selectedDeliveryRequest, setSelectedDeliveryRequest] = useState<string>('');
   const [usedPoints, setUsedPoints] = useState<number>(0);
   const [isProcessingPayment, setIsProcessingPayment] = useState<boolean>(false);
   const [pointsError, setPointsError] = useState<string>('');
-  // [수정] orderItems state를 location.state에 담겨온 selectedItems 값으로 직접 초기화합니다.
   const [orderItems, setOrderItems] = useState<TOrderItem[]>(paymentDataFromState?.selectedItems || []);
 
   const [backendCalculatedAmount, setBackendCalculatedAmount] = useState<{
@@ -107,23 +94,13 @@ export default function Payment() {
   const { data: pointsData, isLoading: pointsLoading } = useInfinitePoints();
   const { data: couponsData, isLoading: couponsLoading } = useInfiniteCoupons();
   const { calculateDiscount, getAppliedCoupon, getLocalAppliedCoupon, isExpired, isApplicable, clearAppliedCoupon, isCouponStillAvailable } = useCartCoupon();
+  const { mutateAsync: applyCoupon } = useApplyCoupon();
   const paymentPrepareMutation = usePaymentPrepare();
 
   const user = userInfo?.result;
   const userPoints = pointsData?.pages[0]?.result?.pointBalance ?? 0;
   const addresses: IAddress[] = Array.isArray(addressesData) ? addressesData : [];
 
-  // [삭제] 버그의 원인이었던 getOrderItemsForDirectPurchase 함수를 완전히 삭제합니다.
-  /*
-  const getOrderItemsForDirectPurchase = () => { ... };
-  */
-
-  // [삭제] 위 함수의 결과였던 currentOrderItems 변수도 삭제합니다.
-  /*
-  const currentOrderItems = getOrderItemsForDirectPurchase().filter(...)
-  */
-
-  // [수정] calculateEstimatedAmount 함수가 이제 'orderItems' state를 직접 사용하도록 변경합니다.
   const calculateEstimatedAmount = () => {
     if (!orderItems || orderItems.length === 0) return 0;
 
@@ -159,16 +136,14 @@ export default function Payment() {
   const currentOrderAmount = calculateEstimatedAmount();
   const couponsCount = availableCoupons.filter((coupon) => !isExpired(coupon) && isApplicable(currentOrderAmount, coupon)).length;
 
-  // [추가] 비정상적인 접근을 막고, state 변경에 대응하기 위한 useEffect 로직
   useEffect(() => {
     if (paymentDataFromState?.selectedItems && paymentDataFromState.selectedItems.length > 0) {
       setOrderItems(paymentDataFromState.selectedItems);
     } else {
-      // 결제할 상품 정보가 없이 페이지에 접근하면 장바구니로 보냅니다.
       toast.error('결제할 상품 정보가 없습니다.');
       navigate('/cart');
     }
-  }, [location.state, navigate]); // location.state가 바뀔 때마다 이 로직이 실행됩니다.
+  }, [location.state, navigate]);
 
   useEffect(() => {
     const localCoupon = getLocalAppliedCoupon();
@@ -275,6 +250,7 @@ export default function Payment() {
     if (isProcessingPayment) {
       return;
     }
+
     setIsProcessingPayment(true);
     const formattedPhoneNumber = formatPhoneNumberForToss(selectedAddress.phone);
     if (!/^\d{10,11}$/.test(formattedPhoneNumber)) {
@@ -282,6 +258,9 @@ export default function Payment() {
       setIsProcessingPayment(false);
       return;
     }
+
+    const currentAppliedCoupon = appliedCoupon;
+
     try {
       if (paymentDataFromState?.isDirectBuy) {
         const itemsToDelete = orderItems.map((item) => ({
@@ -353,6 +332,8 @@ export default function Payment() {
       sessionStorage.removeItem('directBuyItemsToDelete');
 
       let errorMessage = '결제 처리 중 오류가 발생했습니다.';
+      let shouldRestoreCoupon = false;
+
       if (error && typeof error === 'object' && 'response' in error) {
         const axiosError = error as any;
         if (axiosError.response?.data?.code) {
@@ -363,19 +344,15 @@ export default function Payment() {
               setPointsError('적립금을 다시 확인해주세요.');
               break;
             case 'COUPON4003':
-              errorMessage = '선택한 쿠폰을 사용할 수 없습니다. 쿠폰이 만료되었거나 이미 사용되었을 수 있습니다.';
-              localStorage.removeItem('appliedCoupon');
-              break;
             case 'COUPON4001':
-              errorMessage = '이미 사용된 쿠폰입니다.';
-              localStorage.removeItem('appliedCoupon');
+            case 'COUPON_INVALID':
+              errorMessage = '선택한 쿠폰을 사용할 수 없습니다. 쿠폰이 만료되었거나 이미 사용되었을 수 있습니다.';
+              clearAppliedCoupon();
+              shouldRestoreCoupon = false;
               break;
             case 'COUPON4002':
               errorMessage = '쿠폰 사용 조건을 만족하지 않습니다.';
-              break;
-            case 'COUPON_INVALID':
-              errorMessage = '선택한 쿠폰을 사용할 수 없습니다.';
-              localStorage.removeItem('appliedCoupon');
+              shouldRestoreCoupon = true;
               break;
             case 'ADDRESS_NOT_FOUND':
               errorMessage = '배송지 정보를 확인할 수 없습니다.';
@@ -385,12 +362,25 @@ export default function Payment() {
               break;
             default:
               errorMessage = axiosError.response.data.message || errorMessage;
+              shouldRestoreCoupon = true;
           }
         } else if (axiosError.response?.data?.message) {
           errorMessage = axiosError.response.data.message;
+          shouldRestoreCoupon = true;
         }
       } else if (error instanceof Error) {
         errorMessage = error.message;
+        shouldRestoreCoupon = true;
+      }
+
+      if (shouldRestoreCoupon && currentAppliedCoupon) {
+        try {
+          await applyCoupon(currentAppliedCoupon.couponId);
+          console.log('쿠폰 상태가 복구되었습니다.');
+        } catch (restoreError) {
+          console.error('쿠폰 복구 실패:', restoreError);
+          clearAppliedCoupon();
+        }
       }
       toast.error(errorMessage);
     } finally {
