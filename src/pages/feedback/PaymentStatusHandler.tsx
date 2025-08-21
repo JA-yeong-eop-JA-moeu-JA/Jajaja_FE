@@ -38,6 +38,46 @@ export const usePaymentStatus = (): IUsePaymentStatusReturn => {
     }
     didEffectRun.current = true;
 
+    // ✅ 장바구니 아이템 삭제 함수를 먼저 정의
+    const handleCartItemDeletion = async () => {
+      try {
+        // 1. 직접구매 케이스 (기존 로직)
+        const directBuyItemsJson = sessionStorage.getItem('directBuyItemsToDelete');
+        if (directBuyItemsJson) {
+          const itemsToDelete = JSON.parse(directBuyItemsJson);
+          if (itemsToDelete && itemsToDelete.length > 0) {
+            await deleteSelectedItems(itemsToDelete);
+            console.log('직접구매 아이템 장바구니에서 삭제 완료');
+          }
+          sessionStorage.removeItem('directBuyItemsToDelete');
+        }
+
+        // 2. 장바구니에서 결제한 케이스 (새로 추가)
+        const cartItemsJson = sessionStorage.getItem('cartItemsToDelete');
+        if (cartItemsJson) {
+          const itemsToDelete = JSON.parse(cartItemsJson);
+          const orderType = sessionStorage.getItem('paymentOrderType');
+
+          if (itemsToDelete && itemsToDelete.length > 0) {
+            await deleteSelectedItems(itemsToDelete);
+
+            if (orderType === 'individual') {
+              console.log('장바구니 개별구매 아이템 삭제 완료');
+            } else if (orderType === 'team_join') {
+              console.log('팀 참여 후 결제 완료, 장바구니 아이템 삭제 완료');
+            } else if (orderType === 'team_create') {
+              console.log('팀 생성 후 결제 완료, 장바구니 아이템 삭제 완료');
+            }
+          }
+
+          sessionStorage.removeItem('cartItemsToDelete');
+          sessionStorage.removeItem('paymentOrderType');
+        }
+      } catch (deleteError) {
+        console.error('장바구니 아이템 삭제 실패:', deleteError);
+      }
+    };
+
     const confirmPayment = async () => {
       const paymentKey = searchParams.get('paymentKey');
       const orderId = searchParams.get('orderId');
@@ -62,19 +102,7 @@ export const usePaymentStatus = (): IUsePaymentStatusReturn => {
           setConfirmResult(response);
           sessionStorage.removeItem('finalAmount');
 
-          const itemsJson = sessionStorage.getItem('directBuyItemsToDelete');
-          if (itemsJson) {
-            try {
-              const itemsToDelete = JSON.parse(itemsJson);
-              if (itemsToDelete && itemsToDelete.length > 0) {
-                await deleteSelectedItems(itemsToDelete);
-              }
-            } catch (deleteError) {
-              console.error('Failed to delete direct-buy items from cart:', deleteError);
-            } finally {
-              sessionStorage.removeItem('directBuyItemsToDelete');
-            }
-          }
+          await handleCartItemDeletion();
         } else {
           setError(response.message || '결제 승인에 실패했습니다.');
         }

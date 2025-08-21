@@ -262,12 +262,17 @@ export default function Payment() {
     const currentAppliedCoupon = appliedCoupon;
 
     try {
+      const itemsToDelete = orderItems.map((item) => ({
+        productId: item.productId,
+        optionId: item.optionId,
+      }));
+
       if (paymentDataFromState?.isDirectBuy) {
-        const itemsToDelete = orderItems.map((item) => ({
-          productId: item.productId,
-          optionId: item.optionId,
-        }));
         sessionStorage.setItem('directBuyItemsToDelete', JSON.stringify(itemsToDelete));
+      } else {
+        sessionStorage.setItem('cartItemsToDelete', JSON.stringify(itemsToDelete));
+
+        sessionStorage.setItem('paymentOrderType', paymentDataFromState?.orderType || 'individual');
       }
       const isTeamOrder = paymentDataFromState?.orderType !== 'individual';
       const prepareData: any = {
@@ -330,6 +335,8 @@ export default function Payment() {
       });
     } catch (error) {
       sessionStorage.removeItem('directBuyItemsToDelete');
+      sessionStorage.removeItem('cartItemsToDelete');
+      sessionStorage.removeItem('paymentOrderType');
 
       let errorMessage = '결제 처리 중 오류가 발생했습니다.';
       let shouldRestoreCoupon = false;

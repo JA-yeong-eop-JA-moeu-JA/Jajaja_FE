@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
+import { useCart } from '@/hooks/cart/useCartQuery';
+
 import { usePaymentConfirm } from './usePaymentConfirm';
 
 interface IPaymentConfirmResponse {
@@ -23,6 +25,7 @@ export const usePaymentStatus = (): IUsePaymentStatusReturn => {
   const [error, setError] = useState<unknown>(null);
 
   const paymentConfirmMutation = usePaymentConfirm();
+  const { deleteSelectedItems } = useCart();
   const didEffectRun = useRef(false);
 
   useEffect(() => {
@@ -30,6 +33,36 @@ export const usePaymentStatus = (): IUsePaymentStatusReturn => {
       return;
     }
     didEffectRun.current = true;
+
+    const handleCartItemDeletion = async () => {
+      try {
+        const directBuyItemsJson = sessionStorage.getItem('directBuyItemsToDelete');
+
+        if (directBuyItemsJson) {
+          const itemsToDelete = JSON.parse(directBuyItemsJson);
+
+          if (itemsToDelete && itemsToDelete.length > 0) {
+            await deleteSelectedItems(itemsToDelete);
+          }
+          sessionStorage.removeItem('directBuyItemsToDelete');
+        }
+
+        const cartItemsJson = sessionStorage.getItem('cartItemsToDelete');
+
+        if (cartItemsJson) {
+          const itemsToDelete = JSON.parse(cartItemsJson);
+
+          if (itemsToDelete && itemsToDelete.length > 0) {
+            await deleteSelectedItems(itemsToDelete);
+          }
+
+          sessionStorage.removeItem('cartItemsToDelete');
+          sessionStorage.removeItem('paymentOrderType');
+        }
+      } catch (deleteError) {
+        console.error('장바구니 아이템 삭제 실패:', deleteError);
+      }
+    };
 
     const confirmPayment = async () => {
       const paymentKey = searchParams.get('paymentKey');
@@ -53,6 +86,7 @@ export const usePaymentStatus = (): IUsePaymentStatusReturn => {
         if (response.isSuccess) {
           setConfirmResult(response);
           sessionStorage.removeItem('finalAmount');
+          await handleCartItemDeletion();
         } else {
           setError(new Error(response.message || '결제 승인에 실패했습니다.'));
         }
@@ -64,7 +98,7 @@ export const usePaymentStatus = (): IUsePaymentStatusReturn => {
     };
 
     confirmPayment();
-  }, []);
+  }, [searchParams, paymentConfirmMutation, deleteSelectedItems]);
 
   return {
     isConfirming,
