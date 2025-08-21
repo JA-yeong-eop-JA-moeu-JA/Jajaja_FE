@@ -2,7 +2,6 @@ import { useNavigate } from 'react-router-dom';
 
 import type { TReviewableOrderItem } from '@/types/review/myReview';
 
-// API 응답에 맞는 장바구니 아이템 타입
 interface ICartItem {
   id: number;
   productId: number;
@@ -24,10 +23,9 @@ export interface IOrderDataProps {
   item: TOrderItemType;
   show: boolean;
   showPrice?: boolean;
-  // 같은 상품의 여러 옵션에 대한 총합 가격 (선택적)
   totalTeamPrice?: number;
   totalIndividualPrice?: number;
-  showTotalPriceOnly?: boolean; // 총합 가격만 표시할지 여부
+  showTotalPriceOnly?: boolean;
 }
 
 const isReviewableOrderItem = (orderItem: TOrderItemType): orderItem is TReviewableOrderItem => {
@@ -96,7 +94,6 @@ export default function OrderItem({ item, show, showPrice = true, totalTeamPrice
   function PriceDisplay() {
     if (!showPrice) return null;
 
-    // 총합 가격만 표시하는 경우 (같은 상품의 여러 옵션 그룹)
     if (showTotalPriceOnly && totalTeamPrice && totalIndividualPrice) {
       return (
         <div className="flex flex-col gap-1">
