@@ -51,7 +51,7 @@ export default function ReviewCard({ review, isLike, imageUrls }: TGetReviews) {
       <section>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.75">
-            <img className="w-8 h-8" src={review.profileUrl} />
+            <img className="w-8 h-8 rounded-full" src={review.profileUrl} />
             <div>
               <div className="flex items-center gap-2 text-small-regular">
                 <p>{review.nickname}</p>
