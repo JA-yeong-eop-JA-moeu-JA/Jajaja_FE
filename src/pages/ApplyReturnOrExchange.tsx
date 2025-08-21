@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 //import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { TOptionBase } from '@/types/optionApply';
@@ -45,6 +45,8 @@ const DELIVERY_REQUEST_OPTIONS = [
 ];
 
 export default function ApplyReturnOrExchange() {
+  const location = useLocation();
+
   const params = useParams<{ orderId?: string; orderProductId?: string }>();
   const [sp] = useSearchParams();
   const orderIdStr = params.orderId ?? sp.get('orderId') ?? '';
@@ -125,6 +127,49 @@ export default function ApplyReturnOrExchange() {
     isReviewWritten: it.reviewed,
   });
 
+  const handleAddressChangeClick = () => {
+    navigate('/address/change', {
+      state: {
+        returnPath: '/mypage/apply', // 수정 필요
+        ...location.state, // 현재 state를 그대로 다시 전달
+      },
+    });
+  };
+
+  // const mutation = useMutation({
+  //   mutationFn: submitAfterSales,
+  //   onMutate: async (vars: TMutationVars) => {
+  //     const key = [...QUERY_KEYS.GET_ORDER_DETAIL_PERSONAL, id] as const;
+  //     await queryClient.cancelQueries({ queryKey: key });
+
+  //     const prev = queryClient.getQueryData(key);
+
+  //     queryClient.setQueryData(key, (current: any) => {
+  //       const base = current ?? data;
+  //       if (!base || !Array.isArray(base.items)) return base ?? current;
+  //       const nextItems = base.items.map((it: any) =>
+  //         it.orderProductId === vars.orderProductId
+  //           ? {
+  //               ...it,
+  //               status: vars.type === '반품' ? 'RETURN_REQUESTED' : 'EXCHANGE_REQUESTED',
+  //               teamStatus: '',
+  //             }
+  //           : it,
+  //       );
+  //       return { ...base, items: nextItems };
+  //     });
+
+  //     return { prev, key };
+  //   },
+  //   onError: (_err, _vars, ctx) => {
+  //     if (ctx?.prev && ctx?.key) queryClient.setQueryData(ctx.key, ctx.prev);
+  //   },
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.GET_ORDER_DETAIL_PERSONAL, id] });
+  //     queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.GET_MY_ORDERS] });
+  //   },
+  // });
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <PageHeader title="교환/반품" />
@@ -179,7 +224,9 @@ export default function ApplyReturnOrExchange() {
         <section className="flex flex-col gap-2 px-4">
           <div className="flex justify-between items-center">
             <h2 className="text-subtitle-medium">회수지 정보</h2>
-            <button className="text-small-medium h-[16px] text-orange">변경하기</button>
+            <button className="text-orange text-small-medium" onClick={handleAddressChangeClick}>
+              변경하기
+            </button>
           </div>
           <div className="flex flex-col gap-[2px] text-body-regular text-black">
             <p>{delivery.name}</p>

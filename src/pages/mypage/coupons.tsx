@@ -19,7 +19,7 @@ export default function Coupons() {
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const coupons = data?.pages.flatMap((page) => page.result.coupons) ?? [];
+  const coupons = data?.pages.flatMap((page) => page.result.coupons).filter(Boolean) ?? [];
 
   if (isPending) {
     return (
@@ -35,7 +35,7 @@ export default function Coupons() {
       <div className="w-full min-h-screen bg-white">
         <div className="flex flex-col gap-3 px-3">
           {coupons.map((coupon) => (
-            <CouponCard key={coupon.couponId} coupon={coupon} isSelected={false} onClick={() => {}} />
+            <CouponCard key={coupon.couponId} coupon={coupon} isSelected={false} onClick={() => {}} applicability="APPLICABLE" disabled={true} />
           ))}
 
           {isFetchingNextPage && Array.from({ length: 3 }).map((_, i) => <CouponCardSkeleton key={`skeleton-${i}`} />)}

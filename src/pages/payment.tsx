@@ -4,15 +4,14 @@ import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 
 import type { IAddress } from '@/types/address/TAddress';
-import type { TPaymentData, TPaymentItem } from '@/types/cart/TCart';
+import type { ICartItem, TOrderType, TPaymentItem } from '@/types/cart/TCart';
 import type { TCoupons } from '@/types/coupon/TGetCoupons';
 
 import { formatPhoneNumberForToss, generateCustomerKey } from '@/utils/paymentUtils';
 
 import { useModalStore } from '@/stores/modalStore';
 import { useGetAddresses } from '@/hooks/address/useAddress';
-import { useCart } from '@/hooks/cart/useCartQuery';
-import { useCartCoupon } from '@/hooks/coupon/useCoupons';
+import { useApplyCoupon, useCartCoupon } from '@/hooks/coupon/useCoupons';
 import useInfiniteCoupons from '@/hooks/coupon/useInfiniteCoupons';
 import useUserInfo from '@/hooks/members/useUserInfo';
 import { usePayment } from '@/hooks/payment/usePayment';
@@ -25,9 +24,8 @@ import Loading from '@/components/loading';
 import OrderItem from '@/components/review/orderItem';
 
 import Down from '@/assets/icons/down.svg?react';
-import { orderData } from '@/mocks/orderData';
 
-const convertPaymentItemToCartItem = (item: TPaymentItem, orderType: string) => {
+const convertPaymentItemToCartItem = (item: TPaymentItem, orderType: string): ICartItem => {
   const price = orderType === 'individual' ? item.individualPrice || item.unitPrice : item.teamPrice || item.unitPrice;
 
   return {
@@ -62,23 +60,18 @@ interface IPaymentSummaryProps {
   shippingFee: number;
   finalAmount: number;
 }
+type TOrderItem = TPaymentItem & { cartItemId: number };
 
 export default function Payment() {
   const navigate = useNavigate();
   const location = useLocation();
   const { openModal } = useModalStore();
-  const { cartData, isLoading: cartLoading } = useCart();
 
-  const paymentData = location.state as TPaymentData & {
-    isDirectPurchase?: boolean;
-    directPurchaseInfo?: {
-      products: { productId: number; optionId: number; quantity: number; timestamp: number }[];
-      productDetails?: {
-        name: string;
-        thumbnailUrl: string;
-        store: string;
-      };
-    };
+  const paymentDataFromState = location.state as {
+    isDirectBuy: any;
+    orderType: TOrderType;
+    selectedItems: TOrderItem[];
+    teamId?: number;
   };
 
   const [selectedAddress, setSelectedAddress] = useState<IAddress | null>(null);
@@ -86,6 +79,7 @@ export default function Payment() {
   const [usedPoints, setUsedPoints] = useState<number>(0);
   const [isProcessingPayment, setIsProcessingPayment] = useState<boolean>(false);
   const [pointsError, setPointsError] = useState<string>('');
+  const [orderItems, setOrderItems] = useState<TOrderItem[]>(paymentDataFromState?.selectedItems || []);
 
   const [backendCalculatedAmount, setBackendCalculatedAmount] = useState<{
     totalAmount: number;
@@ -100,110 +94,41 @@ export default function Payment() {
   const { data: pointsData, isLoading: pointsLoading } = useInfinitePoints();
   const { data: couponsData, isLoading: couponsLoading } = useInfiniteCoupons();
   const { calculateDiscount, getAppliedCoupon, getLocalAppliedCoupon, isExpired, isApplicable, clearAppliedCoupon, isCouponStillAvailable } = useCartCoupon();
+  const { mutateAsync: applyCoupon } = useApplyCoupon();
   const paymentPrepareMutation = usePaymentPrepare();
 
   const user = userInfo?.result;
   const userPoints = pointsData?.pages[0]?.result?.pointBalance ?? 0;
   const addresses: IAddress[] = Array.isArray(addressesData) ? addressesData : [];
 
-  // calculateEstimatedAmount 함수를 미리 정의
-  const getOrderItemsForDirectPurchase = () => {
-    if (!paymentData?.isDirectPurchase || !paymentData?.directPurchaseInfo || !cartData) {
-      return paymentData?.selectedItems || orderData[0].items;
-    }
-
-    const directProducts = paymentData.directPurchaseInfo.products;
-    const productDetails = paymentData.directPurchaseInfo.productDetails;
-
-    const exactMatches = cartData.products.filter((cartItem) => {
-      return directProducts.some(
-        (directProduct) =>
-          directProduct.productId === cartItem.productId && directProduct.optionId === cartItem.optionId && directProduct.quantity === cartItem.quantity,
-      );
-    });
-
-    if (exactMatches.length > 0) {
-      return exactMatches.map((cartItem) => ({
-        id: cartItem.id,
-        productId: cartItem.productId,
-        optionId: cartItem.optionId,
-        quantity: cartItem.quantity,
-        unitPrice: cartItem.unitPrice,
-        teamPrice: cartItem.teamPrice || cartItem.unitPrice,
-        individualPrice: cartItem.individualPrice || cartItem.unitPrice,
-        productName: cartItem.productName,
-        optionName: cartItem.optionName,
-        productThumbnail: cartItem.productThumbnail,
-        brand: cartItem.brand,
-        store: cartItem.brand,
-      }));
-    }
-
-    const partialMatches = directProducts
-      .map((directProduct) => {
-        const cartItem = cartData.products.find((item) => item.productId === directProduct.productId && item.optionId === directProduct.optionId);
-
-        if (cartItem) {
-          return {
-            id: cartItem.id,
-            productId: cartItem.productId,
-            optionId: cartItem.optionId,
-            quantity: directProduct.quantity,
-            unitPrice: cartItem.unitPrice,
-            teamPrice: cartItem.teamPrice || cartItem.unitPrice,
-            individualPrice: cartItem.individualPrice || cartItem.unitPrice,
-            productName: productDetails?.name || cartItem.productName,
-            optionName: cartItem.optionName,
-            productThumbnail: productDetails?.thumbnailUrl || cartItem.productThumbnail,
-            brand: productDetails?.store || cartItem.brand,
-            store: productDetails?.store || cartItem.brand,
-          };
-        }
-        return null;
-      })
-      .filter(Boolean);
-
-    return partialMatches;
-  };
-
-  const currentOrderItems = getOrderItemsForDirectPurchase().filter((item): item is NonNullable<typeof item> => item !== null);
-
   const calculateEstimatedAmount = () => {
-    if (!currentOrderItems || currentOrderItems.length === 0) return 0;
+    if (!orderItems || orderItems.length === 0) return 0;
 
-    const orderType = paymentData?.orderType || 'individual';
+    const orderType = paymentDataFromState?.orderType || 'individual';
 
-    return currentOrderItems.reduce((acc, item) => {
+    return orderItems.reduce((acc, item) => {
       const price = orderType === 'individual' ? item.individualPrice || item.unitPrice : item.teamPrice || item.unitPrice;
       return acc + price * item.quantity;
     }, 0);
   };
 
   const appliedCoupon: TCoupons | null = (() => {
-    // 우선순위 1: 장바구니에서 적용된 쿠폰 (서버에서 관리)
     const cartAppliedCoupon = getAppliedCoupon();
     if (cartAppliedCoupon) {
       return cartAppliedCoupon;
     }
-
-    // 우선순위 2: localStorage에서 적용된 쿠폰 (클라이언트 임시 저장)
     const localAppliedCoupon = getLocalAppliedCoupon();
     if (localAppliedCoupon) {
-      // 만료 확인
       if (isExpired(localAppliedCoupon)) {
         localStorage.removeItem('appliedCoupon');
         return null;
       }
-
-      // 적용 가능 여부 확인
       const currentAmount = calculateEstimatedAmount();
       if (!isApplicable(currentAmount, localAppliedCoupon)) {
         return null;
       }
-
       return localAppliedCoupon;
     }
-
     return null;
   })();
 
@@ -211,15 +136,20 @@ export default function Payment() {
   const currentOrderAmount = calculateEstimatedAmount();
   const couponsCount = availableCoupons.filter((coupon) => !isExpired(coupon) && isApplicable(currentOrderAmount, coupon)).length;
 
-  // 페이지 로드 시 쿠폰 유효성 검증
+  useEffect(() => {
+    if (paymentDataFromState?.selectedItems && paymentDataFromState.selectedItems.length > 0) {
+      setOrderItems(paymentDataFromState.selectedItems);
+    } else {
+      toast.error('결제할 상품 정보가 없습니다.');
+      navigate('/cart');
+    }
+  }, [location.state, navigate]);
+
   useEffect(() => {
     const localCoupon = getLocalAppliedCoupon();
     if (localCoupon && availableCoupons.length > 0) {
-      // 현재 사용 가능한 쿠폰 목록에서 해당 쿠폰이 있는지 확인
       const isStillAvailable = isCouponStillAvailable(localCoupon.couponId, availableCoupons);
-
       if (!isStillAvailable) {
-        // 쿠폰이 더 이상 사용 불가능하면 localStorage에서 제거
         clearAppliedCoupon();
         toast.info('이전에 선택한 쿠폰이 더 이상 사용할 수 없어 제거되었습니다.');
       }
@@ -257,20 +187,10 @@ export default function Payment() {
       };
 
   const customerKey = generateCustomerKey(user?.id?.toString() || 'anonymous');
-
-  const {
-    payment,
-    isLoading: paymentLoading,
-    requestPayment,
-  } = usePayment({
-    customerKey,
-  });
-
+  const { payment, isLoading: paymentLoading, requestPayment } = usePayment({ customerKey });
   const handlePointsChange = (value: number) => {
     const numValue = Number(value) || 0;
-
     setPointsError('');
-
     if (numValue > userPoints) {
       setUsedPoints(userPoints);
       setPointsError(`사용 가능한 적립금은 최대 ${userPoints.toLocaleString()}원입니다.`);
@@ -283,51 +203,42 @@ export default function Payment() {
       setUsedPoints(numValue);
     }
   };
-
   const isPointsValid = usedPoints <= userPoints && usedPoints >= 0;
   const pointsInputClassName = `w-16 text-right text-body-regular bg-transparent outline-none ${pointsError ? 'text-red-500' : ''}`;
-
   const handleDeliveryRequestClick = () => {
     openModal('delivery', {
       onSelect: (text: string) => setSelectedDeliveryRequest(text),
     });
   };
-
   const handleAddressChangeClick = () => {
     navigate('/address/change', {
       state: {
         returnPath: '/payment',
-        paymentData,
-        selectedAddress,
+        ...location.state, // 현재 state를 그대로 다시 전달
       },
     });
   };
-
   const handleAddAddress = () => {
     navigate('/address/add', {
       state: {
         returnPath: '/address/change',
-        originalData: { returnPath: '/payment', paymentData, selectedAddress },
+        originalData: { returnPath: '/payment', ...location.state },
       },
     });
   };
-
   const handlePayment = async () => {
     if (!isPointsValid) {
       toast.error('적립금 입력을 확인해주세요.');
       return;
     }
-
     if (!user) {
       toast.error('사용자 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
       return;
     }
-
     if (!selectedAddress) {
       toast.error('배송지를 선택해주세요.');
       return;
     }
-
     if (!selectedAddress.phone) {
       toast.error('선택된 배송지에 휴대폰 번호가 없습니다. 배송지를 변경하거나 수정해주세요.');
       return;
@@ -336,67 +247,65 @@ export default function Payment() {
       toast.error('결제 시스템을 초기화하고 있습니다. 잠시 후 다시 시도해주세요.');
       return;
     }
-
     if (isProcessingPayment) {
       return;
     }
 
     setIsProcessingPayment(true);
-
     const formattedPhoneNumber = formatPhoneNumberForToss(selectedAddress.phone);
-
     if (!/^\d{10,11}$/.test(formattedPhoneNumber)) {
       toast.error('선택된 배송지의 휴대폰 번호 형식이 올바르지 않습니다.');
       setIsProcessingPayment(false);
       return;
     }
 
-    try {
-      const isTeamOrder = paymentData?.orderType !== 'individual';
+    const currentAppliedCoupon = appliedCoupon;
 
+    try {
+      const itemsToDelete = orderItems.map((item) => ({
+        productId: item.productId,
+        optionId: item.optionId,
+      }));
+
+      if (paymentDataFromState?.isDirectBuy) {
+        sessionStorage.setItem('directBuyItemsToDelete', JSON.stringify(itemsToDelete));
+      } else {
+        sessionStorage.setItem('cartItemsToDelete', JSON.stringify(itemsToDelete));
+
+        sessionStorage.setItem('paymentOrderType', paymentDataFromState?.orderType || 'individual');
+      }
+      const isTeamOrder = paymentDataFromState?.orderType !== 'individual';
       const prepareData: any = {
-        items: currentOrderItems.map((item) => item.id),
+        items: orderItems.map((item) => item.id),
         addressId: selectedAddress.id,
         orderType: isTeamOrder ? 'TEAM' : 'PERSONAL',
         deliveryRequest: selectedDeliveryRequest || '현관문 앞에 놓아주세요.',
         point: usedPoints,
       };
-
-      // 팀 구매일 경우에만 teamId 추가
       if (isTeamOrder) {
-        if (!paymentData.teamId) {
+        if (!paymentDataFromState.teamId) {
           toast.error('팀 정보가 올바르지 않습니다. 다시 시도해주세요.');
           setIsProcessingPayment(false);
           return;
         }
-        prepareData.teamId = paymentData.teamId;
+        prepareData.teamId = paymentDataFromState.teamId;
       }
-
-      // 쿠폰 적용 로직 - Swagger 스펙에 맞춰 appliedCouponId 전달
       if (appliedCoupon?.couponId) {
         prepareData.appliedCouponId = appliedCoupon.couponId;
       }
-
       const prepareResult = await paymentPrepareMutation.mutateAsync(prepareData);
-
       if (!prepareResult.isSuccess) {
         throw new Error(prepareResult.message || '결제 준비에 실패했습니다.');
       }
-
       const responseData = prepareResult.result;
-
       if (!responseData) {
         throw new Error('결제 준비 응답 데이터가 없습니다.');
       }
-
       const { orderId, orderName, finalAmount } = responseData;
-
       if (!orderId || !orderName || typeof finalAmount === 'undefined') {
         throw new Error('결제 준비 응답에 필수 데이터가 누락되었습니다.');
       }
-
       sessionStorage.setItem('finalAmount', finalAmount.toString());
-
       setBackendCalculatedAmount({
         totalAmount: responseData.totalAmount,
         discountAmount: responseData.discountAmount,
@@ -404,15 +313,12 @@ export default function Payment() {
         shippingFee: responseData.shippingFee,
         finalAmount,
       });
-
       if (finalAmount <= 0) {
         toast.error('결제 금액이 0원입니다. 쿠폰 또는 포인트 사용을 조정해주세요.');
         setIsProcessingPayment(false);
         return;
       }
-
       const baseUrl = window.location.origin;
-
       await requestPayment({
         method: 'CARD',
         amount: {
@@ -428,11 +334,15 @@ export default function Payment() {
         failUrl: `${baseUrl}/payment/confirm`,
       });
     } catch (error) {
+      sessionStorage.removeItem('directBuyItemsToDelete');
+      sessionStorage.removeItem('cartItemsToDelete');
+      sessionStorage.removeItem('paymentOrderType');
+
       let errorMessage = '결제 처리 중 오류가 발생했습니다.';
+      let shouldRestoreCoupon = false;
 
       if (error && typeof error === 'object' && 'response' in error) {
         const axiosError = error as any;
-
         if (axiosError.response?.data?.code) {
           switch (axiosError.response.data.code) {
             case 'POINT4002':
@@ -441,19 +351,15 @@ export default function Payment() {
               setPointsError('적립금을 다시 확인해주세요.');
               break;
             case 'COUPON4003':
-              errorMessage = '선택한 쿠폰을 사용할 수 없습니다. 쿠폰이 만료되었거나 이미 사용되었을 수 있습니다.';
-              localStorage.removeItem('appliedCoupon');
-              break;
             case 'COUPON4001':
-              errorMessage = '이미 사용된 쿠폰입니다.';
-              localStorage.removeItem('appliedCoupon');
+            case 'COUPON_INVALID':
+              errorMessage = '선택한 쿠폰을 사용할 수 없습니다. 쿠폰이 만료되었거나 이미 사용되었을 수 있습니다.';
+              clearAppliedCoupon();
+              shouldRestoreCoupon = false;
               break;
             case 'COUPON4002':
               errorMessage = '쿠폰 사용 조건을 만족하지 않습니다.';
-              break;
-            case 'COUPON_INVALID':
-              errorMessage = '선택한 쿠폰을 사용할 수 없습니다.';
-              localStorage.removeItem('appliedCoupon');
+              shouldRestoreCoupon = true;
               break;
             case 'ADDRESS_NOT_FOUND':
               errorMessage = '배송지 정보를 확인할 수 없습니다.';
@@ -463,14 +369,26 @@ export default function Payment() {
               break;
             default:
               errorMessage = axiosError.response.data.message || errorMessage;
+              shouldRestoreCoupon = true;
           }
         } else if (axiosError.response?.data?.message) {
           errorMessage = axiosError.response.data.message;
+          shouldRestoreCoupon = true;
         }
       } else if (error instanceof Error) {
         errorMessage = error.message;
+        shouldRestoreCoupon = true;
       }
 
+      if (shouldRestoreCoupon && currentAppliedCoupon) {
+        try {
+          await applyCoupon(currentAppliedCoupon.couponId);
+          console.log('쿠폰 상태가 복구되었습니다.');
+        } catch (restoreError) {
+          console.error('쿠폰 복구 실패:', restoreError);
+          clearAppliedCoupon();
+        }
+      }
       toast.error(errorMessage);
     } finally {
       setIsProcessingPayment(false);
@@ -542,7 +460,7 @@ export default function Payment() {
     );
   }
 
-  if (userLoading || addressesLoading || pointsLoading || couponsLoading || (paymentData?.isDirectPurchase && cartLoading)) {
+  if (userLoading || addressesLoading || pointsLoading || couponsLoading) {
     return (
       <>
         <PageHeader title="주문 결제" />
@@ -578,11 +496,11 @@ export default function Payment() {
       >
         <PageHeader title="주문 결제" />
 
-        {paymentData?.orderType !== 'individual' && (
+        {paymentDataFromState?.orderType !== 'individual' && (
           <section className="p-4 border-b-4 border-black-1">
             <p className="text-subtitle-medium mb-4">팀 구매 정보</p>
             <div className="bg-orange-50 p-3 rounded">
-              {paymentData.orderType === 'team_create' && (
+              {paymentDataFromState.orderType === 'team_create' && (
                 <>
                   <p className="text-body-regular">팀을 생성하고 있습니다</p>
                   <p className="text-body-regular">
@@ -590,7 +508,7 @@ export default function Payment() {
                   </p>
                 </>
               )}
-              {paymentData.orderType === 'team_join' && (
+              {paymentDataFromState.orderType === 'team_join' && (
                 <>
                   <p className="text-small-medium">팀 구매에 참여하고 있습니다.</p>
                   <p className="text-small-regular">결제 확인 후 팀 매칭이 완료됩니다.</p>
@@ -624,9 +542,9 @@ export default function Payment() {
         </section>
 
         <section className="p-4 border-b-4 border-black-1">
-          <p className="text-subtitle-medium mb-4">주문 상품 {currentOrderItems.length}개</p>
-          {currentOrderItems.map((item, index) => {
-            const convertedItem = convertPaymentItemToCartItem(item, paymentData?.orderType || 'individual');
+          <p className="text-subtitle-medium mb-4">주문 상품 {orderItems.length}개</p>
+          {orderItems.map((item, index) => {
+            const convertedItem = convertPaymentItemToCartItem(item, paymentDataFromState?.orderType || 'individual');
 
             return (
               <div key={`order-item-${item.productId || 'unknown'}-${item.optionId || index}`} className="mb-5">

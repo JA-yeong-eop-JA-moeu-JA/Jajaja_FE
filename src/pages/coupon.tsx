@@ -1,25 +1,44 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
+import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import type { TCoupons } from '@/types/coupon/TGetCoupons';
+import { QUERY_KEYS } from '@/constants/querykeys/queryKeys';
 
-import { useCart } from '@/hooks/cart/useCartQuery';
-import { useApplyCoupon, useCartCoupon, useUnapplyCoupon } from '@/hooks/coupon/useCoupons';
+import { getCartItems } from '@/apis/cart/cart';
+
+import { useApplyCoupon, useUnapplyCoupon } from '@/hooks/coupon/useCoupons';
 import useInfiniteCoupons from '@/hooks/coupon/useInfiniteCoupons';
 
 import CouponCard from '@/components/coupon/CouponCard';
 import PageHeader from '@/components/head_bottom/PageHeader';
+import Loading from '@/components/loading';
+
+type TCouponWithStatus = TCoupons & {
+  applicability: 'APPLICABLE' | 'UNUSABLE';
+};
 
 export default function CouponPage() {
-  const [selectedCoupon, setSelectedCoupon] = useState<TCoupons | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const { data: couponsData, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error } = useInfiniteCoupons();
-  const { mutate: applyCoupon, isPending: isApplying } = useApplyCoupon();
-  const { mutate: unapplyCoupon, isPending: isUnapplying } = useUnapplyCoupon();
-  const { getAppliedCoupon } = useCartCoupon();
-  const { cartData, refetch: refetchCart } = useCart();
+  const {
+    data: couponsData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: isCouponsLoading,
+    error: couponsError,
+    refetch: refetchCoupons,
+  } = useInfiniteCoupons();
+
+  const { data: cartData, isLoading: isCartLoading } = useQuery({
+    queryKey: QUERY_KEYS.GET_CART_ITEMS,
+    queryFn: getCartItems,
+  });
+
+  const { mutateAsync: applyCoupon, isPending: isApplying } = useApplyCoupon();
+  const { mutateAsync: unapplyCoupon, isPending: isUnapplying } = useUnapplyCoupon();
 
   const { ref, inView } = useInView({ threshold: 0 });
 
@@ -29,146 +48,125 @@ export default function CouponPage() {
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  useEffect(() => {
-    const appliedCoupon = getAppliedCoupon();
-    if (appliedCoupon) {
-      setSelectedCoupon(appliedCoupon);
-    }
-  }, [getAppliedCoupon, cartData]);
-
   const handleCouponSelect = async (coupon: TCoupons) => {
     if (isProcessing || isApplying || isUnapplying) return;
 
     setIsProcessing(true);
-    const currentAppliedCoupon = cartData?.appliedCoupon;
+    const currentAppliedCoupon = cartData?.result?.appliedCoupon;
 
     try {
-      if (currentAppliedCoupon && currentAppliedCoupon.couponId === coupon.couponId) {
-        await new Promise<void>((resolve, reject) => {
-          unapplyCoupon(undefined, {
-            onSuccess: () => {
-              setSelectedCoupon(null);
-              refetchCart();
-              toast.success('쿠폰이 취소되었습니다');
-              resolve();
-            },
-            onError: (err) => {
-              toast.error('쿠폰 취소에 실패했습니다');
-              reject(err);
-            },
-          });
-        });
-        return;
+      if (currentAppliedCoupon?.couponId === coupon.couponId) {
+        await unapplyCoupon();
+        toast.success('쿠폰이 취소되었습니다');
+      } else if (currentAppliedCoupon) {
+        await unapplyCoupon();
+        await applyCoupon(coupon.couponId);
+        toast.success(`${coupon.couponName} 쿠폰이 적용되었습니다`);
+      } else {
+        await applyCoupon(coupon.couponId);
+        toast.success(`${coupon.couponName} 쿠폰이 적용되었습니다`);
       }
-
-      if (currentAppliedCoupon && currentAppliedCoupon.couponId !== coupon.couponId) {
-        await new Promise<void>((resolve, reject) => {
-          unapplyCoupon(undefined, {
-            onSuccess: () => {
-              refetchCart();
-              resolve();
-            },
-            onError: (err) => {
-              reject(err);
-            },
-          });
-        });
-
-        await new Promise((resolve) => setTimeout(resolve, 300));
+    } catch (err: any) {
+      refetchCoupons();
+      let errorMessage = '쿠폰 처리에 실패했습니다';
+      if (err.response?.data?.code) {
+        switch (err.response.data.code) {
+          case 'COUPON4001':
+            errorMessage = '이미 사용된 쿠폰입니다';
+            break;
+          case 'COUPON4002':
+            errorMessage = '쿠폰 사용 조건을 만족하지 않습니다';
+            break;
+          case 'COUPON4003':
+            errorMessage = '사용할 수 없는 쿠폰입니다';
+            break;
+          default:
+            errorMessage = err.response.data.message || errorMessage;
+        }
       }
-
-      setSelectedCoupon(coupon);
-
-      await new Promise<void>((resolve, reject) => {
-        applyCoupon(coupon.couponId, {
-          onSuccess: () => {
-            refetchCart();
-            toast.success(`${coupon.couponName} 쿠폰이 적용되었습니다`);
-            resolve();
-          },
-          onError: (err: any) => {
-            setSelectedCoupon(null);
-
-            let errorMessage = '쿠폰 적용에 실패했습니다';
-            if (err.response?.data?.code) {
-              switch (err.response.data.code) {
-                case 'COUPON4003':
-                  errorMessage = '사용할 수 없는 쿠폰입니다';
-                  break;
-                case 'COUPON4001':
-                  errorMessage = '이미 사용된 쿠폰입니다';
-                  break;
-                case 'COUPON4002':
-                  errorMessage = '쿠폰 사용 조건을 만족하지 않습니다';
-                  break;
-                default:
-                  errorMessage = err.response.data.message || errorMessage;
-              }
-            }
-
-            toast.error(errorMessage);
-            reject(err);
-          },
-        });
-      });
-    } catch (err) {
-      console.error('쿠폰 처리 중 오류:', err);
+      toast.error(errorMessage);
     } finally {
       setIsProcessing(false);
     }
   };
 
-  if (isLoading) {
-    return (
-      <>
-        <PageHeader title="쿠폰" />
-        <div className="w-full h-screen flex justify-center items-center">
-          <div className="text-body-regular text-black-4">쿠폰을 불러오는 중...</div>
-        </div>
-      </>
-    );
-  }
+  const processedCoupons = useMemo(() => {
+    const allCoupons = couponsData?.pages.flatMap((page) => page.result.coupons).filter(Boolean) ?? [];
 
-  if (error) {
-    return (
-      <>
-        <PageHeader title="쿠폰" />
-        <div className="w-full h-screen flex justify-center items-center">
-          <div className="text-body-regular text-error-3">쿠폰을 불러오는데 실패했습니다</div>
-        </div>
-      </>
+    const couponsWithStatus = allCoupons.map(
+      (coupon): TCouponWithStatus => ({
+        ...coupon,
+        applicability: coupon.isApplicable ? 'APPLICABLE' : 'UNUSABLE',
+      }),
     );
-  }
 
-  const coupons = couponsData?.pages.flatMap((page) => page.result.coupons) ?? [];
+    couponsWithStatus.sort((a, b) => {
+      if (a.isApplicable !== b.isApplicable) return a.isApplicable ? -1 : 1;
+      const typeOrder = { FIXED_AMOUNT: 0, PERCENTAGE: 1 };
+      if (typeOrder[a.discountType] !== typeOrder[b.discountType]) {
+        return typeOrder[a.discountType] - typeOrder[b.discountType];
+      }
+      return b.discountValue - a.discountValue;
+    });
+
+    return couponsWithStatus;
+  }, [couponsData]);
+
+  if (isCouponsLoading || isCartLoading) return <LoadingPage />;
+  if (couponsError) return <ErrorPage />;
 
   return (
     <>
       <PageHeader title="쿠폰" />
       <div className="w-full min-h-screen bg-white">
         <div className="flex flex-col gap-3 px-3 py-4">
-          {coupons.length === 0 ? (
+          {processedCoupons.length === 0 ? (
             <div className="text-center text-body-regular text-black-4 mt-10">사용 가능한 쿠폰이 없습니다</div>
           ) : (
-            <>
-              {coupons.map((coupon) => (
+            processedCoupons.map((coupon) => {
+              const isClickable = coupon.isApplicable;
+              const isDisabled = !isClickable || isProcessing || isApplying || isUnapplying;
+              const isSelectedNow = cartData?.result?.appliedCoupon?.couponId === coupon.couponId;
+
+              return (
                 <CouponCard
                   key={coupon.couponId}
                   coupon={coupon}
-                  isSelected={selectedCoupon?.couponId === coupon.couponId}
+                  isSelected={isSelectedNow}
                   onClick={() => handleCouponSelect(coupon)}
-                  disabled={isProcessing || isApplying || isUnapplying}
+                  disabled={isDisabled}
+                  applicability={coupon.applicability}
                 />
-              ))}
-            </>
+              );
+            })
           )}
         </div>
-
         <div ref={ref} className="h-2" />
-
-        {(isFetchingNextPage || isApplying || isUnapplying || isProcessing) && (
-          <p className="text-center py-4 text-gray-500">{isFetchingNextPage ? '더 불러오는 중...' : '쿠폰 처리 중...'}</p>
+        {(isFetchingNextPage || isProcessing) && (
+          <p className="text-center py-4 text-black-4">{isFetchingNextPage ? '더 불러오는 중...' : '쿠폰 처리 중...'}</p>
         )}
+      </div>
+    </>
+  );
+}
+
+function LoadingPage() {
+  return (
+    <>
+      <PageHeader title="쿠폰" />
+      <div className="w-full min-h-screen flex items-center justify-center">
+        <Loading />
+      </div>
+    </>
+  );
+}
+
+function ErrorPage() {
+  return (
+    <>
+      <PageHeader title="쿠폰" />
+      <div className="w-full h-screen flex justify-center items-center">
+        <div className="text-body-regular text-error-3">쿠폰을 불러오는데 실패했습니다</div>
       </div>
     </>
   );
