@@ -69,7 +69,6 @@ export const useApplyCoupon = () => {
 
       localStorage.setItem('appliedCoupon', JSON.stringify(couponData));
 
-      // 쿠폰 적용 후 관련 쿼리 모두 무효화
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.GET_COUPONS_INFINITE],
         exact: false,
@@ -78,12 +77,9 @@ export const useApplyCoupon = () => {
         queryKey: QUERY_KEYS.GET_CART_ITEMS,
         exact: false,
       });
-
-      console.log('쿠폰 적용 완료 - 쿠폰 및 장바구니 캐시 무효화');
     },
     onError: () => {
       localStorage.removeItem('appliedCoupon');
-      console.log('쿠폰 적용 실패 - localStorage 정리');
     },
   });
 };
@@ -96,7 +92,6 @@ export const useUnapplyCoupon = () => {
     onSuccess: () => {
       localStorage.removeItem('appliedCoupon');
 
-      // 쿠폰 취소 후 관련 쿼리 모두 무효화
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.GET_COUPONS_INFINITE],
         exact: false,
@@ -105,12 +100,8 @@ export const useUnapplyCoupon = () => {
         queryKey: QUERY_KEYS.GET_CART_ITEMS,
         exact: false,
       });
-
-      console.log('쿠폰 취소 완료 - localStorage 정리 및 캐시 무효화');
     },
-    onError: () => {
-      console.log('쿠폰 취소 실패');
-    },
+    onError: () => {},
   });
 };
 
@@ -157,7 +148,6 @@ export const useCartCoupon = () => {
       queryKey: [QUERY_KEYS.GET_COUPONS_INFINITE],
       exact: false,
     });
-    console.log('쿠폰 상태 강제 정리 - localStorage 및 캐시 무효화');
   };
 
   const isCouponStillAvailable = (couponId: number, availableCoupons: TCoupons[]): boolean => {
@@ -217,13 +207,8 @@ export const useCartCoupon = () => {
     const cartCoupon = getCartAppliedCoupon();
 
     if (localCoupon && !cartCoupon) {
-      console.log('사용된 쿠폰 감지 - localStorage 정리');
       localStorage.removeItem('appliedCoupon');
       return false;
-    }
-
-    if (cartCoupon && !localCoupon) {
-      console.log('장바구니 쿠폰을 localStorage에 동기화');
     }
 
     return true;
@@ -237,7 +222,7 @@ export const useCartCoupon = () => {
     isApplicable,
     isExpired,
     isCouponStillAvailable,
-    syncCouponState, // 새로운 동기화 함수
+    syncCouponState,
   };
 };
 

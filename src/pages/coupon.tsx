@@ -73,8 +73,6 @@ export default function CouponPage() {
         throw new Error('현재 장바구니 상품에는 사용할 수 없는 쿠폰입니다.');
       }
 
-      console.log(`쿠폰 적용 시도: ID=${coupon.couponId}, Name=${coupon.couponName}, isApplicable=${coupon.isApplicable}`);
-
       if (currentAppliedCoupon?.couponId === coupon.couponId) {
         await unapplyCoupon();
         toast.success('쿠폰이 취소되었습니다');
@@ -87,14 +85,6 @@ export default function CouponPage() {
         toast.success(`${coupon.couponName} 쿠폰이 적용되었습니다`);
       }
     } catch (err: any) {
-      console.error('쿠폰 처리 오류:', {
-        couponId: coupon.couponId,
-        couponName: coupon.couponName,
-        isApplicable: coupon.isApplicable,
-        error: err,
-        response: err.response?.data,
-      });
-
       setFailedCoupons((prev) => new Set([...prev, coupon.couponId]));
 
       refetchCoupons();
@@ -135,7 +125,6 @@ export default function CouponPage() {
 
     const couponsWithStatus = allCoupons.map((coupon): TCouponWithStatus => {
       if (!coupon || !coupon.couponId || !coupon.applicableConditions) {
-        console.warn('올바르지 않은 쿠폰 데이터:', coupon);
         return { ...coupon, applicability: 'UNUSABLE' };
       }
 
@@ -147,11 +136,6 @@ export default function CouponPage() {
       }
 
       if (orderAmount < coupon.applicableConditions.minOrderAmount) {
-        console.warn(`쿠폰 ${coupon.couponId}: 백엔드에서는 적용 가능하다고 했지만 최소 주문 금액 미달`, {
-          orderAmount,
-          minOrderAmount: coupon.applicableConditions.minOrderAmount,
-          couponName: coupon.couponName,
-        });
         return { ...coupon, applicability: 'CONDITION_NOT_MET' };
       }
 
