@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 //import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { TOptionBase } from '@/types/optionApply';
@@ -45,8 +45,6 @@ const DELIVERY_REQUEST_OPTIONS = [
 ];
 
 export default function ApplyReturnOrExchange() {
-  const location = useLocation();
-
   const params = useParams<{ orderId?: string; orderProductId?: string }>();
   const [sp] = useSearchParams();
   const orderIdStr = params.orderId ?? sp.get('orderId') ?? '';
@@ -127,49 +125,6 @@ export default function ApplyReturnOrExchange() {
     isReviewWritten: it.reviewed,
   });
 
-  const handleAddressChangeClick = () => {
-    navigate('/address/change', {
-      state: {
-        returnPath: '/mypage/apply', // 수정 필요
-        ...location.state, // 현재 state를 그대로 다시 전달
-      },
-    });
-  };
-
-  // const mutation = useMutation({
-  //   mutationFn: submitAfterSales,
-  //   onMutate: async (vars: TMutationVars) => {
-  //     const key = [...QUERY_KEYS.GET_ORDER_DETAIL_PERSONAL, id] as const;
-  //     await queryClient.cancelQueries({ queryKey: key });
-
-  //     const prev = queryClient.getQueryData(key);
-
-  //     queryClient.setQueryData(key, (current: any) => {
-  //       const base = current ?? data;
-  //       if (!base || !Array.isArray(base.items)) return base ?? current;
-  //       const nextItems = base.items.map((it: any) =>
-  //         it.orderProductId === vars.orderProductId
-  //           ? {
-  //               ...it,
-  //               status: vars.type === '반품' ? 'RETURN_REQUESTED' : 'EXCHANGE_REQUESTED',
-  //               teamStatus: '',
-  //             }
-  //           : it,
-  //       );
-  //       return { ...base, items: nextItems };
-  //     });
-
-  //     return { prev, key };
-  //   },
-  //   onError: (_err, _vars, ctx) => {
-  //     if (ctx?.prev && ctx?.key) queryClient.setQueryData(ctx.key, ctx.prev);
-  //   },
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.GET_ORDER_DETAIL_PERSONAL, id] });
-  //     queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.GET_MY_ORDERS] });
-  //   },
-  // });
-
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <PageHeader title="교환/반품" />
@@ -208,42 +163,52 @@ export default function ApplyReturnOrExchange() {
         {/* 사유 */}
         <section className="flex flex-col gap-2 px-4 pb-8 border-b border-b-black-1 border-b-4">
           <h2 className="text-subtitle-medium pb-2">사유</h2>
-          {selectedType && (
-            <ApplyDropDown
-              key={dropdownKey}
-              options={reasonOptions as TOption[]}
-              onChange={({ id: reasonId }) => {
-                const selected = reasonOptions.find((r) => r.id === reasonId);
-                if (selected) setSelectedReason(selected.name);
-              }}
-            />
-          )}
+          <ApplyDropDown
+            key={dropdownKey}
+            defaultLabel="사유 선택"
+            options={reasonOptions as TOption[]}
+            onChange={({ id: reasonId }) => {
+              const selected = reasonOptions.find((r) => r.id === reasonId);
+              if (selected) setSelectedReason(selected.name);
+            }}
+          />
         </section>
 
         {/* 회수지 정보 + 요청사항 */}
         <section className="flex flex-col gap-2 px-4">
           <div className="flex justify-between items-center">
             <h2 className="text-subtitle-medium">회수지 정보</h2>
-            <button className="text-orange text-small-medium" onClick={handleAddressChangeClick}>
-              변경하기
-            </button>
+            <button className="text-small-medium h-[16px] text-orange">변경하기</button>
           </div>
           <div className="flex flex-col gap-[2px] text-body-regular text-black">
             <p>{delivery.name}</p>
-            <p>{delivery.phone}</p>
-            <p>{delivery.address}</p>
+            <p className="no-underline">{delivery.phone}</p>
+            <p className="no-underline">{delivery.address}</p>
           </div>
-          <ApplyDropDown
-            options={DELIVERY_REQUEST_OPTIONS as TOption[]}
-            onChange={({ id: requestId }) => {
-              const selected = DELIVERY_REQUEST_OPTIONS.find((o) => o.id === requestId);
-              setDeliveryRequest(selected?.id === 0 ? '' : (selected?.name ?? ''));
-            }}
-          />
         </section>
 
-        {/* 환불 정보 - 반품일 때만 표시 */}
         {selectedType === '반품' && <RefundInfo refundInfo={refundInfo} />}
+        {selectedType === '교환' && (
+          <section className="flex flex-col gap-2 px-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-subtitle-medium">배송지 정보</h2>
+              <button className="text-small-medium h-[16px] text-orange">변경하기</button>
+            </div>
+            <div className="flex flex-col gap-[2px] text-body-regular text-black">
+              <p>{delivery.name}</p>
+              <p className="no-underline">{delivery.phone}</p>
+              <p className="no-underline">{delivery.address}</p>
+            </div>
+            <ApplyDropDown
+              options={DELIVERY_REQUEST_OPTIONS as TOption[]}
+              defaultLabel="배송 요청 사항을 선택해주세요"
+              onChange={({ id: requestId }) => {
+                const selected = DELIVERY_REQUEST_OPTIONS.find((o) => o.id === requestId);
+                setDeliveryRequest(selected?.id === 0 ? '' : (selected?.name ?? ''));
+              }}
+            />
+          </section>
+        )}
       </main>
 
       {/* 하단 고정 접수 버튼 */}
