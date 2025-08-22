@@ -58,8 +58,8 @@ export default function PhotoReview() {
           </div>
         ))}
       </section>
-      <section className="flex items-center justify-self-end gap-3 text-body-regular mt-6 mb-3 mr-3">
-        <div className="flex justify-end text-body-regular text-black-4 mb-1">
+      <section className="flex items-center justify-end gap-3 text-body-regular mt-6 mb-3 mr-3">
+        <div className="flex justify-start text-body-regular text-black-4 mb-1">
           {[
             { label: '최신순', value: 'LATEST' },
             { label: '추천순', value: 'RECOMMEND' },
