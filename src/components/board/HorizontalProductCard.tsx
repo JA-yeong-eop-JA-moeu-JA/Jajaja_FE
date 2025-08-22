@@ -14,7 +14,7 @@ export default function HorizontalProductCard({ data }: THorizontalProductCardPr
   const { discountRate, price, productName, thumbnailUrl, nickname, leaderProfileImageUrl } = data;
 
   return (
-    <div className="w-[328px] flex w-full p-2 border-b border-b-1" style={{ borderBottomColor: 'var(--color-black-2)' }}>
+    <div className="w-[328px] flex w-full p-2 pb-4 border-b border-b-1" style={{ borderBottomColor: 'var(--color-black-2)' }}>
       <img src={thumbnailUrl} alt={productName} className="w-26 h-26 object-cover rounded-md flex-shrink-0" />
 
       <div className="w-[104px] flex flex-col ml-2 flex-grow text-body-regular">
