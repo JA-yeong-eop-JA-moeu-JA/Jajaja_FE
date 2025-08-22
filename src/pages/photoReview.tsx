@@ -28,7 +28,7 @@ export default function PhotoReview() {
   return (
     <div className="pb-5">
       <ProductHeader />
-      <section className="flex items-center justify-self-end gap-3 text-body-regular my-3 mr-3">
+      <section className="flex items-center justify-end gap-3 text-body-regular my-3 mr-3">
         {[
           { label: '최신순', value: 'LATEST' },
           { label: '추천순', value: 'RECOMMEND' },
