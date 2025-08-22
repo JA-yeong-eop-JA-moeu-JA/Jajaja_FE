@@ -19,7 +19,7 @@ export default function ExchangeCompletePage() {
           leftVariant="left-outline"
           rightVariant="right-orange"
           onLeftClick={() => {
-            window.location.href = '/exchange/history';
+            window.location.href = '/mypage/order';
           }}
           onRightClick={() => {
             window.location.href = '/home';

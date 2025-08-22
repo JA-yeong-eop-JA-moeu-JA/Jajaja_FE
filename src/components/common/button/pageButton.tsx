@@ -4,7 +4,7 @@ export type TTabId = 'basic' | 'industry' | 'writeReview' | 'myReview' | 'review
 
 export const TAB_LABELS: Record<TTabId, string> = {
   basic: '기본',
-  industry: '업종별',
+  industry: '업종',
   writeReview: '리뷰 쓰기',
   myReview: '작성한 리뷰',
   review: '리뷰',
