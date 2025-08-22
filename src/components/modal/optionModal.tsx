@@ -201,11 +201,24 @@ export default function OptionModal({ type, teamId, mode }: IOptionModalProps) {
     }
 
     try {
-      await joinTeamMutate(teamId);
+      // 🔽 서버 API가 요구하는 형식으로 선택된 옵션 데이터를 가공합니다.
+      const optionsPayload = selectedItems.map((item) => ({
+        optionId: item.id,
+        quantity: item.quantity,
+      }));
 
+      // 🔽 teamId와 가공된 옵션 데이터를 객체로 묶어 전달합니다.
+      await joinTeamMutate({
+        teamId, // teamId: teamId 와 동일
+        selectedOptions: optionsPayload,
+      });
+
+      // API 호출이 성공한 후에 후속 처리를 진행합니다.
       toast.success('팀에 참여했습니다! 결제를 진행해주세요.');
       await handleDirectPurchase('team_join');
     } catch (error) {
+      // useJoinTeam 훅의 onError에서 이미 토스트 메시지를 처리해주므로
+      // 여기서는 추가적인 에러 로깅 외에 특별한 UI 처리가 필요 없을 수 있습니다.
       console.error('Failed to proceed after join attempt:', error);
     }
   };

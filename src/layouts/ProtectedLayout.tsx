@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 
 import Loading from '@/components/loading';
+import Subscriber from '@/components/Subscriber';
 
 import Layout from '.';
 import { useAuth } from '@/context/AuthContext';
@@ -21,7 +22,10 @@ export default function ProtectedLayout() {
           <Loading />
         </div>
       ) : !isError && isLoggedIn ? (
-        <Outlet />
+        <>
+          <Subscriber />
+          <Outlet />
+        </>
       ) : (
         <div className="h-screen" />
       )}
