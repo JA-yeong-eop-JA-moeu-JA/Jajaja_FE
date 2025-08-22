@@ -117,18 +117,7 @@ export default function Payment() {
     if (cartAppliedCoupon) {
       return cartAppliedCoupon;
     }
-    const localAppliedCoupon = getLocalAppliedCoupon();
-    if (localAppliedCoupon) {
-      if (isExpired(localAppliedCoupon)) {
-        localStorage.removeItem('appliedCoupon');
-        return null;
-      }
 
-      if (!localAppliedCoupon.isApplicable) {
-        return null;
-      }
-      return localAppliedCoupon;
-    }
     return null;
   })();
 
@@ -136,6 +125,7 @@ export default function Payment() {
   const couponsCount = useMemo(() => {
     return availableCoupons.filter((coupon) => !isExpired(coupon) && coupon.isApplicable).length;
   }, [availableCoupons, isExpired]);
+
   useEffect(() => {
     if (paymentDataFromState?.selectedItems && paymentDataFromState.selectedItems.length > 0) {
       setOrderItems(paymentDataFromState.selectedItems);
@@ -188,6 +178,7 @@ export default function Payment() {
 
   const customerKey = generateCustomerKey(user?.id?.toString() || 'anonymous');
   const { payment, isLoading: paymentLoading, requestPayment } = usePayment({ customerKey });
+
   const handlePointsChange = (value: number) => {
     const numValue = Number(value) || 0;
     setPointsError('');
@@ -203,13 +194,16 @@ export default function Payment() {
       setUsedPoints(numValue);
     }
   };
+
   const isPointsValid = usedPoints <= userPoints && usedPoints >= 0;
   const pointsInputClassName = `w-16 text-right text-body-regular bg-transparent outline-none ${pointsError ? 'text-red-500' : ''}`;
+
   const handleDeliveryRequestClick = () => {
     openModal('delivery', {
       onSelect: (text: string) => setSelectedDeliveryRequest(text),
     });
   };
+
   const handleAddressChangeClick = () => {
     navigate('/address/change', {
       state: {
@@ -218,6 +212,7 @@ export default function Payment() {
       },
     });
   };
+
   const handleAddAddress = () => {
     navigate('/address/add', {
       state: {
@@ -226,6 +221,7 @@ export default function Payment() {
       },
     });
   };
+
   const handlePayment = async () => {
     if (!isPointsValid) {
       toast.error('적립금 입력을 확인해주세요.');
@@ -271,9 +267,9 @@ export default function Payment() {
         sessionStorage.setItem('directBuyItemsToDelete', JSON.stringify(itemsToDelete));
       } else {
         sessionStorage.setItem('cartItemsToDelete', JSON.stringify(itemsToDelete));
-
         sessionStorage.setItem('paymentOrderType', paymentDataFromState?.orderType || 'individual');
       }
+
       const isTeamOrder = paymentDataFromState?.orderType !== 'individual';
       const prepareData: any = {
         items: orderItems.map((item) => item.id),
@@ -282,6 +278,7 @@ export default function Payment() {
         deliveryRequest: selectedDeliveryRequest || '현관문 앞에 놓아주세요.',
         point: usedPoints,
       };
+
       if (isTeamOrder) {
         if (!paymentDataFromState.teamId) {
           toast.error('팀 정보가 올바르지 않습니다. 다시 시도해주세요.');
@@ -290,21 +287,26 @@ export default function Payment() {
         }
         prepareData.teamId = paymentDataFromState.teamId;
       }
+
       if (appliedCoupon?.couponId) {
         prepareData.appliedCouponId = appliedCoupon.couponId;
       }
+
       const prepareResult = await paymentPrepareMutation.mutateAsync(prepareData);
       if (!prepareResult.isSuccess) {
         throw new Error(prepareResult.message || '결제 준비에 실패했습니다.');
       }
+
       const responseData = prepareResult.result;
       if (!responseData) {
         throw new Error('결제 준비 응답 데이터가 없습니다.');
       }
+
       const { orderId, orderName, finalAmount } = responseData;
       if (!orderId || !orderName || typeof finalAmount === 'undefined') {
         throw new Error('결제 준비 응답에 필수 데이터가 누락되었습니다.');
       }
+
       sessionStorage.setItem('finalAmount', finalAmount.toString());
       setBackendCalculatedAmount({
         totalAmount: responseData.totalAmount,
@@ -313,11 +315,13 @@ export default function Payment() {
         shippingFee: responseData.shippingFee,
         finalAmount,
       });
+
       if (finalAmount <= 0) {
         toast.error('결제 금액이 0원입니다. 쿠폰 또는 포인트 사용을 조정해주세요.');
         setIsProcessingPayment(false);
         return;
       }
+
       const baseUrl = window.location.origin;
       await requestPayment({
         method: 'CARD',

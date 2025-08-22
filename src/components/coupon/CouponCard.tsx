@@ -43,7 +43,7 @@ export default function CouponCard({ coupon, isSelected, onClick, disabled = fal
         {coupon.couponName}
       </p>
       <div className="text-black-4 text-body-regular">
-        <p className={cx({ 'text-body-medium': applicability === 'CONDITION_NOT_MET' })}>
+        <p className={cx({ 'text-body-regular': applicability === 'CONDITION_NOT_MET' })}>
           {coupon.applicableConditions.type === 'FIRST' ? '첫 구매 시 사용 가능' : `${minOrderAmountText} 구매 시 사용 가능`}
         </p>
         <p>{coupon.applicableConditions.expireAt.slice(0, 10)} 까지</p>
