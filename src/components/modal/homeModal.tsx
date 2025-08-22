@@ -38,8 +38,8 @@ export default function HomeModal() {
             <p>을 맞아</p>
           </div>
           <div className="flex items-center">
-            <p className="text-orange">랜덤 포인트</p>
-            <p>가 지급됐어요!</p>
+            <p className="text-orange">랜덤 적립금</p>
+            <p>이 지급됐어요!</p>
           </div>
           <Point />
         </div>
@@ -47,7 +47,7 @@ export default function HomeModal() {
 
       <div className="w-full">
         <Button kind="basic" variant="solid-orange" className="w-full" onClick={handleNavigate}>
-          기간 한정 포인트 확인하기
+          기간 한정 적립금 확인하기
         </Button>
       </div>
 
