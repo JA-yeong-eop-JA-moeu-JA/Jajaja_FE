@@ -180,8 +180,6 @@ export default function Payment() {
   const customerKey = generateCustomerKey(user?.id?.toString() || 'anonymous');
   const { payment, isLoading: paymentLoading, requestPayment } = usePayment({ customerKey });
 
-  // ... (이하 모든 코드는 기존과 동일) ...
-
   const handlePointsChange = (value: number) => {
     const numValue = Number(value) || 0;
     setPointsError('');

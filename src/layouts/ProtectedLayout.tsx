@@ -21,9 +21,7 @@ export default function ProtectedLayout() {
           <Loading />
         </div>
       ) : !isError && isLoggedIn ? (
-        <>
-          <Outlet />
-        </>
+        <Outlet />
       ) : (
         <div className="h-screen" />
       )}
