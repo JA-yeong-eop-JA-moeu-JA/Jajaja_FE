@@ -21,6 +21,7 @@ type TCouponWithStatus = TCoupons & {
 
 export default function CouponPage() {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [failedCoupons, setFailedCoupons] = useState<Set<number>>(new Set());
 
   const {
     data: couponsData,
@@ -43,6 +44,10 @@ export default function CouponPage() {
   const { ref, inView } = useInView({ threshold: 0 });
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
@@ -51,10 +56,25 @@ export default function CouponPage() {
   const handleCouponSelect = async (coupon: TCoupons) => {
     if (isProcessing || isApplying || isUnapplying) return;
 
+    if (failedCoupons.has(coupon.couponId)) {
+      toast.error('이 쿠폰은 현재 사용할 수 없습니다. 다른 쿠폰을 선택해주세요.');
+      return;
+    }
+
     setIsProcessing(true);
     const currentAppliedCoupon = cartData?.result?.appliedCoupon;
 
     try {
+      if (!coupon.couponId || !coupon.couponName) {
+        throw new Error('올바르지 않은 쿠폰 정보입니다.');
+      }
+
+      if (!coupon.isApplicable) {
+        throw new Error('현재 장바구니 상품에는 사용할 수 없는 쿠폰입니다.');
+      }
+
+      console.log(`쿠폰 적용 시도: ID=${coupon.couponId}, Name=${coupon.couponName}, isApplicable=${coupon.isApplicable}`);
+
       if (currentAppliedCoupon?.couponId === coupon.couponId) {
         await unapplyCoupon();
         toast.success('쿠폰이 취소되었습니다');
@@ -67,8 +87,19 @@ export default function CouponPage() {
         toast.success(`${coupon.couponName} 쿠폰이 적용되었습니다`);
       }
     } catch (err: any) {
+      console.error('쿠폰 처리 오류:', {
+        couponId: coupon.couponId,
+        couponName: coupon.couponName,
+        isApplicable: coupon.isApplicable,
+        error: err,
+        response: err.response?.data,
+      });
+
+      setFailedCoupons((prev) => new Set([...prev, coupon.couponId]));
+
       refetchCoupons();
       let errorMessage = '쿠폰 처리에 실패했습니다';
+
       if (err.response?.data?.code) {
         switch (err.response.data.code) {
           case 'COUPON4001':
@@ -80,10 +111,16 @@ export default function CouponPage() {
           case 'COUPON4003':
             errorMessage = '사용할 수 없는 쿠폰입니다';
             break;
+          case 'COMMON500':
+            errorMessage = '서버에서 쿠폰 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+            break;
           default:
             errorMessage = err.response.data.message || errorMessage;
         }
+      } else if (err.message) {
+        errorMessage = err.message;
       }
+
       toast.error(errorMessage);
     } finally {
       setIsProcessing(false);
@@ -94,22 +131,48 @@ export default function CouponPage() {
     if (!couponsData || !cartData) return [];
 
     const allCoupons = couponsData.pages.flatMap((page) => page.result.coupons).filter(Boolean);
-    // [최종 수정] cartData.result.summary.originalAmount 로 정확한 필드 경로 지정
     const orderAmount = cartData.result.summary.originalAmount;
 
     const couponsWithStatus = allCoupons.map((coupon): TCouponWithStatus => {
-      if (!coupon.isApplicable) {
+      if (!coupon || !coupon.couponId || !coupon.applicableConditions) {
+        console.warn('올바르지 않은 쿠폰 데이터:', coupon);
         return { ...coupon, applicability: 'UNUSABLE' };
       }
+
+      if (!coupon.isApplicable) {
+        if (orderAmount < coupon.applicableConditions.minOrderAmount) {
+          return { ...coupon, applicability: 'CONDITION_NOT_MET' };
+        }
+        return { ...coupon, applicability: 'UNUSABLE' };
+      }
+
       if (orderAmount < coupon.applicableConditions.minOrderAmount) {
+        console.warn(`쿠폰 ${coupon.couponId}: 백엔드에서는 적용 가능하다고 했지만 최소 주문 금액 미달`, {
+          orderAmount,
+          minOrderAmount: coupon.applicableConditions.minOrderAmount,
+          couponName: coupon.couponName,
+        });
         return { ...coupon, applicability: 'CONDITION_NOT_MET' };
       }
+
       return { ...coupon, applicability: 'APPLICABLE' };
     });
 
     couponsWithStatus.sort((a, b) => {
       const order = { APPLICABLE: 0, CONDITION_NOT_MET: 1, UNUSABLE: 2 };
-      return order[a.applicability] - order[b.applicability];
+      const statusDiff = order[a.applicability] - order[b.applicability];
+
+      if (statusDiff !== 0) {
+        return statusDiff;
+      }
+
+      if (a.applicability === 'APPLICABLE') {
+        const aDiscount = a.discountType === 'PERCENTAGE' ? Math.floor(orderAmount * (a.discountValue / 100)) : a.discountValue;
+        const bDiscount = b.discountType === 'PERCENTAGE' ? Math.floor(orderAmount * (b.discountValue / 100)) : b.discountValue;
+        return bDiscount - aDiscount;
+      }
+
+      return b.discountValue - a.discountValue;
     });
 
     return couponsWithStatus;
@@ -127,19 +190,21 @@ export default function CouponPage() {
             <div className="text-center text-body-regular text-black-4 mt-10">사용 가능한 쿠폰이 없습니다</div>
           ) : (
             processedCoupons.map((coupon) => {
-              const isClickable = coupon.applicability === 'APPLICABLE';
+              const isClickable = coupon.applicability === 'APPLICABLE' && !failedCoupons.has(coupon.couponId);
               const isDisabled = !isClickable || isProcessing || isApplying || isUnapplying;
               const isSelectedNow = cartData?.result?.appliedCoupon?.couponId === coupon.couponId;
+              const hasFailed = failedCoupons.has(coupon.couponId);
 
               return (
-                <CouponCard
-                  key={coupon.couponId}
-                  coupon={coupon}
-                  isSelected={isSelectedNow}
-                  onClick={() => handleCouponSelect(coupon)}
-                  disabled={isDisabled}
-                  applicability={coupon.applicability}
-                />
+                <div key={coupon.couponId} className="relative">
+                  <CouponCard
+                    coupon={coupon}
+                    isSelected={isSelectedNow}
+                    onClick={() => handleCouponSelect(coupon)}
+                    disabled={isDisabled}
+                    applicability={hasFailed ? 'UNUSABLE' : coupon.applicability}
+                  />
+                </div>
               );
             })
           )}
