@@ -59,7 +59,6 @@ export const useApplyCoupon = () => {
           minOrderAmount: 0,
           expireAt: '',
         },
-        // [수정 3] isApplicable 필드를 추가합니다. 쿠폰 적용 성공 시점에는 항상 true입니다.
         isApplicable: couponInfo?.isApplicable ?? true,
         cartId: data.result.cartId,
         originalAmount: data.result.originalAmount,
@@ -85,7 +84,6 @@ export const useApplyCoupon = () => {
   });
 };
 
-// ... 이하 useUnapplyCoupon, useCartCoupon 훅은 수정할 필요 없습니다 ...
 export const useUnapplyCoupon = () => {
   const queryClient = useQueryClient();
 

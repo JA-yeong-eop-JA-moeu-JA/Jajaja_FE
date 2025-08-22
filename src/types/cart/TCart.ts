@@ -130,3 +130,11 @@ export interface ICartItem {
   originalPrice: number;
   teamAvailable: boolean;
 }
+
+export type TTeamJoinCartRequest = {
+  selectedOptions: Array<{
+    cartItemId: number;
+    optionId: number;
+    quantity: number;
+  }>;
+};
