@@ -16,7 +16,7 @@ import PageHeader from '@/components/head_bottom/PageHeader';
 import Loading from '@/components/loading';
 
 type TCouponWithStatus = TCoupons & {
-  applicability: 'APPLICABLE' | 'UNUSABLE';
+  applicability: 'APPLICABLE' | 'CONDITION_NOT_MET' | 'UNUSABLE';
 };
 
 export default function CouponPage() {
@@ -91,26 +91,29 @@ export default function CouponPage() {
   };
 
   const processedCoupons = useMemo(() => {
-    const allCoupons = couponsData?.pages.flatMap((page) => page.result.coupons).filter(Boolean) ?? [];
+    if (!couponsData || !cartData) return [];
 
-    const couponsWithStatus = allCoupons.map(
-      (coupon): TCouponWithStatus => ({
-        ...coupon,
-        applicability: coupon.isApplicable ? 'APPLICABLE' : 'UNUSABLE',
-      }),
-    );
+    const allCoupons = couponsData.pages.flatMap((page) => page.result.coupons).filter(Boolean);
+    // [최종 수정] cartData.result.summary.originalAmount 로 정확한 필드 경로 지정
+    const orderAmount = cartData.result.summary.originalAmount;
+
+    const couponsWithStatus = allCoupons.map((coupon): TCouponWithStatus => {
+      if (!coupon.isApplicable) {
+        return { ...coupon, applicability: 'UNUSABLE' };
+      }
+      if (orderAmount < coupon.applicableConditions.minOrderAmount) {
+        return { ...coupon, applicability: 'CONDITION_NOT_MET' };
+      }
+      return { ...coupon, applicability: 'APPLICABLE' };
+    });
 
     couponsWithStatus.sort((a, b) => {
-      if (a.isApplicable !== b.isApplicable) return a.isApplicable ? -1 : 1;
-      const typeOrder = { FIXED_AMOUNT: 0, PERCENTAGE: 1 };
-      if (typeOrder[a.discountType] !== typeOrder[b.discountType]) {
-        return typeOrder[a.discountType] - typeOrder[b.discountType];
-      }
-      return b.discountValue - a.discountValue;
+      const order = { APPLICABLE: 0, CONDITION_NOT_MET: 1, UNUSABLE: 2 };
+      return order[a.applicability] - order[b.applicability];
     });
 
     return couponsWithStatus;
-  }, [couponsData]);
+  }, [couponsData, cartData]);
 
   if (isCouponsLoading || isCartLoading) return <LoadingPage />;
   if (couponsError) return <ErrorPage />;
@@ -124,7 +127,7 @@ export default function CouponPage() {
             <div className="text-center text-body-regular text-black-4 mt-10">사용 가능한 쿠폰이 없습니다</div>
           ) : (
             processedCoupons.map((coupon) => {
-              const isClickable = coupon.isApplicable;
+              const isClickable = coupon.applicability === 'APPLICABLE';
               const isDisabled = !isClickable || isProcessing || isApplying || isUnapplying;
               const isSelectedNow = cartData?.result?.appliedCoupon?.couponId === coupon.couponId;
 
