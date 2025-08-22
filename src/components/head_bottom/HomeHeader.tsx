@@ -11,7 +11,7 @@ interface IHeaderProps {
   showLogo?: boolean;
 }
 
-const cap = (n: number) => (n > 9 ? '9+' : String(n));
+const cap = (n: number) => (n > 9 ? '+' : String(n));
 
 export default function Header({ showSearch = true, showLogo = true }: IHeaderProps) {
   const { count } = useGetNotiUnread();
@@ -29,7 +29,7 @@ export default function Header({ showSearch = true, showLogo = true }: IHeaderPr
           <Link to="/notifications">
             <img src={bellIcon} alt="알림" className="w-5" />
             {count > 0 && (
-              <span className="absolute -right-1.5 top-2 w-4 h-4 px-1 rounded-full bg-red-500 text-white leading-5 text-center text-small-medium">
+              <span className="absolute right-0.5 top-2 translate-x-0.25 translate-y-0.25 w-4 h-4 px-1 rounded-full bg-red-500 text-white leading-5 text-center text-small-medium">
                 {cap(count)}
               </span>
             )}

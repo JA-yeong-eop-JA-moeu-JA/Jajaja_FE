@@ -163,7 +163,7 @@ export default function OrderDetailPersonal() {
 
       <main className="flex flex-col gap-4 text-body-regular text-black">
         <div className="border-b-black-1 border-b-4 pb-4 px-4">
-          <p className="text-subtitle-medium">{new Date(date).toLocaleString('ko-KR')}</p>
+          <p className="text-subtitle-medium"> {new Date(date).toLocaleDateString('ko-KR').slice(0, -1)}</p>
           <p className="text-body-regular text-black-4">주문 번호 {orderNumber}</p>
         </div>
 

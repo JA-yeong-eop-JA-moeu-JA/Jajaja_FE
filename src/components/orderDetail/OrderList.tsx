@@ -133,12 +133,14 @@ export default function OrderList({ orders, onExpire }: IOrderProps) {
           >
             <p className="text-subtitle-medium text-left">
               {order.createdAt
-                ? new Date(order.createdAt).toLocaleDateString('ko-KR', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                  })
-                : '25.12.12'}
+                ? new Date(order.createdAt)
+                    .toLocaleDateString('ko-KR', {
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                    })
+                    .replace(/\.$/, '')
+                : ''}
             </p>
             <img src={ChevronRight} alt=">" className="w-2 h-4" />
           </button>

@@ -60,7 +60,7 @@ export default function ReviewCard({ review, isLike, imageUrls, productId, produ
 
   return (
     <Link to={`/product/${pid}`}>
-      <div className="p-2 flex flex-col gap-2">
+      <div className="px-2 pt-3 pb-0.5 flex flex-col gap-2">
         <section>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
@@ -88,7 +88,7 @@ export default function ReviewCard({ review, isLike, imageUrls, productId, produ
           {review.option && (
             <>
               <br />
-              {review.option}
+              <p>옵션: {review.option}</p>
             </>
           )}
         </article>
@@ -98,7 +98,7 @@ export default function ReviewCard({ review, isLike, imageUrls, productId, produ
 
         {showToggle && (
           <section>
-            <button className="text-body-regular text-black-4 underline underline-offset-2 mb-2" onClick={handleExpand}>
+            <button className="text-body-regular text-black-4 underline underline-offset-2" onClick={handleExpand}>
               {expanded ? '접기' : '더보기'}
             </button>
           </section>
