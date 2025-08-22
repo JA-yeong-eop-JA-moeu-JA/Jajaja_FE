@@ -185,18 +185,30 @@ export default function ApplyReturnOrExchange() {
             <p className="no-underline">{delivery.phone}</p>
             <p className="no-underline">{delivery.address}</p>
           </div>
-          <ApplyDropDown
-            options={DELIVERY_REQUEST_OPTIONS as TOption[]}
-            defaultLabel="배송 요청 사항을 선택해주세요"
-            onChange={({ id: requestId }) => {
-              const selected = DELIVERY_REQUEST_OPTIONS.find((o) => o.id === requestId);
-              setDeliveryRequest(selected?.id === 0 ? '' : (selected?.name ?? ''));
-            }}
-          />
         </section>
 
-        {/* 환불 정보 - 반품일 때만 표시 */}
         {selectedType === '반품' && <RefundInfo refundInfo={refundInfo} />}
+        {selectedType === '교환' && (
+          <section className="flex flex-col gap-2 px-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-subtitle-medium">배송지 정보</h2>
+              <button className="text-small-medium h-[16px] text-orange">변경하기</button>
+            </div>
+            <div className="flex flex-col gap-[2px] text-body-regular text-black">
+              <p>{delivery.name}</p>
+              <p className="no-underline">{delivery.phone}</p>
+              <p className="no-underline">{delivery.address}</p>
+            </div>
+            <ApplyDropDown
+              options={DELIVERY_REQUEST_OPTIONS as TOption[]}
+              defaultLabel="배송 요청 사항을 선택해주세요"
+              onChange={({ id: requestId }) => {
+                const selected = DELIVERY_REQUEST_OPTIONS.find((o) => o.id === requestId);
+                setDeliveryRequest(selected?.id === 0 ? '' : (selected?.name ?? ''));
+              }}
+            />
+          </section>
+        )}
       </main>
 
       {/* 하단 고정 접수 버튼 */}
