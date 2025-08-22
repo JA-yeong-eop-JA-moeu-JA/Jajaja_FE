@@ -1,14 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { useQuery } from '@tanstack/react-query';
-import { toast } from 'sonner';
 
 import type { TCoupons } from '@/types/coupon/TGetCoupons';
 import { QUERY_KEYS } from '@/constants/querykeys/queryKeys';
 
 import { getCartItems } from '@/apis/cart/cart';
 
-import { useApplyCoupon, useUnapplyCoupon } from '@/hooks/coupon/useCoupons';
+import { useSafeApplyCoupon, useUnapplyCoupon } from '@/hooks/coupon/useCoupons';
 import useInfiniteCoupons from '@/hooks/coupon/useInfiniteCoupons';
 
 import CouponCard from '@/components/coupon/CouponCard';
@@ -20,8 +19,7 @@ type TCouponWithStatus = TCoupons & {
 };
 
 export default function CouponPage() {
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [failedCoupons, setFailedCoupons] = useState<Set<number>>(new Set());
+  const [failedCoupons] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     if ('scrollRestoration' in history) {
@@ -44,23 +42,15 @@ export default function CouponPage() {
     };
   }, []);
 
-  const {
-    data: couponsData,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading: isCouponsLoading,
-    error: couponsError,
-    refetch: refetchCoupons,
-  } = useInfiniteCoupons();
+  const { data: couponsData, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading: isCouponsLoading, error: couponsError } = useInfiniteCoupons();
 
   const { data: cartData, isLoading: isCartLoading } = useQuery({
     queryKey: QUERY_KEYS.GET_CART_ITEMS,
     queryFn: getCartItems,
   });
 
-  const { mutateAsync: applyCoupon, isPending: isApplying } = useApplyCoupon();
-  const { mutateAsync: unapplyCoupon, isPending: isUnapplying } = useUnapplyCoupon();
+  const { safeApplyCoupon, isLoading: isSafeApplying } = useSafeApplyCoupon();
+  const { mutate: unapplyCoupon, isPending: isUnapplying } = useUnapplyCoupon();
 
   const { ref, inView } = useInView({ threshold: 0 });
 
@@ -70,67 +60,13 @@ export default function CouponPage() {
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const handleCouponSelect = async (coupon: TCoupons) => {
-    if (isProcessing || isApplying || isUnapplying) return;
+  const handleCouponSelect = (coupon: TCoupons) => {
+    const isCurrentlyApplied = cartData?.result?.appliedCoupon?.couponId === coupon.couponId;
 
-    if (failedCoupons.has(coupon.couponId)) {
-      toast.error('이 쿠폰은 현재 사용할 수 없습니다. 다른 쿠폰을 선택해주세요.');
-      return;
-    }
-
-    setIsProcessing(true);
-    const currentAppliedCoupon = cartData?.result?.appliedCoupon;
-
-    try {
-      if (!coupon.couponId || !coupon.couponName) {
-        throw new Error('올바르지 않은 쿠폰 정보입니다.');
-      }
-
-      if (!coupon.isApplicable) {
-        throw new Error('현재 장바구니 상품에는 사용할 수 없는 쿠폰입니다.');
-      }
-
-      if (currentAppliedCoupon?.couponId === coupon.couponId) {
-        await unapplyCoupon();
-        toast.success('쿠폰이 취소되었습니다');
-      } else if (currentAppliedCoupon) {
-        await unapplyCoupon();
-        await applyCoupon(coupon.couponId);
-        toast.success(`${coupon.couponName} 쿠폰이 적용되었습니다`);
-      } else {
-        await applyCoupon(coupon.couponId);
-        toast.success(`${coupon.couponName} 쿠폰이 적용되었습니다`);
-      }
-    } catch (err: any) {
-      setFailedCoupons((prev) => new Set([...prev, coupon.couponId]));
-
-      refetchCoupons();
-      let errorMessage = '쿠폰 처리에 실패했습니다';
-
-      if (err.response?.data?.code) {
-        switch (err.response.data.code) {
-          case 'COUPON4001':
-            errorMessage = '이미 사용된 쿠폰입니다';
-            break;
-          case 'COUPON4002':
-            errorMessage = '쿠폰 사용 조건을 만족하지 않습니다';
-            break;
-          case 'COUPON4003':
-            errorMessage = '사용할 수 없는 쿠폰입니다';
-            break;
-          case 'COMMON500':
-            errorMessage = '서버에서 쿠폰 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
-            break;
-          default:
-            errorMessage = err.response.data.message || errorMessage;
-        }
-      } else if (err.message) {
-        errorMessage = err.message;
-      }
-
-      toast.error(errorMessage);
-    } finally {
-      setIsProcessing(false);
+    if (isCurrentlyApplied) {
+      unapplyCoupon();
+    } else {
+      safeApplyCoupon(coupon.couponId);
     }
   };
 
@@ -192,7 +128,7 @@ export default function CouponPage() {
           ) : (
             processedCoupons.map((coupon) => {
               const isClickable = coupon.applicability === 'APPLICABLE' && !failedCoupons.has(coupon.couponId);
-              const isDisabled = !isClickable || isProcessing || isApplying || isUnapplying;
+              const isDisabled = !isClickable || isSafeApplying || isUnapplying;
               const isSelectedNow = cartData?.result?.appliedCoupon?.couponId === coupon.couponId;
               const hasFailed = failedCoupons.has(coupon.couponId);
 
@@ -211,7 +147,7 @@ export default function CouponPage() {
           )}
         </div>
         <div ref={ref} className="h-2" />
-        {(isFetchingNextPage || isProcessing) && (
+        {(isFetchingNextPage || isSafeApplying || isUnapplying) && (
           <p className="text-center py-4 text-black-4">{isFetchingNextPage ? '더 불러오는 중...' : '쿠폰 처리 중...'}</p>
         )}
       </div>
