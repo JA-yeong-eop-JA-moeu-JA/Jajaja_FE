@@ -54,10 +54,8 @@ const ORDER_STATUS_LABEL_MAP: Record<TBEOrderStatus, TTOSKey> = {
   TEAM_MATCHING_FAILED: '매칭 실패',
 };
 
-/** 팀 매칭 유효시간(분) — BE와 합의된 값으로 변경 */
 const MATCH_TTL_MINUTES = 30;
 
-/** BE 상태(영문) → UI 라벨(한글) 매핑 */
 const MATCH_STATUS_LABEL_MAP: Record<'MATCHING' | 'COMPLETED' | 'FAILED', keyof typeof MATCH_STATUS_COLOR_MAP> = {
   MATCHING: '매칭 중',
   COMPLETED: '매칭 완료',
@@ -103,6 +101,16 @@ export default function OrderList({ orders, onExpire }: IOrderProps) {
 
   const HIDDEN = new Set<TBEOrderStatus>(['READY', 'EXPIRED']);
 
+  const visibleOrders = orders
+    .map((order) => ({
+      ...order,
+      items: order.items.filter((item: any) => {
+        const beOs = item.orderStatus as TBEOrderStatus | null | undefined;
+        return !(beOs && HIDDEN.has(beOs));
+      }),
+    }))
+    .filter((order) => order.items.length > 0);
+
   const toReviewable = (order: IOrder, item: IOrderItem): TReviewableOrderItem => {
     const anyItem = item as any;
     return {
@@ -117,80 +125,61 @@ export default function OrderList({ orders, onExpire }: IOrderProps) {
       quantity: item.quantity,
       price: item.price,
       isReviewWritten: item.reviewed,
-      imageUrl:
-        anyItem.imageUrl ??
-        anyItem.image ?? // IOrderItem.image
-        anyItem.product?.image ?? // 혹시 product.image로만 오는 경우
-        '',
+      imageUrl: anyItem.imageUrl ?? anyItem.image ?? anyItem.product?.image ?? '',
     } as TReviewableOrderItem;
   };
 
   return (
     <div className="w-full flex flex-col">
-      {orders.map((order, index) => (
-        <section key={order.id} className={`w-full pb-4 mb-4 ${index !== orders.length - 1 ? 'border-b-black-1 border-b-4' : ''}`}>
+      {visibleOrders.map((order, index) => (
+        <section key={order.id} className={`w-full pb-4 mb-4 ${index !== visibleOrders.length - 1 ? 'border-b-black-1 border-b-4' : ''}`}>
           <button
             className="w-full flex items-center justify-between pr-2 pl-4"
             onClick={() => navigate(`/mypage/order/orderDetailPersonal?orderId=${order.id}`)}
           >
             <p className="text-subtitle-medium text-left">
               {order.createdAt
-                ? new Date(order.createdAt).toLocaleDateString('ko-KR', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                  })
+                ? new Date(order.createdAt).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\.$/, '')
                 : ''}
             </p>
             <img src={ChevronRight} alt=">" className="w-2 h-4" />
           </button>
 
-          {(() => {
-            // 주문별로 한 번만 필터
-            const visibleItems = order.items.filter((item) => {
-              const beOs = (item as any).orderStatus as TBEOrderStatus | null | undefined;
-              return !(beOs && HIDDEN.has(beOs));
-            });
+          {order.items.map((item) => {
+            type TOSKey = keyof typeof ORDER_STATUS_COLOR_MAP;
+            type TMSKey = keyof typeof MATCH_STATUS_COLOR_MAP;
 
-            // 만약 이 주문에서 보여줄 아이템이 0개면 섹션을 통째로 숨기고 싶으면:
-            // if (visibleItems.length === 0) return null;
+            const beOs = (item as any).orderStatus as TBEOrderStatus | null | undefined;
+            const osLabel = beOs ? (ORDER_STATUS_LABEL_MAP[beOs] as TOSKey) : undefined;
 
-            return visibleItems.map((item) => {
-              type TOSKey = keyof typeof ORDER_STATUS_COLOR_MAP;
-              type TMSKey = keyof typeof MATCH_STATUS_COLOR_MAP;
+            const beMs = (item as any).matchStatus as 'MATCHING' | 'COMPLETED' | 'FAILED' | null | undefined;
+            const msLabel = beMs ? (MATCH_STATUS_LABEL_MAP[beMs] as TMSKey) : undefined;
 
-              const beOs = (item as any).orderStatus as TBEOrderStatus | null | undefined;
-              const osLabel = beOs ? (ORDER_STATUS_LABEL_MAP[beOs] as TOSKey) : undefined;
+            const isMatching = beMs === 'MATCHING';
 
-              const beMs = (item as any).matchStatus as 'MATCHING' | 'COMPLETED' | 'FAILED' | null | undefined;
-              const msLabel = beMs ? (MATCH_STATUS_LABEL_MAP[beMs] as TMSKey) : undefined;
-
-              const isMatching = beMs === 'MATCHING';
-
-              return (
-                <div
-                  key={`${item.orderId}-${item.productId}`}
-                  className="px-4 pt-4 cursor-pointer"
-                  onClick={(e) => {
-                    if ((e.target as HTMLElement).closest('button')) return;
-                    navigate(`/mypage/order/orderDetailPersonal?orderId=${order.id}`);
-                  }}
-                >
-                  {(osLabel || msLabel) && (
-                    <div className="pb-2 flex justify-between items-center text-body-medium">
-                      <div>{osLabel && <span className={ORDER_STATUS_COLOR_MAP[osLabel]}>{osLabel}</span>}</div>
-                      <div className="flex items-center gap-2">
-                        {msLabel && <span className={MATCH_STATUS_COLOR_MAP[msLabel]}>{msLabel}</span>}
-                        {isMatching && <Countdown teamCreatedAt={(item as any).teamCreatedAt ?? null} onExpire={onExpire} />}
-                      </div>
+            return (
+              <div
+                key={`${item.orderId}-${item.productId}`}
+                className="px-4 pt-4 cursor-pointer"
+                onClick={(e) => {
+                  if ((e.target as HTMLElement).closest('button')) return;
+                  navigate(`/mypage/order/orderDetailPersonal?orderId=${order.id}`);
+                }}
+              >
+                {(osLabel || msLabel) && (
+                  <div className="pb-2 flex justify-between items-center text-body-medium">
+                    <div>{osLabel && <span className={ORDER_STATUS_COLOR_MAP[osLabel]}>{osLabel}</span>}</div>
+                    <div className="flex items-center gap-2">
+                      {msLabel && <span className={MATCH_STATUS_COLOR_MAP[msLabel]}>{msLabel}</span>}
+                      {isMatching && <Countdown teamCreatedAt={(item as any).teamCreatedAt ?? null} onExpire={onExpire} />}
                     </div>
-                  )}
+                  </div>
+                )}
 
-                  <OrderItem item={toReviewable(order, item)} show={false} />
-                </div>
-              );
-            });
-          })()}
+                <OrderItem item={toReviewable(order, item)} show={false} />
+              </div>
+            );
+          })}
         </section>
       ))}
     </div>
