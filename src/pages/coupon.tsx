@@ -44,7 +44,17 @@ export default function CouponPage() {
   const { ref, inView } = useInView({ threshold: 0 });
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    const scrollToTop = () => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+
+    scrollToTop();
+
+    const timeoutId = setTimeout(scrollToTop, 50);
+
+    return () => clearTimeout(timeoutId);
   }, []);
 
   useEffect(() => {
@@ -166,7 +176,7 @@ export default function CouponPage() {
   if (couponsError) return <ErrorPage />;
 
   return (
-    <>
+    <div className="w-full min-h-screen">
       <PageHeader title="쿠폰" />
       <div className="w-full min-h-screen bg-white">
         <div className="flex flex-col gap-3 px-3 py-4">
@@ -198,7 +208,7 @@ export default function CouponPage() {
           <p className="text-center py-4 text-black-4">{isFetchingNextPage ? '더 불러오는 중...' : '쿠폰 처리 중...'}</p>
         )}
       </div>
-    </>
+    </div>
   );
 }
 
