@@ -561,7 +561,14 @@ export default function Payment() {
         <section className="p-4 mt-3 border-b-4 border-black-1">
           <p className="text-subtitle-medium mb-4">할인 혜택</p>
 
-          <div className="flex justify-between items-center border-1 border-black-3 rounded px-4 py-3 mb-3" onClick={() => navigate('/coupon')}>
+          <div
+            className="flex justify-between items-center border-1 border-black-3 rounded px-4 py-3 mb-3"
+            onClick={() => {
+              // 쿠폰 페이지로 이동하기 전에 스크롤 위치 초기화
+              window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+              navigate('/coupon');
+            }}
+          >
             <p className="text-body-medium">쿠폰</p>
             <div className="flex items-center gap-3">
               <p className="text-body-regular">
