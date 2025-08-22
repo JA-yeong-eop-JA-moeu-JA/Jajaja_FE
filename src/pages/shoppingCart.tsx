@@ -301,7 +301,7 @@ export default function ShoppingCart() {
         ) : (
           <>
             <section className="flex items-center px-4 py-3 border-b-4 border-black-1">
-              <BaseCheckbox checked={isAllChecked()} onClick={handleToggleAll} message="전체 선택" textClassName="text-small-medium" disabled={isCartEmpty} />
+              <BaseCheckbox checked={isAllChecked()} onClick={handleToggleAll} message="전체 선택" textClassName="text-body-medium" disabled={isCartEmpty} />
               <button
                 className="ml-auto text-body-regular text-black disabled:text-black-3"
                 disabled={!isAnyChecked || isDeletingMultiple}
