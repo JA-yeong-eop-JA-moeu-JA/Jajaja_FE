@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 import type { TCoupon } from '@/types/cart/TCart';
 import type { TCoupons, TStoredCouponData } from '@/types/coupon/TGetCoupons';
@@ -48,7 +49,7 @@ export const useApplyCoupon = () => {
         }
       }
 
-      const couponData: TStoredCouponData = {
+      const couponDataForStorage: TStoredCouponData = {
         couponId: data.result.couponId,
         couponName: data.result.couponName,
         discountType: couponInfo?.discountType || 'FIXED_AMOUNT',
@@ -67,19 +68,54 @@ export const useApplyCoupon = () => {
         appliedAt: new Date().toISOString(),
       };
 
-      localStorage.setItem('appliedCoupon', JSON.stringify(couponData));
+      localStorage.setItem('appliedCoupon', JSON.stringify(couponDataForStorage));
+
+      queryClient.setQueryData(QUERY_KEYS.GET_CART_ITEMS, (oldData: any) => {
+        if (!oldData) return oldData;
+        const newData = JSON.parse(JSON.stringify(oldData));
+        if (newData.result) {
+          newData.result.appliedCoupon = {
+            couponId: data.result.couponId,
+            couponName: data.result.couponName,
+            discountType: couponInfo?.discountType || 'FIXED_AMOUNT',
+            discountValue: couponInfo?.discountValue || data.result.discountAmount,
+            applicableConditions: couponInfo?.applicableConditions,
+          };
+        }
+        return newData;
+      });
 
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.GET_COUPONS_INFINITE],
         exact: false,
       });
-      queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.GET_CART_ITEMS,
-        exact: false,
-      });
+
+      toast.success(`'${data.result.couponName}' 쿠폰이 적용되었습니다.`);
     },
-    onError: () => {
+    onError: (err: any) => {
       localStorage.removeItem('appliedCoupon');
+      let errorMessage = '쿠폰 적용에 실패했습니다';
+      if (err.response?.data?.code) {
+        switch (err.response.data.code) {
+          case 'COUPON4001':
+            errorMessage = '이미 사용된 쿠폰입니다';
+            break;
+          case 'COUPON4002':
+            errorMessage = '쿠폰 사용 조건을 만족하지 않습니다';
+            break;
+          case 'COUPON4003':
+            errorMessage = '사용할 수 없는 쿠폰입니다';
+            break;
+          case 'COMMON500':
+            errorMessage = '서버에서 쿠폰 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+            break;
+          default:
+            errorMessage = err.response.data.message || errorMessage;
+        }
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      toast.error(errorMessage);
     },
   });
 };
@@ -92,16 +128,25 @@ export const useUnapplyCoupon = () => {
     onSuccess: () => {
       localStorage.removeItem('appliedCoupon');
 
+      queryClient.setQueryData(QUERY_KEYS.GET_CART_ITEMS, (oldData: any) => {
+        if (!oldData) return oldData;
+        const newData = JSON.parse(JSON.stringify(oldData));
+        if (newData.result && newData.result.appliedCoupon) {
+          newData.result.appliedCoupon = null;
+        }
+        return newData;
+      });
+
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.GET_COUPONS_INFINITE],
         exact: false,
       });
-      queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.GET_CART_ITEMS,
-        exact: false,
-      });
+
+      toast.success('쿠폰 적용이 취소되었습니다.');
     },
-    onError: () => {},
+    onError: () => {
+      toast.error('쿠폰 취소에 실패했습니다.');
+    },
   });
 };
 
@@ -156,47 +201,29 @@ export const useCartCoupon = () => {
 
   const calculateDiscount = (orderAmount: number, coupon?: TCoupons): number => {
     const targetCoupon = coupon || getCartAppliedCoupon() || getLocalAppliedCoupon();
-    if (!targetCoupon) {
-      return 0;
-    }
-
-    if (!targetCoupon.applicableConditions) {
-      return 0;
-    }
-
+    if (!targetCoupon) return 0;
+    if (!targetCoupon.applicableConditions) return 0;
     const minOrderAmount = targetCoupon.applicableConditions.minOrderAmount || 0;
-    if (minOrderAmount > orderAmount) {
-      return 0;
-    }
-
+    if (minOrderAmount > orderAmount) return 0;
     let discount = 0;
     if (targetCoupon.discountType === 'PERCENTAGE') {
       discount = Math.floor(orderAmount * (targetCoupon.discountValue / 100));
     } else {
       discount = targetCoupon.discountValue;
     }
-
     return discount;
   };
 
   const isApplicable = (orderAmount: number, coupon?: TCoupons): boolean => {
     const targetCoupon = coupon || getCartAppliedCoupon() || getLocalAppliedCoupon();
-
-    if (!targetCoupon || !targetCoupon.applicableConditions) {
-      return false;
-    }
-
+    if (!targetCoupon || !targetCoupon.applicableConditions) return false;
     const minOrderAmount = targetCoupon.applicableConditions.minOrderAmount || 0;
     return minOrderAmount <= orderAmount;
   };
 
   const isExpired = (coupon?: TCoupons): boolean => {
     const targetCoupon = coupon || getCartAppliedCoupon() || getLocalAppliedCoupon();
-
-    if (!targetCoupon || !targetCoupon.applicableConditions || !targetCoupon.applicableConditions.expireAt) {
-      return false;
-    }
-
+    if (!targetCoupon || !targetCoupon.applicableConditions || !targetCoupon.applicableConditions.expireAt) return false;
     const expireDate = new Date(targetCoupon.applicableConditions.expireAt);
     const now = new Date();
     return now > expireDate;
@@ -205,12 +232,10 @@ export const useCartCoupon = () => {
   const syncCouponState = async () => {
     const localCoupon = getLocalAppliedCoupon();
     const cartCoupon = getCartAppliedCoupon();
-
     if (localCoupon && !cartCoupon) {
       localStorage.removeItem('appliedCoupon');
       return false;
     }
-
     return true;
   };
 
@@ -227,3 +252,31 @@ export const useCartCoupon = () => {
 };
 
 export const useAppliedCoupon = useCartCoupon;
+
+export const useSafeApplyCoupon = () => {
+  const { mutateAsync: applyAsync, isPending: isApplying } = useApplyCoupon();
+  const { mutateAsync: unapplyAsync, isPending: isUnapplying } = useUnapplyCoupon();
+  const { getAppliedCoupon } = useCartCoupon();
+
+  const safeApplyCoupon = async (couponId: number) => {
+    const currentlyAppliedCoupon = getAppliedCoupon();
+
+    if (currentlyAppliedCoupon?.couponId === couponId) {
+      return;
+    }
+
+    try {
+      if (currentlyAppliedCoupon) {
+        await unapplyAsync();
+      }
+      await applyAsync(couponId);
+    } catch (error) {
+      console.error('쿠폰 처리 중 에러 발생:', error);
+    }
+  };
+
+  return {
+    safeApplyCoupon,
+    isLoading: isApplying || isUnapplying,
+  };
+};
