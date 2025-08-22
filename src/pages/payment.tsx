@@ -97,15 +97,17 @@ export default function Payment() {
   const { mutateAsync: applyCoupon } = useApplyCoupon();
   const paymentPrepareMutation = usePaymentPrepare();
 
+  useEffect(() => {
+    localStorage.removeItem('appliedCoupon');
+  }, []);
+
   const user = userInfo?.result;
   const userPoints = pointsData?.pages[0]?.result?.pointBalance ?? 0;
   const addresses: IAddress[] = Array.isArray(addressesData) ? addressesData : [];
 
   const calculateEstimatedAmount = () => {
     if (!orderItems || orderItems.length === 0) return 0;
-
     const orderType = paymentDataFromState?.orderType || 'individual';
-
     return orderItems.reduce((acc, item) => {
       const price = orderType === 'individual' ? item.individualPrice || item.unitPrice : item.teamPrice || item.unitPrice;
       return acc + price * item.quantity;
@@ -117,7 +119,6 @@ export default function Payment() {
     if (cartAppliedCoupon) {
       return cartAppliedCoupon;
     }
-
     return null;
   })();
 
@@ -131,7 +132,7 @@ export default function Payment() {
       setOrderItems(paymentDataFromState.selectedItems);
     } else {
       toast.error('결제할 상품 정보가 없습니다.');
-      navigate('/cart');
+      navigate('/shoppingcart');
     }
   }, [location.state, navigate]);
 
@@ -178,6 +179,8 @@ export default function Payment() {
 
   const customerKey = generateCustomerKey(user?.id?.toString() || 'anonymous');
   const { payment, isLoading: paymentLoading, requestPayment } = usePayment({ customerKey });
+
+  // ... (이하 모든 코드는 기존과 동일) ...
 
   const handlePointsChange = (value: number) => {
     const numValue = Number(value) || 0;
