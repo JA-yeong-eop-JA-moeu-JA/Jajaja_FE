@@ -124,7 +124,7 @@ export default function OrderDetailPersonal() {
     );
   }
 
-  const { date, orderNumber, items, delivery, payment } = data;
+  const { date, items, delivery, payment } = data;
 
   const firstMatching = items.find((it) => (it.teamStatus ?? it.matchingStatus ?? '').toUpperCase() === 'MATCHING');
   const teamCreatedAt = firstMatching?.teamCreatedAt;
@@ -164,10 +164,9 @@ export default function OrderDetailPersonal() {
       <main className="flex flex-col gap-4 text-body-regular text-black">
         <div className="border-b-black-1 border-b-4 pb-4 px-4">
           <p className="text-subtitle-medium"> {new Date(date).toLocaleDateString('ko-KR')}</p>
-          <p className="text-body-regular text-black-4">주문 번호 {orderNumber}</p>
+          <p className="text-body-regular text-black-4"> 주문 번호 {'1' + '0'.repeat(10 - String(id).length - 1) + id}</p>
         </div>
 
-        {/* 주문 상품 헤더 + 우측에 매칭 상태/카운트다운 */}
         <div className="px-6 flex items-center justify-between">
           <h2 className="text-subtitle-medium">주문 상품</h2>
           {firstMatching && (
@@ -178,10 +177,9 @@ export default function OrderDetailPersonal() {
           )}
         </div>
 
-        {/* 팀/개인 공용: 개인은 matchStatus가 표시되지 않음 */}
         <OrderProductList items={mappedItems} parentOrderId={id} />
 
-        <section className="px-4 bg-white p-4 pt-0 pb-8 border-b-4 border-b-black-1">
+        <section className="px-6 bg-white p-4 pt-0 pb-8 border-b-4 border-b-black-1">
           <h2 className="text-subtitle-medium mb-3">배송지 정보</h2>
           <div className="flex gap-0">
             <div className="flex flex-col gap-2 text-black-4 text-body-regular w-18">
@@ -190,9 +188,9 @@ export default function OrderDetailPersonal() {
               <span>주소</span>
             </div>
             <div className="flex flex-col gap-2 text-body-regular">
-              <span>{delivery.name}</span>
-              <span>{delivery.phone}</span>
-              <span>{delivery.address}</span>
+              <span className="no-underline">{delivery.name}</span>
+              <span className="no-underline">{delivery.phone}</span>
+              <span className="no-underline">{delivery.address}</span>
             </div>
           </div>
         </section>
