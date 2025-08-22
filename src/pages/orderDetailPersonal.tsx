@@ -9,7 +9,7 @@ import OrderProductList from '@/components/orderDetail/orderProductList';
 import PaymentInfo from '@/components/orderDetail/paymentInfo';
 
 type TOrderStatus =
-  | '결제 완료' // READY
+  | '결제 준비' // READY
   | '결제 완료' // DONE
   | '결제 취소' // CANCELED
   | '결제 실패' // ABORTED
@@ -53,7 +53,7 @@ type TBEOrderStatus =
   | 'TEAM_MATCHING_FAILED';
 
 const ORDER_STATUS_LABEL_MAP: Record<TBEOrderStatus, TOrderStatus> = {
-  READY: '결제 완료',
+  READY: '결제 준비',
   DONE: '결제 완료',
   CANCELED: '결제 취소',
   ABORTED: '결제 실패',

@@ -122,7 +122,7 @@ export default function DeliveryInfo() {
           className="w-full"
           onClick={() => {
             if (invoiceNumber) {
-              window.open(`https://trace.cjlogistics.com/web/detail.jsp?slipno=${invoiceNumber}`, '_blank', 'noopener,noreferrer');
+              window.open('https://www.cjlogistics.com/ko/tool/parcel/tracking');
             } else {
               navigate('/home');
             }
