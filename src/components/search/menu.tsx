@@ -3,7 +3,7 @@ interface ISortMenuProps {
   onSelect: (value?: string) => void;
 }
 
-const SORT_OPTIONS = ['신상품순', '인기순', '낮은 가격 순', '리뷰 많은 순'];
+const SORT_OPTIONS = ['신상품순', '인기순', '낮은 가격 순', '리뷰 많은순'];
 
 export default function Menu({ selected, onSelect }: ISortMenuProps) {
   return (
