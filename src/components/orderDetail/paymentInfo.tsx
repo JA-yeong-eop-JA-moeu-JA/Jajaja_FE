@@ -11,7 +11,7 @@ type TPaymentInfoProps = {
 
 export default function PaymentInfo({ paymentInfo }: TPaymentInfoProps) {
   return (
-    <section className="px-4 bg-white pt-2 flex flex-col gap-2">
+    <section className="px-6 pr-8 bg-white pt-2 flex flex-col gap-2">
       <h2 className="text-subtitle-medium">결제 정보</h2>
       <div className="flex flex-col gap-1 text-body-regular">
         <div className="flex justify-between">
