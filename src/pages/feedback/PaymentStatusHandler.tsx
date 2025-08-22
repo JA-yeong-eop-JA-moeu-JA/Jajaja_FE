@@ -38,10 +38,8 @@ export const usePaymentStatus = (): IUsePaymentStatusReturn => {
     }
     didEffectRun.current = true;
 
-    // ✅ 장바구니 아이템 삭제 함수를 먼저 정의
     const handleCartItemDeletion = async () => {
       try {
-        // 1. 직접구매 케이스 (기존 로직)
         const directBuyItemsJson = sessionStorage.getItem('directBuyItemsToDelete');
         if (directBuyItemsJson) {
           const itemsToDelete = JSON.parse(directBuyItemsJson);
@@ -52,7 +50,6 @@ export const usePaymentStatus = (): IUsePaymentStatusReturn => {
           sessionStorage.removeItem('directBuyItemsToDelete');
         }
 
-        // 2. 장바구니에서 결제한 케이스 (새로 추가)
         const cartItemsJson = sessionStorage.getItem('cartItemsToDelete');
         if (cartItemsJson) {
           const itemsToDelete = JSON.parse(cartItemsJson);

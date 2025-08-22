@@ -201,7 +201,15 @@ export default function OptionModal({ type, teamId, mode }: IOptionModalProps) {
     }
 
     try {
-      await joinTeamMutate(teamId);
+      const optionsPayload = selectedItems.map((item) => ({
+        optionId: item.id,
+        quantity: item.quantity,
+      }));
+
+      await joinTeamMutate({
+        teamId,
+        selectedOptions: optionsPayload,
+      });
 
       toast.success('팀에 참여했습니다! 결제를 진행해주세요.');
       await handleDirectPurchase('team_join');

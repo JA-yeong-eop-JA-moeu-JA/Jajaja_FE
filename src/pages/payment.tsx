@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
@@ -93,7 +93,7 @@ export default function Payment() {
   const { data: addressesData, isLoading: addressesLoading } = useGetAddresses();
   const { data: pointsData, isLoading: pointsLoading } = useInfinitePoints();
   const { data: couponsData, isLoading: couponsLoading } = useInfiniteCoupons();
-  const { calculateDiscount, getAppliedCoupon, getLocalAppliedCoupon, isExpired, isApplicable, clearAppliedCoupon, isCouponStillAvailable } = useCartCoupon();
+  const { calculateDiscount, getAppliedCoupon, getLocalAppliedCoupon, isExpired, clearAppliedCoupon, isCouponStillAvailable } = useCartCoupon();
   const { mutateAsync: applyCoupon } = useApplyCoupon();
   const paymentPrepareMutation = usePaymentPrepare();
 
@@ -123,8 +123,8 @@ export default function Payment() {
         localStorage.removeItem('appliedCoupon');
         return null;
       }
-      const currentAmount = calculateEstimatedAmount();
-      if (!isApplicable(currentAmount, localAppliedCoupon)) {
+
+      if (!localAppliedCoupon.isApplicable) {
         return null;
       }
       return localAppliedCoupon;
@@ -133,9 +133,9 @@ export default function Payment() {
   })();
 
   const availableCoupons = couponsData?.pages.flatMap((page) => page.result.coupons || []) ?? [];
-  const currentOrderAmount = calculateEstimatedAmount();
-  const couponsCount = availableCoupons.filter((coupon) => !isExpired(coupon) && isApplicable(currentOrderAmount, coupon)).length;
-
+  const couponsCount = useMemo(() => {
+    return availableCoupons.filter((coupon) => !isExpired(coupon) && coupon.isApplicable).length;
+  }, [availableCoupons, isExpired]);
   useEffect(() => {
     if (paymentDataFromState?.selectedItems && paymentDataFromState.selectedItems.length > 0) {
       setOrderItems(paymentDataFromState.selectedItems);
