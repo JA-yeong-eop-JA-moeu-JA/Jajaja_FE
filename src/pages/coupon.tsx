@@ -23,6 +23,27 @@ export default function CouponPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [failedCoupons, setFailedCoupons] = useState<Set<number>>(new Set());
 
+  useEffect(() => {
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
+
+    const resetScroll = () => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+
+    resetScroll();
+    requestAnimationFrame(resetScroll);
+
+    return () => {
+      if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'auto';
+      }
+    };
+  }, []);
+
   const {
     data: couponsData,
     fetchNextPage,
@@ -42,20 +63,6 @@ export default function CouponPage() {
   const { mutateAsync: unapplyCoupon, isPending: isUnapplying } = useUnapplyCoupon();
 
   const { ref, inView } = useInView({ threshold: 0 });
-
-  useEffect(() => {
-    const scrollToTop = () => {
-      window.scrollTo(0, 0);
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-    };
-
-    scrollToTop();
-
-    const timeoutId = setTimeout(scrollToTop, 50);
-
-    return () => clearTimeout(timeoutId);
-  }, []);
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
@@ -176,7 +183,7 @@ export default function CouponPage() {
   if (couponsError) return <ErrorPage />;
 
   return (
-    <div className="w-full min-h-screen">
+    <div className="w-full min-h-screen bg-white">
       <PageHeader title="쿠폰" />
       <div className="w-full min-h-screen bg-white">
         <div className="flex flex-col gap-3 px-3 py-4">
