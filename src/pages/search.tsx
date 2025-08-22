@@ -24,6 +24,7 @@ import Tag from '@/components/search/tag';
 
 import Back from '@/assets/icons/back.svg?react';
 import Down from '@/assets/icons/down.svg?react';
+import NoResult from '@/assets/icons/noResult.svg?react';
 import Up from '@/assets/icons/up.svg?react';
 
 export default function Search() {
@@ -329,7 +330,12 @@ export default function Search() {
               </div>
             )}
           </div>
-
+          {displayList.length === 0 && (
+            <div className="min-h-[calc(100vh-144px)] flex flex-col justify-center items-center gap-2">
+              <NoResult />
+              <p className="text-subtitle-medium">찾으시는 상품이 없습니다.</p>
+            </div>
+          )}
           <div className="w-full grid grid-cols-2 gap-x-2 gap-y-6.5 items-center justify-center ">
             {displayList.map((item) => (
               <ProductCard
