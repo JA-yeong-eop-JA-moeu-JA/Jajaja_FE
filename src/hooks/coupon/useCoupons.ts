@@ -144,10 +144,14 @@ export const useCartCoupon = () => {
       queryKey: QUERY_KEYS.GET_CART_ITEMS,
       exact: false,
     });
+    queryClient.invalidateQueries({
+      queryKey: [QUERY_KEYS.GET_COUPONS_INFINITE],
+      exact: false,
+    });
   };
 
   const isCouponStillAvailable = (couponId: number, availableCoupons: TCoupons[]): boolean => {
-    return availableCoupons.some((coupon) => coupon.couponId === couponId);
+    return availableCoupons.some((coupon) => coupon.couponId === couponId && coupon.isApplicable);
   };
 
   const calculateDiscount = (orderAmount: number, coupon?: TCoupons): number => {
@@ -198,6 +202,18 @@ export const useCartCoupon = () => {
     return now > expireDate;
   };
 
+  const syncCouponState = async () => {
+    const localCoupon = getLocalAppliedCoupon();
+    const cartCoupon = getCartAppliedCoupon();
+
+    if (localCoupon && !cartCoupon) {
+      localStorage.removeItem('appliedCoupon');
+      return false;
+    }
+
+    return true;
+  };
+
   return {
     getAppliedCoupon: getCartAppliedCoupon,
     getLocalAppliedCoupon,
@@ -206,6 +222,7 @@ export const useCartCoupon = () => {
     isApplicable,
     isExpired,
     isCouponStillAvailable,
+    syncCouponState,
   };
 };
 

@@ -18,14 +18,19 @@ export const usePaymentConfirm = () => {
 
   return useMutation({
     mutationFn: confirmPaymentWithAuth,
-    onSuccess: (data) => {
-      console.log('결제 승인 성공:', data);
+    onSuccess: () => {
+      localStorage.removeItem('appliedCoupon');
 
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.GET_CART_ITEMS });
-      localStorage.removeItem('appliedCoupon');
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_COUPONS_INFINITE] });
+      queryClient.removeQueries({ queryKey: [QUERY_KEYS.GET_COUPONS_INFINITE] });
     },
-    onError: (error) => {
-      console.error('결제 승인 실패:', error);
+    onError: () => {
+      const storedCoupon = localStorage.getItem('appliedCoupon');
+      if (storedCoupon) {
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.GET_CART_ITEMS });
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_COUPONS_INFINITE] });
+      }
     },
   });
 };
