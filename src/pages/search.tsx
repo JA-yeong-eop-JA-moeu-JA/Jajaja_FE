@@ -64,7 +64,7 @@ export default function Search() {
     POPULAR: '인기순',
     NEW: '신상품순',
     PRICE_ASC: '낮은 가격 순',
-    REVIEW: '리뷰 많은 순',
+    REVIEW: '리뷰 많은순',
   };
 
   const labelToEnum = (label: string): TCategorySort => {

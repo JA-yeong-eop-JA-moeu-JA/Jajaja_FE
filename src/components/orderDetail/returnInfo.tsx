@@ -56,7 +56,7 @@ export default function RefundInfo({ refundInfo }: TRefundInfoProps) {
   // 총 환불 예상 금액 = 상품금액 - 할인 - 포인트 ± 반품/회수 비용
   const total = refundInfo.amount - refundInfo.discount - refundInfo.pointsUsed + returnFee;
 
-  const deliveryFeeText = refundInfo.deliveryFee > 0 ? `+${formatKRW(refundInfo.deliveryFee)}` : '무료 배송';
+  const deliveryFeeText = refundInfo.deliveryFee > 0 ? `+${formatKRW(refundInfo.deliveryFee)}` : '무료';
 
   const methodLabel = METHOD_LABEL[refundInfo.method] ?? refundInfo.method;
 
@@ -92,7 +92,7 @@ export default function RefundInfo({ refundInfo }: TRefundInfoProps) {
           </span>
         </div>
 
-        <div className="flex justify-between text-body-regular border-t border-t-black-1 pt-2">
+        <div className="flex justify-between border-t-1 border-black-1 text-base text-body-regular pt-3">
           <span>환불 예상 금액</span>
           <span className="text-green">{formatKRW(total)}</span>
         </div>

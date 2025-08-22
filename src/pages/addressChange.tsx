@@ -65,6 +65,13 @@ export default function AddressChange() {
           selectedAddress: address,
         },
       });
+    } else if (returnPath.startsWith('/mypage/apply')) {
+      navigate(returnPath, {
+        state: {
+          ...paymentData,
+          selectedAddress: address,
+        },
+      });
     }
   };
 

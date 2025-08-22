@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
+import type { IAddress } from '@/types/address/TAddress';
 //import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { TOptionBase } from '@/types/optionApply';
 import type { IOrderItem } from '@/types/order/orderItem';
 import type { TOption } from '@/types/product/option';
 import type { TReviewableOrderItem } from '@/types/review/myReview';
 
+import { useModalStore } from '@/stores/modalStore';
 //import { QUERY_KEYS } from '@/constants/querykeys/queryKeys';
 //import { axiosInstance } from '@/apis/axiosInstance';
 import useOrderDetailPersonal from '@/hooks/order/useOrderDetailPersonal';
@@ -18,7 +20,16 @@ import ConfirmModal from '@/components/modal/confirmModal';
 import RefundInfo from '@/components/orderDetail/returnInfo';
 import OrderItem from '@/components/review/orderItem';
 
+import Down from '@/assets/icons/down.svg?react';
+
 type TApplyType = '교환' | '반품';
+type TNavState = {
+  selectedType?: TApplyType;
+  selectedReason?: string;
+  selectedDeliveryRequest?: string;
+  selectedAddress?: IAddress;
+  returnPath?: string;
+};
 
 const RETURN_REASONS = [
   { id: 1, name: '고객 단순 변심' },
@@ -37,14 +48,8 @@ const EXCHANGE_REASONS = [
   { id: 6, name: '상품 오배송' },
 ];
 
-const DELIVERY_REQUEST_OPTIONS = [
-  { id: 1, name: '문 앞에 놔주세요' },
-  { id: 2, name: '직접 전달해주세요' },
-  { id: 3, name: '경비실에 맡겨주세요' },
-  { id: 4, name: '전화 후 전달해주세요' },
-];
-
 export default function ApplyReturnOrExchange() {
+  const location = useLocation();
   const params = useParams<{ orderId?: string; orderProductId?: string }>();
   const [sp] = useSearchParams();
   const orderIdStr = params.orderId ?? sp.get('orderId') ?? '';
@@ -56,11 +61,29 @@ export default function ApplyReturnOrExchange() {
 
   const [selectedType, setSelectedType] = useState<TApplyType | null>(null);
   const [selectedReason, setSelectedReason] = useState('');
-  const [, setDeliveryRequest] = useState('');
+  const [selectedDeliveryRequest, setSelectedDeliveryRequest] = useState<string>('');
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [dropdownKey, setDropdownKey] = useState(0);
+  const { openModal } = useModalStore();
 
   const { data } = useOrderDetailPersonal(id);
+
+  const navState = (location.state ?? {}) as TNavState;
+
+  const handleAddressChangeClick = () => {
+    const returnPath = `${location.pathname}${location.search}`; // 쿼리까지 유지!
+    navigate('/address/change', {
+      state: {
+        returnPath,
+        // 폼 상태를 함께 전달해서 복귀 시 그대로 복구
+        selectedType,
+        selectedReason,
+        selectedDeliveryRequest,
+        ...location.state,
+      },
+    });
+  };
 
   if (!Number.isFinite(id) || id <= 0) {
     return <p className="p-4 text-error-3">유효하지 않은 주문입니다.</p>;
@@ -125,6 +148,13 @@ export default function ApplyReturnOrExchange() {
     isReviewWritten: it.reviewed,
   });
 
+  const handleDeliveryRequestClick = () => {
+    openModal('delivery', {
+      onSelect: (text: string) => setSelectedDeliveryRequest(text),
+    });
+  };
+  const deliveryAddress = navState.selectedAddress ?? delivery;
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <PageHeader title="교환/반품" />
@@ -177,13 +207,15 @@ export default function ApplyReturnOrExchange() {
         {/* 회수지 정보 + 요청사항 */}
         <section className="flex flex-col gap-2 px-4">
           <div className="flex justify-between items-center">
-            <h2 className="text-subtitle-medium">회수지 정보</h2>
-            <button className="text-small-medium h-[16px] text-orange">변경하기</button>
+            <h2 className="text-subtitle-medium pb-1">회수지 정보</h2>
+            <button className="text-orange text-small-medium" onClick={handleAddressChangeClick}>
+              변경하기
+            </button>
           </div>
           <div className="flex flex-col gap-[2px] text-body-regular text-black">
-            <p>{delivery.name}</p>
-            <p className="no-underline">{delivery.phone}</p>
-            <p className="no-underline">{delivery.address}</p>
+            <p>{deliveryAddress.name}</p>
+            <p className="no-underline">{deliveryAddress.phone}</p>
+            <p className="no-underline">{deliveryAddress.address}</p>
           </div>
         </section>
 
@@ -191,22 +223,23 @@ export default function ApplyReturnOrExchange() {
         {selectedType === '교환' && (
           <section className="flex flex-col gap-2 px-4">
             <div className="flex justify-between items-center">
-              <h2 className="text-subtitle-medium">배송지 정보</h2>
-              <button className="text-small-medium h-[16px] text-orange">변경하기</button>
+              <h2 className="text-subtitle-medium pb-1">배송지 정보</h2>
+              <button className="text-orange text-small-medium" onClick={handleAddressChangeClick}>
+                변경하기
+              </button>
             </div>
             <div className="flex flex-col gap-[2px] text-body-regular text-black">
-              <p>{delivery.name}</p>
-              <p className="no-underline">{delivery.phone}</p>
-              <p className="no-underline">{delivery.address}</p>
+              <p>{deliveryAddress.name}</p>
+              <p className="no-underline">{deliveryAddress.phone}</p>
+              <p className="no-underline">{deliveryAddress.address}</p>
+              <button
+                className="w-full flex items-center justify-between border border-black-3 text-small-medium rounded mt-3 mb-4 px-4 py-3"
+                onClick={handleDeliveryRequestClick}
+              >
+                <span className={selectedDeliveryRequest ? 'text-black' : 'text-black-4'}>{selectedDeliveryRequest || '배송 요청 사항을 선택해주세요.'}</span>
+                <Down className="w-4 h-2" />
+              </button>
             </div>
-            <ApplyDropDown
-              options={DELIVERY_REQUEST_OPTIONS as TOption[]}
-              defaultLabel="배송 요청 사항을 선택해주세요"
-              onChange={({ id: requestId }) => {
-                const selected = DELIVERY_REQUEST_OPTIONS.find((o) => o.id === requestId);
-                setDeliveryRequest(selected?.id === 0 ? '' : (selected?.name ?? ''));
-              }}
-            />
           </section>
         )}
       </main>
