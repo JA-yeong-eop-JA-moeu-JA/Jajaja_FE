@@ -32,7 +32,7 @@ type TTOSKey =
   | '결제 완료'
   | '결제 취소'
   | '결제 실패'
-  | '거래 취소'
+  | '결제 취소'
   | '배송 중'
   | '배송 완료'
   | '환불 요청'
@@ -45,7 +45,7 @@ const ORDER_STATUS_LABEL_MAP: Record<TBEOrderStatus, TTOSKey> = {
   DONE: '결제 완료',
   CANCELED: '결제 취소',
   ABORTED: '결제 실패',
-  EXPIRED: '거래 취소',
+  EXPIRED: '결제 취소',
   SHIPPING: '배송 중',
   DELIVERED: '배송 완료',
   REFUND_REQUESTED: '환불 요청',
@@ -55,7 +55,7 @@ const ORDER_STATUS_LABEL_MAP: Record<TBEOrderStatus, TTOSKey> = {
 };
 
 /** 팀 매칭 유효시간(분) — BE와 합의된 값으로 변경 */
-const MATCH_TTL_MINUTES = 600;
+const MATCH_TTL_MINUTES = 30;
 
 /** BE 상태(영문) → UI 라벨(한글) 매핑 */
 const MATCH_STATUS_LABEL_MAP: Record<'MATCHING' | 'COMPLETED' | 'FAILED', keyof typeof MATCH_STATUS_COLOR_MAP> = {
@@ -133,12 +133,14 @@ export default function OrderList({ orders, onExpire }: IOrderProps) {
           >
             <p className="text-subtitle-medium text-left">
               {order.createdAt
-                ? new Date(order.createdAt).toLocaleDateString('ko-KR', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                  })
-                : '25.12.12'}
+                ? new Date(order.createdAt)
+                    .toLocaleDateString('ko-KR', {
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                    })
+                    .replace(/\.$/, '')
+                : ''}
             </p>
             <img src={ChevronRight} alt=">" className="w-2 h-4" />
           </button>

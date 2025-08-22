@@ -13,7 +13,7 @@ type TOrderStatus =
   | '결제 완료' // DONE
   | '결제 취소' // CANCELED
   | '결제 실패' // ABORTED
-  | '거래 취소' // EXPIRED
+  | '결제 취소' // EXPIRED
   | '배송 중' // SHIPPING
   | '배송 완료' // DELIVERED
   | '환불 요청' // REFUND_REQUESTED
@@ -57,7 +57,7 @@ const ORDER_STATUS_LABEL_MAP: Record<TBEOrderStatus, TOrderStatus> = {
   DONE: '결제 완료',
   CANCELED: '결제 취소',
   ABORTED: '결제 실패',
-  EXPIRED: '거래 취소',
+  EXPIRED: '결제 취소',
   SHIPPING: '배송 중',
   DELIVERED: '배송 완료',
   REFUND_REQUESTED: '환불 요청',
@@ -163,7 +163,7 @@ export default function OrderDetailPersonal() {
 
       <main className="flex flex-col gap-4 text-body-regular text-black">
         <div className="border-b-black-1 border-b-4 pb-4 px-4">
-          <p className="text-subtitle-medium">{new Date(date).toLocaleString('ko-KR')}</p>
+          <p className="text-subtitle-medium"> {new Date(date).toLocaleDateString('ko-KR').slice(0, -1)}</p>
           <p className="text-body-regular text-black-4">주문 번호 {orderNumber}</p>
         </div>
 

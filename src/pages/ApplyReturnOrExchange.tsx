@@ -44,30 +44,6 @@ const DELIVERY_REQUEST_OPTIONS = [
   { id: 4, name: '전화 후 전달해주세요' },
 ];
 
-//type TOrderStatus = '배송 중' | '결제 완료' | '결제 취소' | '반품 접수' | '교환 접수';
-/*
-const toOrderStatusLabel = (items: Array<{ status?: string }>): TOrderStatus => {
-  const codes = items.map((i) => (i.status ?? '').toUpperCase());
-  if (codes.some((c) => c === 'CANCELED' || c === 'CANCELLED' || c === 'PAYMENT_CANCELED')) return '결제 취소';
-  if (codes.some((c) => c === 'RETURN_REQUESTED' || c === 'RETURNING' || c === 'REFUND_REQUESTED')) return '반품 접수';
-  if (codes.some((c) => c === 'EXCHANGE_REQUESTED' || c === 'EXCHANGING')) return '교환 접수';
-  if (codes.some((c) => c === 'SHIPPING' || c === 'IN_DELIVERY' || c === 'DELIVERING' || c === 'DELIVERED')) return '배송 중';
-  return '결제 완료';
-};
-*/
-
-// type TMutationVars = {
-//   orderId: number;
-//   orderProductId: number;
-//   type: TApplyType;
-//   reason: string;
-// };
-
-// async function submitAfterSales({ orderId, orderProductId, type, reason }: TMutationVars) {
-//   const path = type === '반품' ? 'returns' : 'exchanges';
-//   return axiosInstance.post(`/api/orders/${orderId}/${path}`, { orderProductId, reason });
-// }
-
 export default function ApplyReturnOrExchange() {
   const location = useLocation();
 
