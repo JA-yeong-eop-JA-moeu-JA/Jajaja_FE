@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 import { useReviewImageStore } from '@/stores/reviewImageStore';
 import usePatchUserInfo from '@/hooks/members/usePatchUserInfo';
@@ -62,11 +63,15 @@ export default function Profile() {
   const handleSubmit = async () => {
     const rawPhone = stripHyphen(phone);
     if (!nameRegex.test(name)) {
-      alert('이름은 한글 2~4자여야 합니다.');
+      toast.error('이름은 한글 2~4자여야 합니다.');
+      return;
+    }
+    if (!rawPhone) {
+      toast.error('전화번호 입력은 필수입니다.');
       return;
     }
     if (!phoneRegex.test(rawPhone)) {
-      alert('전화번호는 숫자만 10~12자여야 합니다.');
+      toast.error('전화번호는 숫자만 10~12자여야 합니다.');
       return;
     }
 
