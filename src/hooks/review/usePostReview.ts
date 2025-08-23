@@ -10,7 +10,7 @@ import { useCoreMutation } from '@/hooks/customQuery';
 export default function usePostReview() {
   const queryClient = useQueryClient();
   const { mutate } = useCoreMutation<TPostReview, TPostReviewRequest>(
-    ({ productId, rating, content, imageKeys }) => postReview({ productId, rating, content, imageKeys }),
+    ({ orderProductId, rating, content, imageKeys }) => postReview({ orderProductId, rating, content, imageKeys }),
     {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.GET_REVIEWABLE });
