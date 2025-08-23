@@ -47,7 +47,7 @@ export default function WriteReview() {
     try {
       if (!files || files.length === 0) {
         mutate({
-          productId: item.productId,
+          orderProductId: item.orderProductId,
           rating: star,
           content: comment,
           imageKeys: [],
@@ -70,7 +70,7 @@ export default function WriteReview() {
       const imageKeys = urlSets.map((s) => s.keyName);
 
       mutate({
-        productId: item.productId,
+        orderProductId: item.orderProductId,
         rating: star,
         content: comment,
         imageKeys,

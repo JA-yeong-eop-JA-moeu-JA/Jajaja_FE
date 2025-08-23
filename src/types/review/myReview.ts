@@ -27,7 +27,7 @@ export type TGetReviewable = TCommonResponse<{
 }>;
 
 export type TPostReviewRequest = {
-  productId: number;
+  orderProductId: number;
   rating: number;
   content: string;
   imageKeys: string[];
