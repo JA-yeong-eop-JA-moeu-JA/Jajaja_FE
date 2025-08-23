@@ -10,7 +10,7 @@ export const getReviewable = async ({ page, size }: TInfiniteRequest): Promise<T
   return data;
 };
 
-export const postReview = async ({ productId, rating, content, imageKeys }: TPostReviewRequest): Promise<TPostReview> => {
+export const postReview = async ({ orderProductId: productId, rating, content, imageKeys }: TPostReviewRequest): Promise<TPostReview> => {
   const { data } = await axiosInstance.post(`/api/reviews/${productId}`, { rating, content, imageKeys });
   return data;
 };
